@@ -1,0 +1,12 @@
+bin
+lib
+lib64
+include
+pyvenv.cfg
+docker
+node_modules
+venv
+.venv
+.vscode/*
+dist
+.parcel*
