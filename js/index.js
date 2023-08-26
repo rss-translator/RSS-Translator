@@ -65,7 +65,7 @@ async function create(event) {
     const urlObject = new URL(url.value);
     
     if (lang.value === "") {
-      throw new Error("Invalid Language");
+      throw new Error("Invalid Language!");
     }
     
     // Initialize
@@ -89,12 +89,11 @@ async function create(event) {
       url.value = null;
     } else {
       result.style.display = 'none';
-      error_msg.textContent = "Error, Please check the URL and try again!";
-      console.error(res);
+      throw new Error("Please check the URL and try again!");
     }
 
   } catch (error) {
-    error_msg.textContent = "Error, Please check the URL and try again!";
+    error_msg.textContent = error.message;
     console.error(error);
   } finally {
     loading.style.display = 'none';
