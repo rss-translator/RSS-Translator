@@ -101,6 +101,7 @@ async function create(event) {
 }
 
 function copy(){
+  event.preventDefault();
   const button = document.querySelector('#copy');
   const text = t_feed_url.value;
   
