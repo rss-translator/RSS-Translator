@@ -14,3 +14,11 @@ body {
 button,input,select {
   text-align: center !important;
 }
+form {
+  max-width: 20rem;
+}
+.brand sub {
+  font-size: 12px;
+  vertical-align: middle;
+}
+
