@@ -89,7 +89,7 @@ async function create(event) {
       url.value = null;
     } else {
       result.style.display = 'none';
-      throw new Error("Please check the URL and try again!");
+      throw new Error(JSON.stringify(res));
     }
 
   } catch (error) {
@@ -100,7 +100,7 @@ async function create(event) {
   }
 }
 
-function copy(){
+function copy(event){
   event.preventDefault();
   const button = document.querySelector('#copy');
   const text = t_feed_url.value;
