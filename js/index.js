@@ -79,17 +79,18 @@ async function create(event) {
     console.log(payload);
     loading.style.display = 'block';
     const promise = await functions.createExecution('rss_action', JSON.stringify(payload));
-    let res = promise.response.replace(/\\\\/g, "\\");
-    res = JSON.parse(res);
-    let translated_feed_url = res.t_feed_url || null;
+    let translated_feed_url = promise.response//.replace(/\\\\/g, "\\");
+    //res = JSON.parse(res);
+    //let translated_feed_url = res.t_feed_url || null;
 
-    if (translated_feed_url) {
+    if (translated_feed_url!='error') {
       result.style.display = 'block';
       t_feed_url.value = translated_feed_url;
       url.value = null;
     } else {
       result.style.display = 'none';
-      throw new Error(JSON.stringify(res));
+      //throw new Error(JSON.stringify(res));
+      throw new Error('Error, Please check the URL and try again')
     }
 
   } catch (error) {
