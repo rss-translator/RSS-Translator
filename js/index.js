@@ -72,7 +72,7 @@ async function create(event) {
     error_msg.textContent = "";
     result.style.display = 'none';
   
-    const payload = {
+    let payload = {
       feed_url: url.value,
       to_lang: lang.value
     };
@@ -86,11 +86,17 @@ async function create(event) {
     if (translated_feed_url!='error') {
       result.style.display = 'block';
       t_feed_url.value = translated_feed_url;
+      payload = {
+        feed_url: url.value,
+        to_lang: lang.value,
+        update: true
+      };
+      functions.createExecution('dev_rss_action', JSON.stringify(payload),true);
       url.value = null;
     } else {
       result.style.display = 'none';
       //throw new Error(JSON.stringify(res));
-      throw new Error('Error, Please check the URL and try again')
+      throw new Error('Please check the URL and try again')
     }
 
   } catch (error) {
