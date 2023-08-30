@@ -91,7 +91,7 @@ async function create(event) {
         to_lang: lang.value,
         update: true
       };
-      functions.createExecution('dev_rss_action', JSON.stringify(payload),true);
+      functions.createExecution('rss_action', JSON.stringify(payload),true);
       url.value = null;
     } else {
       result.style.display = 'none';
