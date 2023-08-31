@@ -63,7 +63,7 @@ async function create(event) {
   
   try {
     const urlObject = new URL(url.value);
-    
+    const Appwrite_Function = process.env.Appwrite_Function;
     if (lang.value === "") {
       throw new Error("Invalid Language!");
     }
@@ -78,7 +78,7 @@ async function create(event) {
     };
     console.log(payload);
     loading.style.display = 'block';
-    const promise = await functions.createExecution('rss_action', JSON.stringify(payload));
+    const promise = await functions.createExecution(Appwrite_Function, JSON.stringify(payload));
     let translated_feed_url = promise.response//.replace(/\\\\/g, "\\");
     //res = JSON.parse(res);
     //let translated_feed_url = res.t_feed_url || null;
@@ -91,7 +91,7 @@ async function create(event) {
         to_lang: lang.value,
         update: true
       };
-      functions.createExecution('rss_action', JSON.stringify(payload),true);
+      functions.createExecution(Appwrite_Function, JSON.stringify(payload),true);
       url.value = null;
     } else {
       result.style.display = 'none';
