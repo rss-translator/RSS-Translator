@@ -21,4 +21,12 @@ form {
   font-size: 12px;
   vertical-align: middle;
 }
+sub {
+  vertical-align: middle;
+}
+.footer {
+  color:#888
+}
+
+
 

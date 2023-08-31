@@ -1,8 +1,12 @@
 import { Client, Functions } from 'appwrite';
 
+const Appwrite_Function = process.env.Appwrite_Function;
+const Appwrite_Endpoint = process.env.Appwrite_Endpoint;
+const Appwrite_Project = process.env.Appwrite_Project;
+
 const client = new Client()
-      .setEndpoint('https://appwrite.rsstranslator.com/v1')
-      .setProject('RSS_Translator');
+      .setEndpoint(Appwrite_Endpoint)
+      .setProject(Appwrite_Project);
 const functions = new Functions(client);
 const langMap = {
       EN: "English",
@@ -63,7 +67,9 @@ async function create(event) {
   
   try {
     const urlObject = new URL(url.value);
-    const Appwrite_Function = process.env.Appwrite_Function;
+    const translation_update = document.querySelector('#translation_update');
+    const translation_process = document.querySelector('#translation_process');
+
     if (lang.value === "") {
       throw new Error("Invalid Language!");
     }
@@ -71,18 +77,18 @@ async function create(event) {
     // Initialize
     error_msg.textContent = "";
     result.style.display = 'none';
-  
+    translation_process.style.display = 'unset';
+    translation_update.innerHTML = "Translation in progress. Updates shortly";
+
     let payload = {
       feed_url: url.value,
       to_lang: lang.value
     };
     console.log(payload);
     loading.style.display = 'block';
-    const promise = await functions.createExecution(Appwrite_Function, JSON.stringify(payload));
-    let translated_feed_url = promise.response//.replace(/\\\\/g, "\\");
-    //res = JSON.parse(res);
-    //let translated_feed_url = res.t_feed_url || null;
 
+    const promise = await functions.createExecution(Appwrite_Function, JSON.stringify(payload));
+    let translated_feed_url = promise.response
     if (translated_feed_url!='error') {
       result.style.display = 'block';
       t_feed_url.value = translated_feed_url;
@@ -91,7 +97,23 @@ async function create(event) {
         to_lang: lang.value,
         update: true
       };
-      functions.createExecution(Appwrite_Function, JSON.stringify(payload),true);
+
+      functions.createExecution(Appwrite_Function, JSON.stringify(payload))
+        .then(res => {
+          console.log(res);
+          if (res.response != 'error') {       
+            translation_update.innerHTML += ' ✔';
+          }else{
+            translation_update.innerHTML += ' ✘';
+          }
+          translation_process.style.display = 'none';
+        })
+        .catch(error => {
+          console.error(error);
+          translation_process.style.display = 'none';
+          translation_update.innerHTML += ' ✘';
+        });
+
       url.value = null;
     } else {
       result.style.display = 'none';
