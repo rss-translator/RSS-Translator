@@ -8,53 +8,8 @@ const client = new Client()
       .setEndpoint(Appwrite_Endpoint)
       .setProject(Appwrite_Project);
 const functions = new Functions(client);
-const langMap = {
-      EN: "English",
-      ES: "español",
-      ZH: "中文",
-      AR: "العربية",
-      PT: "português",
-      RU: "русский",
-      JA: "日本語",
-      FR: "français",
-      DE: "Deutsch",
-      IT: "italiano",
-      KO: "한국어",
-      TR: "Türkçe",
-      VI: "Tiếng Việt",
-      PL: "polski",
-      ID: "Bahasa Indonesia",
-      NL: "Nederlands",
-      BN: "বাংলা",
-      TA: "தமிழ்",
-      FA: "فارسی",
-      TH: "ไทย",
-      UK: "українська",
-      RO: "română",
-      SV: "svenska",
-      HU: "magyar",
-      EL: "Ελληνικά",
-      CS: "čeština",
-      DA: "dansk",
-      FI: "suomi",
-      BG: "български",
-      HR: "hrvatski",
-      LT: "lietuvių",
-      SK: "slovenčina",
-      SL: "slovenščina",
-      ET: "eesti",
-      LV: "latviešu",
-      NB: "norsk bokmål",
-    };
+
 const t_feed_url = document.querySelector('#t_feed_url');
-//add options to language dropdown
-const langDropdown = document.querySelector('#language');
-for (const [key, value] of Object.entries(langMap)) {
-  const option = document.createElement('option');
-  option.value = key;
-  option.text = value;
-  langDropdown.appendChild(option);
-};
 
 async function create(event) {
   event.preventDefault();
