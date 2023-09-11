@@ -59,14 +59,15 @@ async function create(event) {
           if (res.response != 'error') {       
             translation_update.innerHTML += ' ✔';
           }else{
-            translation_update.innerHTML += ' ✘';
+            //translation_update.innerHTML += ' ✘';
+            console.error(res);
           }
           translation_process.style.display = 'none';
         })
         .catch(error => {
           console.error(error);
           translation_process.style.display = 'none';
-          translation_update.innerHTML += ' ✘';
+          //translation_update.innerHTML += ' ✘';
         });
 
       url.value = null;
