@@ -17,15 +17,13 @@ button,input,select, small {
 form {
   max-width: 20rem;
 }
-.brand sub {
-  font-size: 12px;
-  vertical-align: middle;
+.brand {
+  display:ruby;
 }
-sub {
-  vertical-align: middle;
-}
+
 .footer {
-  color:#888
+  color:#888;
+  font-size: .85rem;
 }
 
 
