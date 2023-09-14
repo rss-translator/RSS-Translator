@@ -74,11 +74,11 @@ async function create(event) {
     } else {
       result.style.display = 'none';
       //throw new Error(JSON.stringify(res));
-      throw new Error('Please check the URL and try again')
+      throw new Error('Invalid RSS feed URL.\nPlease verify the URL and try again')
     }
 
   } catch (error) {
-    error_msg.textContent = error.message;
+    error_msg.innerHTML = error.message.replace(/\n/g, '<br>');
     console.error(error);
   } finally {
     loading.style.display = 'none';
