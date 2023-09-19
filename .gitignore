@@ -10,3 +10,4 @@ venv
 .vscode/*
 dist
 .parcel*
+.DS_Store
