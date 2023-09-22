@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "appwrite": "^11.0.0",
+    "appwrite": "^13.0.0",
     "parcel": "^2.9.3"
   }
 }

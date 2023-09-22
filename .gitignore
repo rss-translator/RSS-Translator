@@ -11,3 +11,4 @@ venv
 dist
 .parcel*
 .DS_Store
+.yarn.lock
