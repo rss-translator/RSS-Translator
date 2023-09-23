@@ -57,7 +57,7 @@ async function create(event) {
       functions.createExecution(Appwrite_Function, JSON.stringify(payload))
         .then(res => {
           //console.log(res);
-          if (res.response != 'error') {       
+          if (res.responseBody != 'error') {       
             translation_update.innerHTML += ' ✔';
           }else{
             //translation_update.innerHTML += ' ✘';
