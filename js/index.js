@@ -43,7 +43,8 @@ async function create(event) {
     loading.style.display = 'block';
 
     const promise = await functions.createExecution(Appwrite_Function, JSON.stringify(payload));
-    let translated_feed_url = promise.response
+    let translated_feed_url = promise.responseBody
+    //console.log(translated_feed_url);
     if (translated_feed_url!='error') {
       result.style.display = 'block';
       t_feed_url.value = translated_feed_url;
@@ -55,7 +56,7 @@ async function create(event) {
 
       functions.createExecution(Appwrite_Function, JSON.stringify(payload))
         .then(res => {
-          console.log(res);
+          //console.log(res);
           if (res.response != 'error') {       
             translation_update.innerHTML += ' ✔';
           }else{

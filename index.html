@@ -111,11 +111,84 @@
 
     <br />
     
-    
-    <h3>Page Under Maintenance</h3>
-    We are currently updating our service.<br>
-    We will be back shortly. Thank you for your patience<br>
-    2023-09-22</p>
+    <section class="flex center" >
+      <form id="addRss">
+        <input
+          class="stack"
+          type="url"
+          id="rssUrl"
+          placeholder="https://example.com/rss"
+        />
+        <select id="language" class="stack">
+          <option disabled selected value="">Translate to...</option>
+          <option value="EN" lang="en-us">English</option>
+          <option value="ZH-CN" lang="zh-cn">中文(简体)</option>
+          <option value="ZH-TW" lang="zh-tw">中文(繁體)</option>
+          <option value="JA" lang="ja-jp">日本語</option>
+          <option value="KO" lang="ko-kr">한국어</option>
+          <option value="CS" lang="cs-cz">Čeština</option>
+          <option value="DA" lang="da-dk">Dansk</option>
+          <option value="DE" lang="de-de">Deutsch</option>
+          <option value="ES" lang="es-es">Español</option>
+          <option value="FR" lang="fr-fr">Français</option>
+          <option value="ID" lang="id-id">Indonesia</option>
+          <option value="IT" lang="it-it">Italiano</option>
+          <option value="HU" lang="hu-hu">Magyar</option>
+          <option value="NB" lang="nb-no">Norsk</option>
+          <option value="NL" lang="nl-nl">Nederlands</option>
+          <option value="PL" lang="pl-pl">Polski</option>
+          <option value="PT" lang="pt-pt">Português</option>
+          <option value="SV" lang="sv-se">Svenska</option>
+          <option value="TR" lang="tr-tr">Türkçe</option>
+          <option value="RU" lang="ru-ru">Pусский</option>
+        </select>
+        <button id="create" class="stack">
+          Create
+        </button>
+      </form>
+      <small class="stack" >For now, only the title will be translated.</small>
+    </section>
+
+    <div id="loading" style="display: none;"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_I8Q1{animation:spinner_qhi1 .75s linear infinite}.spinner_vrS7{animation-delay:-.375s}@keyframes spinner_qhi1{0%,100%{r:1.5px}50%{r:3px}}</style><circle class="spinner_I8Q1" cx="4" cy="12" r="1.5"/><circle class="spinner_I8Q1 spinner_vrS7" cx="12" cy="12" r="3"/><circle class="spinner_I8Q1" cx="20" cy="12" r="1.5"/></svg></div>
+
+    <section class="flex center">
+      <form>
+        <div id="result" style="display: none;" >
+          <input readonly="true" id="t_feed_url" class="stack" value=""></input>
+          <button id="copy" class="success stack">Copy</button>
+          <small id="translation_update">Translation in progress. Updates shortly</small>
+            <sub id="translation_process">
+              <svg width="5%" height="50%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <style>
+                  .spinner_I8Q1 {
+                    animation: spinner_qhi1 .75s linear infinite
+                  }
+          
+                  .spinner_vrS7 {
+                    animation-delay: -.375s
+                  }
+          
+                  @keyframes spinner_qhi1 {
+          
+                    0%,
+                    100% {
+                      r: 1.5px
+                    }
+          
+                    50% {
+                      r: 3px
+                    }
+                  }
+                </style>
+                <circle class="spinner_I8Q1" cx="4" cy="12" r="1.5" />
+                <circle class="spinner_I8Q1 spinner_vrS7" cx="12" cy="12" r="3" />
+                <circle class="spinner_I8Q1" cx="20" cy="12" r="1.5" />
+              </svg>              
+            </sub>
+        </div>
+        <span id="error_msg"></span>
+      </form>      
+    </section>
 
     <section class="footer">
       <small>
