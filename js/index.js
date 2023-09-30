@@ -53,24 +53,7 @@ async function create(event) {
         to_lang: lang.value,
         update: true
       };
-
-      functions.createExecution(Appwrite_Function, JSON.stringify(payload))
-        .then(res => {
-          //console.log(res);
-          if (res.responseBody != 'error') {       
-            translation_update.innerHTML += ' ✔';
-          }else{
-            //translation_update.innerHTML += ' ✘';
-            console.error(res);
-          }
-          translation_process.style.display = 'none';
-        })
-        .catch(error => {
-          console.error(error);
-          translation_process.style.display = 'none';
-          //translation_update.innerHTML += ' ✘';
-        });
-
+      start_translate(payload,translation_process,translation_update)
       url.value = null;
     } else {
       result.style.display = 'none';
@@ -85,7 +68,24 @@ async function create(event) {
     loading.style.display = 'none';
   }
 }
-
+async function start_translate(payload,translation_process,translation_update) {
+  functions.createExecution(Appwrite_Function, JSON.stringify(payload))
+        .then(res => {
+          //console.log(res);
+          if (res.responseBody != 'error') {       
+            translation_update.innerHTML += ' ✔';
+          }else{
+            translation_update.innerHTML += ' ✘ Ops,Please try again or feedback to us.';
+            console.error(res);
+          }
+          translation_process.style.display = 'none';
+        })
+        .catch(error => {
+          console.error(error);
+          translation_process.style.display = 'none';
+          translation_update.innerHTML += ' ✘ Ops,Please try again or feedback to us.';
+        });
+}
 function copy(event){
   event.preventDefault();
   const button = document.querySelector('#copy');
