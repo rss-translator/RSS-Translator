@@ -69,21 +69,16 @@ async function create(event) {
   }
 }
 async function start_translate(payload,translation_process,translation_update) {
-  functions.createExecution(Appwrite_Function, JSON.stringify(payload))
+  functions.createExecution(Appwrite_Function, JSON.stringify(payload),true)
         .then(res => {
           //console.log(res);
-          if (res.responseBody != 'error') {       
+          if (res.status != 'failed') {       
             translation_update.innerHTML += ' ✔';
           }else{
             translation_update.innerHTML += ' ✘ Ops,Please try again or feedback to us.';
             console.error(res);
           }
           translation_process.style.display = 'none';
-        })
-        .catch(error => {
-          console.error(error);
-          translation_process.style.display = 'none';
-          translation_update.innerHTML += ' ✘ Ops,Please try again or feedback to us.';
         });
 }
 function copy(event){
