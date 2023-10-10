@@ -51,7 +51,7 @@ async function create(event) {
       payload = {
         feed_url: url.value,
         to_lang: lang.value,
-        update: true
+        force: true
       };
       start_translate(payload,translation_process,translation_update)
       url.value = null;
