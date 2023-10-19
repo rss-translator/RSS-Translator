@@ -46,6 +46,7 @@ async function create(event) {
     let translated_feed_url = promise.responseBody
     console.log("Response:",translated_feed_url);
     if (translated_feed_url==''){
+      result.style.display = 'block';
       t_feed_url.value = "Ops! Please try again!";
     }else if (translated_feed_url!='error') {
       result.style.display = 'block';
