@@ -44,7 +44,7 @@ async function create(event) {
 
     const promise = await functions.createExecution(Appwrite_Function, JSON.stringify(payload));
     let translated_feed_url = promise.responseBody
-    //console.log(translated_feed_url);
+    console.log("Response:",translated_feed_url);
     if (translated_feed_url==''){
       t_feed_url.value = "Ops! Please try again!";
     }else if (translated_feed_url!='error') {
