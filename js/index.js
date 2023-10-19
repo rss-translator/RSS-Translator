@@ -45,7 +45,9 @@ async function create(event) {
     const promise = await functions.createExecution(Appwrite_Function, JSON.stringify(payload));
     let translated_feed_url = promise.responseBody
     //console.log(translated_feed_url);
-    if (translated_feed_url!='error') {
+    if (translated_feed_url==''){
+      t_feed_url.value = "Ops! Please try again!";
+    }else if (translated_feed_url!='error') {
       result.style.display = 'block';
       t_feed_url.value = translated_feed_url;
       payload = {
@@ -55,7 +57,7 @@ async function create(event) {
       };
       start_translate(payload,translation_process,translation_update)
       url.value = null;
-    } else {
+    }else {
       result.style.display = 'none';
       //throw new Error(JSON.stringify(res));
       throw new Error('Invalid RSS feed URL.\nPlease verify the URL and try again')
