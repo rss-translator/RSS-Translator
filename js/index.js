@@ -72,7 +72,7 @@ async function create(event) {
   }
 }
 async function start_translate(payload,translation_process,translation_update) {
-  functions.createExecution(Appwrite_Function, JSON.stringify(payload),true)
+  functions.createExecution(Appwrite_Function, JSON.stringify(payload))
         .then(res => {
           //console.log(res);
           if (res.status != 'failed') {       
