@@ -22,8 +22,6 @@ async function create(event) {
   
   try {
     const urlObject = new URL(url.value);
-    const translation_update = document.querySelector('#translation_update');
-    const translation_process = document.querySelector('#translation_process');
 
     if (lang.value === "") {
       throw new Error("Invalid Language!");
@@ -32,8 +30,6 @@ async function create(event) {
     // Initialize
     error_msg.textContent = "";
     result.style.display = 'none';
-    translation_process.style.display = 'unset';
-    translation_update.innerHTML = "Translation in progress. Updates shortly";
 
     let payload = {
       feed_url: url.value,
@@ -45,44 +41,27 @@ async function create(event) {
     const promise = await functions.createExecution(Appwrite_Function, JSON.stringify(payload));
     let translated_feed_url = promise.responseBody
     console.log("Response:",translated_feed_url);
+
     if (translated_feed_url==''){
-      result.style.display = 'block';
-      t_feed_url.value = "Ops! Please try again!";
-    }else if (translated_feed_url!='error') {
+      result.style.display = 'none';
+      throw new Error('Ops! Please try again!');
+    }else if (translated_feed_url=='null') {
+      result.style.display = 'none';
+      throw new Error('Sorry, Not in database yet.');
+    }else if (translated_feed_url=='error') {
+      result.style.display = 'none';
+      throw new Error('Invalid RSS feed URL.\nPlease verify the URL and try again');
+    }else {
       result.style.display = 'block';
       t_feed_url.value = translated_feed_url;
-      payload = {
-        feed_url: url.value,
-        to_lang: lang.value,
-        force: true
-      };
-      start_translate(payload,translation_process,translation_update)
-      url.value = null;
-    }else {
-      result.style.display = 'none';
-      //throw new Error(JSON.stringify(res));
-      throw new Error('Invalid RSS feed URL.\nPlease verify the URL and try again')
     }
-
+ 
   } catch (error) {
     error_msg.innerHTML = error.message.replace(/\n/g, '<br>');
     console.error(error);
   } finally {
     loading.style.display = 'none';
   }
-}
-async function start_translate(payload,translation_process,translation_update) {
-  functions.createExecution(Appwrite_Function, JSON.stringify(payload),true)
-        .then(res => {
-          //console.log(res);
-          if (res.status != 'failed') {       
-            translation_update.innerHTML += ' ✔';
-          }else{
-            translation_update.innerHTML += ' ✘ Ops,Please try again or feedback to us.';
-            console.error(res);
-          }
-          translation_process.style.display = 'none';
-        });
 }
 function copy(event){
   event.preventDefault();
