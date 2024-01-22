@@ -73,10 +73,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=your_current_user_name
-Group=your_current_user_name
-WorkingDirectory=/path/to/RSS-Translator-main/
-ExecStart=/path/to/RSS-Translator-main/deploy/start.sh
+User=rsstranslator
+Group=rsstranslator
+WorkingDirectory=/home/rsstranslator/
+ExecStart=/home/rsstranslator/deploy/start.sh
 Restart=always
 RestartSec=2
 
