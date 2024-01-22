@@ -1,0 +1,15 @@
+[Unit]
+Description=RSS Translator Application Service
+After=network.target
+
+[Service]
+Type=simple
+User=rsstranslator
+Group=rsstranslator
+WorkingDirectory=/home/rsstranslator/
+ExecStart=/home/rsstranslator/deploy/start.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

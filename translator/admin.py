@@ -1,0 +1,51 @@
+import logging
+
+from django.contrib import admin
+from django.conf import settings
+
+
+from .models import Translated_Content, OpenAITranslator, DeepLTranslator, MicrosoftTranslator
+from .tasks import translator_validate
+
+@admin.register(OpenAITranslator)
+class OpenAITranslatorAdmin(admin.ModelAdmin):
+    fields = ["name", "api_key", "model", "prompt", "temperature", "max_tokens"]
+    list_display = ["name", "valid", "api_key", "model", "prompt", "temperature", "max_tokens"]
+
+    def save_model(self, request, obj, form, change):
+        logging.debug("Call save_model: %s", obj)
+        obj.valid = None
+        obj.save()
+        translator_validate(obj)  # 会执行一次obj.save()
+
+@admin.register(DeepLTranslator)
+class DeepLTranslatorAdmin(admin.ModelAdmin):
+    fields = ["name", "api_key"]
+    list_display = ["name", "valid", "api_key"]
+
+    def save_model(self, request, obj, form, change):
+        logging.debug("Call save_model: %s", obj)
+        obj.valid = None
+        obj.save()
+        translator_validate(obj)  # 会执行一次obj.save()
+
+@admin.register(MicrosoftTranslator)
+class MicrosoftTranslatorAdmin(admin.ModelAdmin):
+    fields = ["name", "api_key", "location", "endpoint"]
+    list_display = ["name", "valid", "api_key", "location", "endpoint"]
+
+    def save_model(self, request, obj, form, change):
+        logging.debug("Call save_model: %s", obj)
+        obj.valid = None
+        obj.save()
+        translator_validate(obj)  # 会执行一次obj.save()
+
+
+class Translated_ContentAdmin(admin.ModelAdmin):
+    # not permission to change anythin
+    fields = ["original_content", "translated_content", "translated_language", "tokens", "characters"]
+    list_display = ["original_content", "translated_language", "translated_content", "tokens", "characters"]
+
+
+if settings.DEBUG:
+    admin.site.register(Translated_Content, Translated_ContentAdmin)

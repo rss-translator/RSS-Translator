@@ -1,0 +1,13 @@
+django==5.0.1
+django-encrypted-model-fields
+openai
+feedparser
+httpx
+dateutils
+deepl
+huey
+gevent
+cityhash
+django-huey-monitor
+uvicorn
+whitenoise
