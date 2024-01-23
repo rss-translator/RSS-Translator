@@ -8,6 +8,19 @@
 Telegram交流群: https://t.me/rsstranslator
 
 开发的主要原因是解决个人需求，关注了很多国外的博主，但英文标题不利于快速筛选，因此做了RSS翻译器。
+### 目录
+- [功能](#功能)
+- [技术栈](#技术栈)
+- [安装要求](#安装要求)
+- [安装方法](#安装方法)
+  - [自动安装](#自动安装推荐)
+  - [手动安装](#手动安装)
+- [开启SSL](#开启ssl)
+- [使用说明](#使用说明)
+- [赞助](#赞助)
+- [贡献](#贡献)
+
+
 ### 功能：
 1. 可添加并翻译RSS源的标题(内容翻译正在开发中)
 2. 可订阅翻译后的RSS，也可仅代理原来的RSS
@@ -16,14 +29,14 @@ Telegram交流群: https://t.me/rsstranslator
 5. 缓存所有翻译内容，尽可能减少翻译费用
 6. 可查看每个源所花费的Token/字符数
 
-### 技术栈：
+### 技术栈
 Django 5
 
-### 安装要求：
+### 安装要求
 Ubuntu 22.04 LTS / Debian 12 (内存建议512M以上)\
 Python >= 3.10
 
-### 安装步骤：
+### 安装方法
 #### 自动安装（推荐）
 下载安装脚本[install_update.sh](https://github.com/rss-translator/RSS-Translator/blob/main/deploy/install_update.sh)\
 `wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/install_update.sh"`
@@ -135,6 +148,15 @@ sudo systemctl reload caddy
 ```
 如果cloudflare开启了dns代理，则需要在cloudflare的SSL/TLS页面，加密模式选择Full
 
+### 使用说明
+首次登录后，建议点击右上方的修改密码修改默认密码\
+建议先添加翻译引擎后再添加Feed，除非只是想代理源\
+首次添加源后，需要一些时间进行翻译和生成，可能会耗时1分钟左右\
+状态说明：\
+![loading](https://github.com/rss-translator/RSS-Translator/assets/2398708/c796ed1d-b088-4e34-9419-c65fe4cf47c4)：正在处理中\
+![yes](https://github.com/rss-translator/RSS-Translator/assets/2398708/3e974467-948f-486a-9923-91978d47e7ea)：处理完成\
+![no](https://github.com/rss-translator/RSS-Translator/assets/2398708/6a6a5fdc-ac8b-4e7a-b3ae-5093adcf9021)：处理失败\
+目前状态不会自动更新，请刷新页面以获取最新状态
 ### 赞助
 感谢您的赞助
 [爱发电](https://afdian.net/a/versun)
