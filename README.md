@@ -15,6 +15,7 @@ Telegram交流群: https://t.me/rsstranslator
 - [安装方法](#安装方法)
   - [自动安装](#自动安装推荐)
   - [手动安装](#手动安装)
+- [升级方法](#升级方法)
 - [开启SSL](#开启ssl)
 - [使用说明](#使用说明)
 - [赞助](#赞助)
@@ -113,6 +114,8 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 查看服务状态\
 `systemctl status rsstranslator.service`\
 安装完成，访问 http://127.0.0.1:8000
+### 升级方法
+`sudo ./home/rsstranslator/deploy/install_update.sh`
 
 ---
 ### 开启SSL
@@ -147,7 +150,6 @@ sudo cp /home/rsstranslator/deploy/Caddyfile /etc/caddy/
 sudo systemctl reload caddy
 ```
 如果cloudflare开启了dns代理，则需要在cloudflare的SSL/TLS页面，加密模式选择Full
-
 ### 使用说明
 首次登录后，建议点击右上方的修改密码修改默认密码\
 建议先添加翻译引擎后再添加Feed，除非只是想代理源\
