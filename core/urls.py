@@ -4,5 +4,5 @@ from . import views
 
 app_name = "core"
 urlpatterns = [
-    path("<str:t_feed_sid>/", views.rss, name="rss"),
+    path("<str:feed_sid>/", views.rss, name="rss"),
 ]
