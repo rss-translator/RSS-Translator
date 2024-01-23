@@ -1,0 +1,11 @@
+name: 贡献 | Contribution
+description: Contribution request
+title: "[Contribution]: "
+labels: ["contribution"]
+body:
+  - type: textarea
+    attributes:
+      label: 概述 | Summary
+    validations:
+      required: true
+ 
