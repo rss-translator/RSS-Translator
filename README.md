@@ -6,6 +6,7 @@
 
 [中文](README.md) / [EN](README_EN.md)  \
 Telegram交流群: https://t.me/rsstranslator
+开发进度：https://github.com/orgs/rss-translator/projects/2/views/1
 
 开发的主要原因是解决个人需求，关注了很多国外的博主，但英文标题不利于快速筛选，因此做了RSS翻译器。
 ### 目录
@@ -29,6 +30,7 @@ Telegram交流群: https://t.me/rsstranslator
 4. 可控制每个源的更新频率和查看翻译状态
 5. 缓存所有翻译内容，尽可能减少翻译费用
 6. 可查看每个源所花费的Token/字符数
+目前支持的翻译引擎：DeepL API, OpenAI API, Microsoft Translate API （增加中）
 
 ### 技术栈
 Django 5
