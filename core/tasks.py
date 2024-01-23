@@ -127,8 +127,13 @@ def update_translated_feed(sid: str):
                 total_tokens = results.get("tokens")
                 translated_characters = results.get("characters")
             xml_str = generate_atom_feed(feed)  # ???feed is feedparser object
-            obj.total_tokens += total_tokens
-            obj.total_characters += translated_characters
+
+            # There can only be one billing method at a time, either token or character count.
+            if total_tokens > 0:
+                obj.total_tokens += total_tokens
+            else:
+                obj.total_characters += translated_characters
+
             obj.modified = obj.o_feed.modified
             with open(translated_feed_file_path, "w", encoding="utf-8") as f:
                 f.write(xml_str)
