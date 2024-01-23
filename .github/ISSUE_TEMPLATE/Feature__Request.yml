@@ -1,0 +1,11 @@
+name: 新功能建议 | Feature request
+description: Feature request
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: textarea
+    attributes:
+      label: 概述 | Summary
+    validations:
+      required: true
+ 

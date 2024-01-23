@@ -1,0 +1,37 @@
+name: Bug报告 | Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **感谢您的反馈！| Thanks for taking the time to fill out this bug report!**
+            请先查找是否已有类似的 [问题](https://github.com/rss-translator/RSS-Translator/issues) 
+              Please search [issue](https://github.com/rss-translator/RSS-Translator/issues) before asking
+  - type: input
+    id: version
+    attributes:
+      label: 版本号 | Version
+      description: What version of our extension are you running?
+      placeholder: Version 2014.01.22
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: System
+      description: What system are you seeing the problem on?
+      multiple: true
+      options:
+        - Debian 12
+        - Ubuntu 22.04 LTS
+        - Others
+  - type: textarea
+    id: describe
+    attributes:
+      label: 请描述这个Bug | Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+ 

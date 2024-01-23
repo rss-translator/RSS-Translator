@@ -1,0 +1,12 @@
+name: 其它 | Others
+description: What do you need help with?
+title: "[Others]: "
+labels: ["others"]
+body:
+  - type: textarea
+    attributes:
+      label: 概述 | Summary
+      description: What do you need help with?
+    validations:
+      required: true
+ 
