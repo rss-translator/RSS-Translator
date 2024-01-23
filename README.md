@@ -1,10 +1,9 @@
 <div align="center">
 <em><img src="https://github.com/rss-translator/RSS-Translator/assets/2398708/8f10db75-d5b4-4cdd-9fd6-7d319d20079f" height="90px"></em>
-<h1>RSS翻译器<br/><sub>开源，简洁，可自部署的RSS翻译器</sub></h1>
+<h1>RSS翻译器<br/><sub>开源、简洁、可自部署的RSS翻译器</sub></h1>
 </div>
 <br/>
 
-[中文](README.md) / [EN](README_EN.md)  \
 Telegram交流群: https://t.me/rsstranslator \
 开发进度：https://github.com/orgs/rss-translator/projects/2/views/1
 
@@ -163,10 +162,7 @@ sudo systemctl reload caddy
 ![no](https://github.com/rss-translator/RSS-Translator/assets/2398708/6a6a5fdc-ac8b-4e7a-b3ae-5093adcf9021)：处理失败\
 目前状态不会自动更新，请刷新页面以获取最新状态
 ### 赞助
-感谢您的赞助
+感谢您的赞助\
 [爱发电](https://afdian.net/a/versun)
 ### 贡献
-项目还在初期阶段，相关代码还在完善中。\
-感谢您的贡献意愿，请先在issue列表查看是否已有相同贡献，防止重复工作。\
-请在开始工作前，提交贡献issue，简单描述你的贡献目标。\
-[请查看开发者文档](development.md)(正在编写中)
+[请查看Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
