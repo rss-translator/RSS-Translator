@@ -34,7 +34,7 @@ class T_FeedInline(admin.TabularInline):
 
     def feed_url(self, obj):
         if obj.sid:
-            url = reverse('core:rss', kwargs={'t_feed_sid': obj.sid})
+            url = reverse('core:rss', kwargs={'feed_sid': obj.sid})
             full_url = self.request.build_absolute_uri(url)
             return format_html(
                 "<a href='{0}' target='_blank'>{0}  </a>"
@@ -105,9 +105,8 @@ class O_FeedAdmin(admin.ModelAdmin):
     # fields = ['feed_url', 'content_type','object_id']
     inlines = [T_FeedInline]
     list_display = ["name", "valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
-                    "update_frequency", "modified"]
+                    "update_frequency", "modified","proxy_feed_url"]
     search_fields = ["name", "feed_url"]
-
     actions = ['force_update']
 
     def save_formset(self, request, form, formset, change):
@@ -165,7 +164,13 @@ class O_FeedAdmin(admin.ModelAdmin):
                 obj.feed_url
             )
         return ''
-
+    def proxy_feed_url(self, obj):
+        if obj.sid:
+            return format_html(
+                "<a href='/rss/{0}' target='_blank'>Proxy URL</a>",
+                obj.sid
+            )
+        return ''
     @admin.action(description=_('Force Update'))
     def force_update(self, request, queryset):
         logging.debug("Call force_update: %s", queryset)
