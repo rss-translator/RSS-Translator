@@ -57,12 +57,6 @@
                             <p>
                                 <xsl:value-of select="/feed/description"/>
                             </p>
-                            <a hreflang="en" target="_blank">
-                                <xsl:attribute name="href">
-                                    <xsl:value-of select="/feed/link"/>
-                                </xsl:attribute>
-                                Visit Website &#x2192;
-                            </a>
                         </header>
                         <main>
                         <ul>
