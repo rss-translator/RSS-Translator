@@ -1,8 +1,10 @@
 <div align="center">
 <em><img src="https://github.com/rss-translator/RSS-Translator/assets/2398708/8f10db75-d5b4-4cdd-9fd6-7d319d20079f" height="90px"></em>
-<h1>RSS翻译器<br/><sub>开源、简洁、可自部署的RSS翻译器</sub></h1>
+<h1>RSS翻译器<br/><sub>开源、简洁、可自部署</sub></h1>
 </div>
 <br/>
+
+[English](README_EN.md)
 
 Telegram交流群: https://t.me/rsstranslator \
 开发进度：https://github.com/orgs/rss-translator/projects/2/views/1
@@ -64,11 +66,11 @@ sudo ./rsstranslator_install_update.sh
 创建执行用户
 ```
 sudo useradd -r -s /sbin/nologin rsstranslator
-sudo usermod -a -G rsstranslator ${whoami}
+sudo usermod -a -G rsstranslator your_user_name
 ```
 移动文件夹并修正权限
 ```
-mv -f RSS-Translator rsstranslator
+mv -f RSS-Translator /home/rsstranslator
 sudo chown -R rsstranslator:rsstranslator /home/rsstranslator
 sudo chmod -R 775 /home/rsstranslator
 sudo chmod a+x /home/rsstranslator/deploy/*.sh
