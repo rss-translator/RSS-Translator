@@ -71,6 +71,7 @@ sudo usermod -a -G rsstranslator your_user_name
 移动文件夹并修正权限
 ```
 mv -f RSS-Translator /home/rsstranslator
+mkdir /home/rsstranslator/data
 sudo chown -R rsstranslator:rsstranslator /home/rsstranslator
 sudo chmod -R 775 /home/rsstranslator
 sudo chmod a+x /home/rsstranslator/deploy/*.sh
