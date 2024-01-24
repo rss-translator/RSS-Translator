@@ -32,7 +32,7 @@ apt update && apt upgrade -y
 apt install python3-venv git zip -y
 
 #backup data
-if [ -d /home/rsstranslator/data ]; then
+if [ -d /home/rsstranslator/data  ] && [ "$(ls -A /home/rsstranslator/data)" ]; then
     echo "----- Backup current data to /tmp/rsstranslator_data -----"
     cp -rf /home/rsstranslator/data /tmp/rsstranslator_data
 fi
@@ -60,6 +60,11 @@ fi
 rm -rf ${repo_name}
 rm -rf ${repo_name}-main
 rm -rf rsstranslator
+
+if [ ! -d /home/rsstranslator/data ]; then
+    echo "----- Create data folder -----"
+    mkdir -p /home/rsstranslator/data
+fi
 
 echo "----- Correct folder permission  -----"
 if [ -d /home/rsstranslator ]; then

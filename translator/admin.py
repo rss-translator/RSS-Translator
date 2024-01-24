@@ -9,8 +9,8 @@ from .tasks import translator_validate
 
 @admin.register(OpenAITranslator)
 class OpenAITranslatorAdmin(admin.ModelAdmin):
-    fields = ["name", "api_key", "model", "prompt", "temperature", "max_tokens"]
-    list_display = ["name", "valid", "api_key", "model", "prompt", "temperature", "max_tokens"]
+    fields = ["name", "api_key", "base_url", "model", "prompt", "temperature", "max_tokens"]
+    list_display = ["name", "valid", "api_key", "model", "prompt", "temperature", "max_tokens","base_url"]
 
     def save_model(self, request, obj, form, change):
         logging.debug("Call save_model: %s", obj)
