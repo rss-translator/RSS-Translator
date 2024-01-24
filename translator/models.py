@@ -64,6 +64,7 @@ class TranslatorEngine(models.Model):
 class OpenAITranslator(TranslatorEngine):
     # https://platform.openai.com/docs/api-reference/chat
     api_key = EncryptedCharField(max_length=255)
+    base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
     model = models.CharField(max_length=100, default="gpt-3.5-turbo")
     prompt = models.TextField(default="Translate the following to {target_language},only returns translations.\n{text}")
     temperature = models.FloatField(default=0.5)
@@ -78,6 +79,7 @@ class OpenAITranslator(TranslatorEngine):
             try:
                 openai = OpenAI(
                     api_key=self.api_key,
+                    base_url = self.base_url,
                 )
                 res = openai.chat.completions.create(
                     model=self.model,
@@ -93,6 +95,7 @@ class OpenAITranslator(TranslatorEngine):
         logging.debug(">>> OpenAI Translate [%s]:", target_language)
         openai = OpenAI(
             api_key=self.api_key,
+            base_url = self.base_url,
         )
         tokens = 0
         translated_text = ""
