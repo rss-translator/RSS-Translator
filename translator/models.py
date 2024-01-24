@@ -63,7 +63,7 @@ class TranslatorEngine(models.Model):
 
 class OpenAITranslator(TranslatorEngine):
     # https://platform.openai.com/docs/api-reference/chat
-    api_key = EncryptedCharField(max_length=255)
+    api_key = EncryptedCharField(_("API Key"), max_length=255)
     base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
     model = models.CharField(max_length=100, default="gpt-3.5-turbo")
     prompt = models.TextField(default="Translate the following to {target_language},only returns translations.\n{text}")
@@ -117,7 +117,7 @@ class OpenAITranslator(TranslatorEngine):
 
 class DeepLTranslator(TranslatorEngine):
     # https://github.com/DeepLcom/deepl-python
-    api_key = EncryptedCharField(max_length=255)
+    api_key = EncryptedCharField(_("API Key"), max_length=255)
     # url = models.CharField(max_length=255, default="https://api-free.deepl.com/v2/translate")
     language_code_map = {
         "English": "EN-US",
@@ -170,7 +170,7 @@ class DeepLTranslator(TranslatorEngine):
 
 class MicrosoftTranslator(TranslatorEngine):
     # https://learn.microsoft.com/en-us/azure/ai-services/translator/language-support
-    api_key = EncryptedCharField(max_length=255)
+    api_key = EncryptedCharField(_("API Key"), max_length=255)
     location = models.CharField(max_length=100)
     endpoint = models.CharField(max_length=255, default="https://api.cognitive.microsofttranslator.com")
     language_code_map = {
