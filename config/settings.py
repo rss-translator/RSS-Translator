@@ -197,7 +197,7 @@ TRANSLATION_LANGUAGES = [
    ("Swedish", "Swedish"),
    ("Turkish", "Turkish"),
 ]
-LOG_LEVEL= "ERROR" if not DEBUG else "DEBUG"
+LOG_LEVEL= "ERROR" if not DEBUG else "INFO"
 LOGGING = {
    'version': 1,
    'disable_existing_loggers': False,
