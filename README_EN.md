@@ -31,7 +31,13 @@ The main reason for development was to solve personal needs. I followed many for
 5. Caching of all translation content to minimize translation costs.
 6. Ability to view the number of tokens/characters used by each source.
    
-Currently supported translation engines: DeepL API, OpenAI API, Microsoft Translate API (in progress).
+Currently supported translation engines: 
+- DeepL API
+- OpenAI API
+- Azure OpenAI API
+- Microsoft Translate API
+
+We will add more translation engines soon.
 
 ### Technology Stack
 Django 5

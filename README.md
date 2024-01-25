@@ -34,7 +34,13 @@ Telegram交流群: https://t.me/rsstranslator \
 5. 缓存所有翻译内容，尽可能减少翻译费用
 6. 可查看每个源所花费的Token/字符数
    
-目前支持的翻译引擎：DeepL API, OpenAI API, Microsoft Translate API （增加中）
+目前支持的翻译引擎：
+- DeepL API
+- OpenAI API
+- Azure OpenAI API
+- Microsoft Translate API 
+
+陆续增加中
 
 ### 技术栈
 Django 5
