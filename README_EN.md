@@ -17,6 +17,7 @@ The main reason for development was to solve personal needs. I followed many for
  - [Manual Installation](#manual-installation)
 - [Update Method](#update-method)
 - [Enable SSL](#enable-ssl)
+- [IPv6](#IPv6)
 - [Usage Guide](#usage-guide)
 - [Sponsorship](#sponsorship)
 - [Contribution](#contribution)
@@ -146,6 +147,9 @@ sudo cp /home/rsstranslator/deploy/Caddyfile /etc/caddy/
 sudo systemctl reload caddy
 ``
 If dns proxy is enabled in cloudflare, you need to select Full for encryption mode on the SSL/TLS page in cloudflare.
+### IPv6
+IPv4 and IPv6 cannot be supported at the same time;\
+If you want set the server to listen on IPv6 address, just edit the deploy/start.sh file, change `0.0.0.0` to `::`, then restart the service.
 ### Usage Guide
 After login for the first time, it is recommended to change the default password by clicking Change Password on the top right.
 It is recommended to add the translation engine first before adding the feed, unless you just want to proxy the source.

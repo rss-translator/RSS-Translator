@@ -19,6 +19,7 @@ Telegram交流群: https://t.me/rsstranslator \
   - [手动安装](#手动安装)
 - [升级方法](#升级方法)
 - [开启SSL](#开启ssl)
+- [IPv6](#IPv6)
 - [使用说明](#使用说明)
 - [赞助](#赞助)
 - [贡献](#贡献)
@@ -155,6 +156,10 @@ sudo cp /home/rsstranslator/deploy/Caddyfile /etc/caddy/
 sudo systemctl reload caddy
 ```
 如果cloudflare开启了dns代理，则需要在cloudflare的SSL/TLS页面，加密模式选择Full
+### IPv6
+目前无法同时支持IPv4和IPv6；\
+如需改为监听IPv6地址，仅需修改deploy/start.sh文件，将`0.0.0.0`改为`::`, 然后重启服务即可
+
 ### 使用说明
 首次登录后，建议点击右上方的修改密码修改默认密码\
 建议先添加翻译引擎后再添加Feed，除非只是想代理源\
