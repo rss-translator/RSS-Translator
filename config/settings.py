@@ -197,13 +197,13 @@ TRANSLATION_LANGUAGES = [
    ("Swedish", "Swedish"),
    ("Turkish", "Turkish"),
 ]
-
+LOG_LEVEL= "ERROR" if not DEBUG else "INFO"
 LOGGING = {
    'version': 1,
    'disable_existing_loggers': False,
    'handlers': {
        'logfile': {
-           'level': 'INFO',
+           'level': LOG_LEVEL,
            'class': 'logging.handlers.RotatingFileHandler',
            'filename': DATA_FOLDER / 'app.log',
            'maxBytes': 1024 * 1024 * 10,  # 10 MB
@@ -212,6 +212,6 @@ LOGGING = {
    },
    'root': {
        'handlers': ['logfile'],
-       'level': 'INFO',
+       'level': LOG_LEVEL,
    },
 }

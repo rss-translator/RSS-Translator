@@ -17,8 +17,10 @@ Telegram交流群: https://t.me/rsstranslator \
 - [安装方法](#安装方法)
   - [自动安装](#自动安装推荐)
   - [手动安装](#手动安装)
-- [升级方法](#升级方法)
+- [升级](#升级)
+- [卸载](#卸载)
 - [开启SSL](#开启ssl)
+- [IPv6](#IPv6)
 - [使用说明](#使用说明)
 - [赞助](#赞助)
 - [贡献](#贡献)
@@ -32,7 +34,13 @@ Telegram交流群: https://t.me/rsstranslator \
 5. 缓存所有翻译内容，尽可能减少翻译费用
 6. 可查看每个源所花费的Token/字符数
    
-目前支持的翻译引擎：DeepL API, OpenAI API, Microsoft Translate API （增加中）
+目前支持的翻译引擎：
+- DeepL API
+- OpenAI API
+- Azure OpenAI API
+- Microsoft Translate API 
+
+陆续增加中
 
 ### 技术栈
 Django 5
@@ -119,9 +127,11 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 查看服务状态\
 `systemctl status rsstranslator.service`\
 安装完成，访问 http://127.0.0.1:8000
-### 升级方法
+### 升级
 `sudo ./home/rsstranslator/deploy/install_update.sh`
-
+### 卸载
+`sudo ./home/rsstranslator/deploy/uninstall.sh`
+注意：该卸载脚本并不会删除/tmp目录下的数据备份文件，以防万一
 ---
 ### 开启SSL
 建议使用caddy并配合cloudflare的dns代理使用\
@@ -155,6 +165,10 @@ sudo cp /home/rsstranslator/deploy/Caddyfile /etc/caddy/
 sudo systemctl reload caddy
 ```
 如果cloudflare开启了dns代理，则需要在cloudflare的SSL/TLS页面，加密模式选择Full
+### IPv6
+目前无法同时支持IPv4和IPv6；\
+如需改为监听IPv6地址，仅需修改deploy/start.sh文件，将`0.0.0.0`改为`::`, 然后重启服务即可
+
 ### 使用说明
 首次登录后，建议点击右上方的修改密码修改默认密码\
 建议先添加翻译引擎后再添加Feed，除非只是想代理源\

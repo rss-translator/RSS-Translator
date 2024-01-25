@@ -15,8 +15,10 @@ The main reason for development was to solve personal needs. I followed many for
 - [Installation Method](#installation-method)
  - [Automatic Installation](#automatic-installation-recommended)
  - [Manual Installation](#manual-installation)
-- [Update Method](#update-method)
+- [Upgrade](#upgrade)
+- [Uninstall](#uninstall)
 - [Enable SSL](#enable-ssl)
+- [IPv6](#IPv6)
 - [Usage Guide](#usage-guide)
 - [Sponsorship](#sponsorship)
 - [Contribution](#contribution)
@@ -29,7 +31,13 @@ The main reason for development was to solve personal needs. I followed many for
 5. Caching of all translation content to minimize translation costs.
 6. Ability to view the number of tokens/characters used by each source.
    
-Currently supported translation engines: DeepL API, OpenAI API, Microsoft Translate API (in progress).
+Currently supported translation engines: 
+- DeepL API
+- OpenAI API
+- Azure OpenAI API
+- Microsoft Translate API
+
+We will add more translation engines soon.
 
 ### Technology Stack
 Django 5
@@ -111,9 +119,11 @@ Start the service\
 Check the service status\
 `systemctl status rsstranslator.service`
 Installation complete, visit [http://127.0.0.1:8000](http://127.0.0.1:8000)
-### Update Method
+### Upgrade
 `sudo . /home/rsstranslator/deploy/install_update.sh`
-
+### Uninstall
+`sudo . /home/rsstranslator/deploy/uninstall.sh`
+Note: This uninstall script does not delete the data backup files in the /tmp directory, just in case!
 ---
 ### Enable SSL
 It is recommended to use caddy with cloudflare's dns proxy.
@@ -147,6 +157,9 @@ sudo cp /home/rsstranslator/deploy/Caddyfile /etc/caddy/
 sudo systemctl reload caddy
 ``
 If dns proxy is enabled in cloudflare, you need to select Full for encryption mode on the SSL/TLS page in cloudflare.
+### IPv6
+IPv4 and IPv6 cannot be supported at the same time;\
+If you want set the server to listen on IPv6 address, just edit the deploy/start.sh file, change `0.0.0.0` to `::`, then restart the service.
 ### Usage Guide
 After login for the first time, it is recommended to change the default password by clicking Change Password on the top right.
 It is recommended to add the translation engine first before adding the feed, unless you just want to proxy the source.

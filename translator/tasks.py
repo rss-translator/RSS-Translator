@@ -50,16 +50,17 @@ def translate_feed(
                     translated_characters += len(original_content)
 
                     log.debug("Save to cache:%s", results["result"])
-                    hash64 = cityhash.CityHash64(
-                        f"{original_content}{target_language}")  # 在同一次翻译中，可能存在重复的情况，但几率很小，所以重复翻译不影响
-                    need_cache_objs[hash64] = Translated_Content(
-                        hash=hash64.to_bytes(8, byteorder='little'),
-                        original_content=original_content,
-                        translated_language=target_language,
-                        translated_content=results["result"],
-                        tokens=results.get("tokens", 0),
-                        characters=results.get("characters", 0),
-                    )
+                    if original_content and results["result"]:
+                        hash64 = cityhash.CityHash64(
+                            f"{original_content}{target_language}")  # 在同一次翻译中，可能存在重复的情况，但几率很小，所以重复翻译不影响
+                        need_cache_objs[hash64] = Translated_Content(
+                            hash=hash64.to_bytes(8, byteorder='little'),
+                            original_content=original_content,
+                            translated_language=target_language,
+                            translated_content=results["result"],
+                            tokens=results.get("tokens", 0),
+                            characters=results.get("characters", 0),
+                        )
                 # else:
                 # log.debug("Same language,Skip translate [%s]: %s", target_language, entry["title"])
                 else:
@@ -73,7 +74,10 @@ def translate_feed(
     except Exception as e:
         log.error("translate_feed Error: %s", str(e))
     finally:
-        if need_cache_objs:
-            Translated_Content.objects.bulk_create(need_cache_objs.values())
+        try:
+            if need_cache_objs:
+                Translated_Content.objects.bulk_create(need_cache_objs.values())
+        except Exception as e:
+            log.error("Save cache Error: %s", str(e))
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}

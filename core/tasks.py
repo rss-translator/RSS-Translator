@@ -76,7 +76,7 @@ def update_original_feed(sid: str):
         update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
 
     # Update T_Feeds
-    t_feeds = obj.t_feed_set.filter(status=True)
+    t_feeds = obj.t_feed_set.all()
     for t_feed in t_feeds:
         update_translated_feed.schedule(args=(t_feed.sid,), delay=1)
 
