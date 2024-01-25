@@ -69,6 +69,7 @@ sudo usermod -a -G rsstranslator your_user_name
 Move folders and correct permissions
 ```
 mv -f RSS-Translator /home/rsstranslator
+mkdir /home/rsstranslator/data
 sudo chown -R rsstranslator:rsstranslator /home/rsstranslator
 sudo chmod -R 775 /home/rsstranslator
 sudo chmod a+x /home/rsstranslator/deploy/*.sh
