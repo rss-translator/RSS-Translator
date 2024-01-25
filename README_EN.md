@@ -15,7 +15,8 @@ The main reason for development was to solve personal needs. I followed many for
 - [Installation Method](#installation-method)
  - [Automatic Installation](#automatic-installation-recommended)
  - [Manual Installation](#manual-installation)
-- [Update Method](#update-method)
+- [Upgrade](#upgrade)
+- [Uninstall](#uninstall)
 - [Enable SSL](#enable-ssl)
 - [IPv6](#IPv6)
 - [Usage Guide](#usage-guide)
@@ -111,9 +112,11 @@ Start the service\
 Check the service status\
 `systemctl status rsstranslator.service`
 Installation complete, visit [http://127.0.0.1:8000](http://127.0.0.1:8000)
-### Update Method
+### Upgrade
 `sudo . /home/rsstranslator/deploy/install_update.sh`
-
+### Uninstall
+`sudo . /home/rsstranslator/deploy/uninstall.sh`
+Note: This uninstall script does not delete the data backup files in the /tmp directory, just in case!
 ---
 ### Enable SSL
 It is recommended to use caddy with cloudflare's dns proxy.

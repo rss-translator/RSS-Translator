@@ -17,7 +17,8 @@ Telegram交流群: https://t.me/rsstranslator \
 - [安装方法](#安装方法)
   - [自动安装](#自动安装推荐)
   - [手动安装](#手动安装)
-- [升级方法](#升级方法)
+- [升级](#升级)
+- [卸载](#卸载)
 - [开启SSL](#开启ssl)
 - [IPv6](#IPv6)
 - [使用说明](#使用说明)
@@ -120,9 +121,11 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 查看服务状态\
 `systemctl status rsstranslator.service`\
 安装完成，访问 http://127.0.0.1:8000
-### 升级方法
+### 升级
 `sudo ./home/rsstranslator/deploy/install_update.sh`
-
+### 卸载
+`sudo ./home/rsstranslator/deploy/uninstall.sh`
+注意：该卸载脚本并不会删除/tmp目录下的数据备份文件，以防万一
 ---
 ### 开启SSL
 建议使用caddy并配合cloudflare的dns代理使用\
