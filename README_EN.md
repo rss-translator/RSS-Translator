@@ -14,6 +14,7 @@ The main reason for development was to solve personal needs. I followed many for
 - [Installation Requirements](#installation-requirements)
 - [Installation Method](#installation-method)
  - [Automatic Installation](#automatic-installation-recommended)
+- [Install with Docker](#install-with-docker)
  - [Manual Installation](#manual-installation)
 - [Upgrade](#upgrade)
 - [Uninstall](#uninstall)
@@ -62,6 +63,15 @@ Default account: admin\
 Default password: rsstranslator\
 Please change your password after logging in\
 If you need to enable SSL (https), please refer to [here](#enable-ssl)
+
+---
+
+#### Install with Docker
+
+Create data folder\
+`mkdir -p rsstranslator/data`\
+Run the following command to start the container\
+`docker run -d -p 8000:8000 -v rsstranslator/data:/home/rsstranslator/data --name rsstranslator versunpan/rsstranslator:latest`
 
 ---
 #### Manual Installation
