@@ -14,7 +14,7 @@ RUN pip install -r requirements/prod.txt --no-cache-dir
 EXPOSE 8000
 CMD python manage.py makemigrations && \
     python manage.py migrate && \
-    python manage.py collectstatic && \
+    python manage.py collectstatic --noinput && \
     python manage.py create_default_superuser && \
     python manage.py run_huey & \
     uvicorn config.asgi:application --host 0.0.0.0
