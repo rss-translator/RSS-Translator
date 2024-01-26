@@ -71,7 +71,7 @@ If you need to enable SSL (https), please refer to [here](#enable-ssl)
 Create data folder\
 `mkdir -p rsstranslator/data`\
 Run the following command to start the container\
-`docker run -d -p 8000:8000 -v rsstranslator/data:/home/rsstranslator/data --name rsstranslator versunpan/rsstranslator:latest`
+`docker run -d -p 8000:8000 -v rsstranslator/data:/home/rsstranslator/data --name rsstranslator rsstranslator/rsstranslator:latest`
 
 ---
 #### Manual Installation
