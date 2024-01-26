@@ -2,6 +2,7 @@
 *_initial.py
 static/
 data/
+*/migrations/0*.py
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python

@@ -63,9 +63,16 @@ class TranslatorEngine(models.Model):
 
 class OpenAITranslator(TranslatorEngine):
     # https://platform.openai.com/docs/api-reference/chat
+    openai_models = [
+        "gpt-3.5-turbo",
+        "gpt-3.5-turbo-16k",
+        "gpt-4",
+        "gpt-4-32k",
+    ]
+
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
-    model = models.CharField(max_length=100, default="gpt-3.5-turbo")
+    model = models.CharField(max_length=100, default="gpt-3.5-turbo", choices=[(x, x) for x in openai_models])
     prompt = models.TextField(default="Translate the following to {target_language},only returns translations.\n{text}")
     temperature = models.FloatField(default=0.5)
     top_p = models.FloatField(default=0.95)
