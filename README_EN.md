@@ -140,10 +140,14 @@ It is recommended to use caddy with cloudflare's dns proxy.
 Install Caddy: https://caddyserver.com/docs/install#debian-ubuntu-raspbian 
 
 Create caddy configuration file\
-You can refer to [/home/rsstranslator/deploy/Caddyfile](deploy/Caddyfile) for modification, normally you just need to modify the domain name in the first line.
-`sudo nano /home/rsstranslator/deploy/Caddyfile`\\
+You can refer to [/home/rsstranslator/deploy/Caddyfile](deploy/Caddyfile) for modification, normally you just need to
+modify the domain name in the first line.\
+If you use docker to install, please refer
+to [/home/rsstranslator/deploy/Caddyfile_for_docker](deploy/Caddyfile_for_docker)\
+`sudo nano /home/rsstranslator/deploy/Caddyfile`\
 The content is as follows.
-``
+
+```Caddyfile
 example.com {
         encode zstd gzip
         #tls internal

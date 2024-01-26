@@ -149,6 +149,7 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 
 创建caddy配置文件\
 可参考[/home/rsstranslator/deploy/Caddyfile](deploy/Caddyfile)进行修改，正常只要修改第一行的域名即可\
+docker用户请参考[/home/rsstranslator/deploy/Caddyfile_for_docker](deploy/Caddyfile_for_docker)\
 `sudo nano /home/rsstranslator/deploy/Caddyfile`\
 内容如下:
 ```
