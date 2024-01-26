@@ -73,7 +73,7 @@ sudo ./rsstranslator_install_update.sh
 创建数据文件，以存放数据\
 `mkdir -p rsstranslator/data`\
 启动容器
-`docker run -d -p 8000:8000 -v rsstranslator/data:/home/rsstranslator/data --name rsstranslator rsstranslator/rsstranslator:latest`
+`docker run -d -p 8000:8000 -v ~/rsstranslator/data:/home/rsstranslator/data --name rsstranslator rsstranslator/rsstranslator:latest`
 
 ---
 #### 手动安装
