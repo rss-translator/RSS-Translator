@@ -33,10 +33,13 @@ The main reason for development was to solve personal needs. I followed many for
 6. Ability to view the number of tokens/characters used by each source.
    
 Currently supported translation engines: 
-- DeepL API
-- OpenAI API
-- Azure OpenAI API
+
+- DeepL
+- DeepLX
+- OpenAI
+- Azure OpenAI
 - Microsoft Translate API
+- Caiyun API
 
 We will add more translation engines soon.
 

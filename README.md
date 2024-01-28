@@ -36,10 +36,13 @@ Telegram交流群: https://t.me/rsstranslator \
 6. 可查看每个源所花费的Token/字符数
    
 目前支持的翻译引擎：
-- DeepL API
-- OpenAI API
-- Azure OpenAI API
-- Microsoft Translate API 
+
+- DeepL
+- DeepLX
+- OpenAI
+- Azure OpenAI
+- Microsoft Translate API
+- Caiyun API
 
 陆续增加中
 
