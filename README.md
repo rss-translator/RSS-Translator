@@ -16,7 +16,6 @@ Telegram交流群: https://t.me/rsstranslator \
 - [安装要求](#安装要求)
 - [安装方法](#安装方法)
   - [自动安装](#自动安装推荐)
-  - [使用Docker安装](#使用docker安装)
   - [手动安装](#手动安装)
 - [升级](#升级)
 - [卸载](#卸载)
@@ -68,19 +67,6 @@ sudo ./rsstranslator_install_update.sh
 默认密码：rsstranslator\
 请登录后立即修改你的密码\
 如需开启SSL(https)，请参考[这里](#开启SSL)
-
----
-
-#### 使用Docker安装
-
-创建数据文件夹，以存放数据\
-`mkdir -p ~/rsstranslator/`\
-进入rsstranslator文件夹\
-`cd ~/rsstranslator`\
-下载docker-compose.yml文件\
-`wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/docker-compose.yml"` \
-启动容器\
-`docker-compose up -d`
 
 ---
 #### 手动安装

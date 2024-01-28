@@ -14,7 +14,6 @@ The main reason for development was to solve personal needs. I followed many for
 - [Installation Requirements](#installation-requirements)
 - [Installation Method](#installation-method)
  - [Automatic Installation](#automatic-installation-recommended)
-- [Install with Docker](#install-with-docker)
  - [Manual Installation](#manual-installation)
 - [Upgrade](#upgrade)
 - [Uninstall](#uninstall)
@@ -66,19 +65,6 @@ Default account: admin\
 Default password: rsstranslator\
 Please change your password after logging in\
 If you need to enable SSL (https), please refer to [here](#enable-ssl)
-
----
-
-#### Install with Docker
-
-Create data folder to store data\
-`mkdir -p ~/rsstranslator/`\
-Enter the rsstranslator folder\
-`cd ~/rsstranslator`\
-Download the docker-compose.yml file\
-`wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/docker-compose.yml"` \
-Start the container\
-`docker-compose up -d`
 
 ---
 #### Manual Installation
