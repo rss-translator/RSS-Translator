@@ -206,7 +206,6 @@ class DeepLTranslator(TranslatorEngine):
     language_code_map = {
         "English": "EN-US",
         "Chinese Simplified": "ZH",
-        "Chinese Traditional": None,
         "Russian": "RU",
         "Japanese": "JA",
         "Korean": "KO",
@@ -259,7 +258,6 @@ class DeepLXTranslator(TranslatorEngine):
     language_code_map = {
         "English": "EN-US",
         "Chinese Simplified": "ZH",
-        "Chinese Traditional": None,
         "Russian": "RU",
         "Japanese": "JA",
         "Korean": "KO",
@@ -286,8 +284,7 @@ class DeepLXTranslator(TranslatorEngine):
     def validate(self) -> bool:
         try:
             resp = self.translate("Hello World", "Chinese Simplified")
-            if resp.get('result') != "":
-                return True
+            return resp.get("result") != ""
         except Exception as e:
             return False
 
@@ -308,8 +305,7 @@ class DeepLXTranslator(TranslatorEngine):
             resp = httpx.post(url=self.deeplx_api, data=post_data, timeout=10)
             if resp.status_code == 429:
                 raise ("DeepLXTranslator-> IP has been blocked by DeepL temporarily")
-            resp = json.loads(resp.text)
-            translated_text = resp.get("data", "")
+            translated_text = resp.json()["data"]
         except Exception as e:
             logging.error("DeepLXTranslator->%s: %s", text, e)
         return {'result': translated_text, "characters": len(text)}
@@ -378,5 +374,56 @@ class MicrosoftTranslator(TranslatorEngine):
             # [{'detectedLanguage': {'language': 'en', 'score': 1.0}, 'translations': [{'text': '你好，我叫约翰。', 'to': 'zh-Hans'}]}]
         except Exception as e:
             logging.error("MicrosoftTranslator Error ->%s:%s", text, e)
+        finally:
+            return {'result': translated_text, "characters": len(text)}
+
+
+class CaiYunTranslator(TranslatorEngine):
+    # https://docs.caiyunapp.com/blog/2018/09/03/lingocloud-api/
+    token = EncryptedCharField(max_length=255)
+    url = models.URLField(max_length=255, default="http://api.interpreter.caiyunai.com/v1/translator")
+    language_code_map = {
+        "English": "en",
+        "Chinese Simplified": "zh",
+        "Japanese": "ja",
+        "Korean": "ko",
+        "Spanish": "es",
+        "French": "fr",
+        "Russian": "ru",
+    }
+
+    class Meta:
+        verbose_name = "CaiYun"
+        verbose_name_plural = "CaiYun"
+
+    def validate(self) -> bool:
+        result = self.translate("Hi", "Chinese Simplified")
+        return result.get("result") != ""
+
+    def translate(self, text: str, target_language) -> dict:
+        logging.debug(">>> CaiYun Translate [%s]: %s", target_language, text)
+        target_code = self.language_code_map.get(target_language, None)
+        translated_text = ""
+        try:
+            if target_code is None:
+                logging.error("CaiYunTranslator->%s: Not support target language", text)
+
+            payload = {
+                "source": text,
+                "trans_type": f"auto2{target_code}",
+                "request_id": uuid.uuid4().hex,
+                "detect": True,
+            }
+
+            headers = {
+                "content-type": "application/json",
+                "x-authorization": f"token {self.token}",
+            }
+
+            resp = httpx.post(url=self.url, headers=headers, data=json.dumps(payload), timeout=10)
+            resp.raise_for_status()
+            translated_text = resp.json()["target"]
+        except Exception as e:
+            logging.error("CaiYunTranslator Error ->%s:%s", text, e)
         finally:
             return {'result': translated_text, "characters": len(text)}

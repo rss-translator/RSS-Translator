@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.conf import settings
 
 from .models import Translated_Content, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
-    DeepLXTranslator
+    DeepLXTranslator, CaiYunTranslator
 from .tasks import translator_validate
 
 @admin.register(OpenAITranslator)
@@ -58,6 +58,18 @@ class DeepLXTranslatorAdmin(admin.ModelAdmin):
 class MicrosoftTranslatorAdmin(admin.ModelAdmin):
     fields = ["name", "api_key", "location", "endpoint"]
     list_display = ["name", "valid", "api_key", "location", "endpoint"]
+
+    def save_model(self, request, obj, form, change):
+        logging.debug("Call save_model: %s", obj)
+        obj.valid = None
+        obj.save()
+        translator_validate(obj)  # 会执行一次obj.save()
+
+
+@admin.register(CaiYunTranslator)
+class CaiYunTranslatorAdmin(admin.ModelAdmin):
+    fields = ["name", "token", "url"]
+    list_display = ["name", "valid", "token", "url"]
 
     def save_model(self, request, obj, form, change):
         logging.debug("Call save_model: %s", obj)
