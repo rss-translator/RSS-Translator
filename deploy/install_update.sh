@@ -96,6 +96,8 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/pip install -q
 if [ -d /tmp/rsstranslator_data ] && [ "$(ls -A /tmp/rsstranslator_data)" ]; then
     echo "----- Restore db -----"
     cp -rf /tmp/rsstranslator_data/* /home/rsstranslator/data/
+    chown -R rsstranslator:rsstranslator /home/rsstranslator/data/
+    chmod -R 775 /home/rsstranslator/data/
 fi
 
 echo "----- Migrate db -----"
