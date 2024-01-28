@@ -57,7 +57,7 @@ Download the installation script [install_update.sh](https://github.com/rss-tran
 
 Use root to grant execution permissions, and this script can be run multiple times and can be used for updates
 ```
-sudo chmod +x rsstranslator_install_update.sh
+sudo chmod +x install_update.sh
 sudo ./rsstranslator_install_update.sh
 ```
 

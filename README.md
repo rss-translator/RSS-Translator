@@ -60,7 +60,7 @@ Python >= 3.10
 
 使用root赋予运行权限后执行, 此脚本可多次运行，并可用于升级更新
 ```
-sudo chmod +x rsstranslator_install_update.sh
+sudo chmod +x install_update.sh
 sudo ./rsstranslator_install_update.sh
 ```
 安装成功后，访问[http://127.0.0.1:8000](http://127.0.0.1:8000)\
