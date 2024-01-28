@@ -1,0 +1,13 @@
+version: '3'
+services:
+  rsstranslator:
+    image: rsstranslator/rsstranslator
+    volumes:
+      - ./data:/home/rsstranslator/data
+    ports:
+      - 8000:8000
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py create_default_superuser &&
+               python manage.py run_huey & uvicorn config.asgi:application --host 0.0.0.0"

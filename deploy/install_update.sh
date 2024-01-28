@@ -99,8 +99,6 @@ if [ -d /tmp/rsstranslator_data ] && [ "$(ls -A /tmp/rsstranslator_data)" ]; the
 fi
 
 echo "----- Migrate db -----"
-rm -rf /home/rsstranslator/core/migrations/0*.py
-rm -rf /home/rsstranslator/translator/migrations/0*.py
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py makemigrations"
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py migrate"
 

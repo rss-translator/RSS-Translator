@@ -68,10 +68,14 @@ If you need to enable SSL (https), please refer to [here](#enable-ssl)
 
 #### Install with Docker
 
-Create data folder\
-`mkdir -p rsstranslator/data`\
-Run the following command to start the container\
-`docker run -d -p 8000:8000 -v rsstranslator/data:/home/rsstranslator/data --name rsstranslator rsstranslator/rsstranslator:latest`
+Create data folder to store data\
+`mkdir -p ~/rsstranslator/`\
+Enter the rsstranslator folder\
+`cd ~/rsstranslator`\
+Download the docker-compose.yml file\
+`wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/docker-compose.yml"` \
+Start the container\
+`docker-compose up -d`
 
 ---
 #### Manual Installation

@@ -70,10 +70,14 @@ sudo ./rsstranslator_install_update.sh
 
 #### 使用Docker安装
 
-创建数据文件，以存放数据\
-`mkdir -p rsstranslator/data`\
-启动容器
-`docker run -d -p 8000:8000 -v rsstranslator/data:/home/rsstranslator/data --name rsstranslator rsstranslator/rsstranslator:latest`
+创建数据文件夹，以存放数据\
+`mkdir -p ~/rsstranslator/`\
+进入rsstranslator文件夹\
+`cd ~/rsstranslator`\
+下载docker-compose.yml文件\
+`wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/docker-compose.yml"` \
+启动容器\
+`docker-compose up -d`
 
 ---
 #### 手动安装
