@@ -1,5 +1,6 @@
 import logging
 import uuid
+import json
 
 import cityhash
 import deepl
@@ -240,6 +241,7 @@ class DeepLTranslator(TranslatorEngine):
     def translate(self, text, target_language):
         logging.debug(">>> DeepL Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
+        translated_text = ""
         try:
             if target_code is None:
                 logging.error("DeepLTranslator->%s: Not support target language", text)
@@ -248,6 +250,68 @@ class DeepLTranslator(TranslatorEngine):
             translated_text = resp.text
         except Exception as e:
             logging.error("DeepLTranslator->%s: %s", text, e)
+        return {'result': translated_text, "characters": len(text)}
+
+
+class DeepLXTranslator(TranslatorEngine):
+    # https://github.com/OwO-Network/DeepLX
+    deeplx_api = models.CharField(max_length=255, default="http://127.0.0.1:1188/translate")
+    language_code_map = {
+        "English": "EN-US",
+        "Chinese Simplified": "ZH",
+        "Chinese Traditional": None,
+        "Russian": "RU",
+        "Japanese": "JA",
+        "Korean": "KO",
+        "Czech": "CS",
+        "Danish": "DA",
+        "German": "DE",
+        "Spanish": "ES",
+        "French": "FR",
+        "Indonesian": "ID",
+        "Italian": "IT",
+        "Hungarian": "HU",
+        "Norwegian Bokmål": "NB",
+        "Dutch": "NL",
+        "Polish": "PL",
+        "Portuguese": "PT-PT",
+        "Swedish": "SV",
+        "Turkish": "TR",
+    }
+
+    class Meta:
+        verbose_name = "DeepLX"
+        verbose_name_plural = "DeepLX"
+
+    def validate(self) -> bool:
+        try:
+            resp = self.translate("Hello World", "Chinese Simplified")
+            if resp.get('result') != "":
+                return True
+        except Exception as e:
+            return False
+
+    def translate(self, text, target_language):
+        logging.debug(">>> DeepLX Translate [%s]: %s", target_language, text)
+        target_code = self.language_code_map.get(target_language, None)
+        translated_text = ""
+        try:
+            if target_code is None:
+                logging.error("DeepLXTranslator->%s: Not support target language", text)
+
+            data = {
+                "text": text,
+                "source_lang": "auto",
+                "target_lang": target_code,
+            }
+            post_data = json.dumps(data)
+            resp = httpx.post(url=self.deeplx_api, data=post_data, timeout=10)
+            if resp.status_code == 429:
+                raise ("DeepLXTranslator-> IP has been blocked by DeepL temporarily")
+            resp = json.loads(resp.text)
+            translated_text = resp.get("data", "")
+        except Exception as e:
+            logging.error("DeepLXTranslator->%s: %s", text, e)
         return {'result': translated_text, "characters": len(text)}
 
 

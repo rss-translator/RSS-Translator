@@ -15,7 +15,8 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
 
 from huey.contrib.djhuey import HUEY as huey
-from translator.models import OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator
+from translator.models import OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
+    DeepLXTranslator
 
 from .models import O_Feed, T_Feed
 from .tasks import update_original_feed, update_translated_feed
@@ -65,7 +66,8 @@ class O_FeedForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(O_FeedForm, self).__init__(*args, **kwargs)
-        translator_models = [OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator]
+        translator_models = [OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator,
+                             DeepLXTranslator]
         # Cache ContentTypes to avoid repetitive database calls
         content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
 
@@ -105,7 +107,7 @@ class O_FeedAdmin(admin.ModelAdmin):
     # fields = ['feed_url', 'content_type','object_id']
     inlines = [T_FeedInline]
     list_display = ["name", "valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
-                    "update_frequency", "modified","proxy_feed_url"]
+                    "update_frequency", "modified"]
     search_fields = ["name", "feed_url"]
     actions = ['force_update']
 

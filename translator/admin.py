@@ -3,8 +3,8 @@ import logging
 from django.contrib import admin
 from django.conf import settings
 
-
-from .models import Translated_Content, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator
+from .models import Translated_Content, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
+    DeepLXTranslator
 from .tasks import translator_validate
 
 @admin.register(OpenAITranslator)
@@ -40,6 +40,19 @@ class DeepLTranslatorAdmin(admin.ModelAdmin):
         obj.valid = None
         obj.save()
         translator_validate(obj)  # 会执行一次obj.save()
+
+
+@admin.register(DeepLXTranslator)
+class DeepLXTranslatorAdmin(admin.ModelAdmin):
+    fields = ["name", "deeplx_api"]
+    list_display = ["name", "valid", "deeplx_api"]
+
+    def save_model(self, request, obj, form, change):
+        logging.debug("Call save_model: %s", obj)
+        obj.valid = None
+        obj.save()
+        translator_validate(obj)  # 会执行一次obj.save()
+
 
 @admin.register(MicrosoftTranslator)
 class MicrosoftTranslatorAdmin(admin.ModelAdmin):
