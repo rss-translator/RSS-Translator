@@ -1,3 +1,7 @@
+# Multi-arch build:
+# docker buildx create --use
+# docker buildx build . --platform linux/arm64,linux/amd64 --push -t rsstranslator/rsstranslator:latest -t rsstranslator/rsstranslator:version
+
 FROM python:3.11-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE 1
