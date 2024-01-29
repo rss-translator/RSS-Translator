@@ -69,12 +69,16 @@ class T_FeedInline(admin.TabularInline):
             return ''
         if obj.status is None:
             return format_html(
-                "<img src='/static/img/icon-loading.svg' alt='True'>"
+                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
             )
         elif obj.status is True:
-            return True
+            return format_html(
+                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
+            )
         else:
-            return False
+            return format_html(
+                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
+            )
 
     obj_status.short_description = 'Status'
     def get_formset(self, request, obj=None, **kwargs):
@@ -184,12 +188,16 @@ class O_FeedAdmin(admin.ModelAdmin):
     def is_valid(self, obj):
         if obj.valid is None:
             return format_html(
-                "<img src='/static/img/icon-loading.svg' alt='True'>"
+                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
             )
         elif obj.valid is True:
-            return True
+            return format_html(
+                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
+            )
         else:
-            return False
+            return format_html(
+                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
+            )
 
     is_valid.short_description = 'Valid'
     @admin.display(description="feed_url")
