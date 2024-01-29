@@ -26,11 +26,21 @@ admin.site.site_title = _('RSS Translator')
 admin.site.index_title = _('Dashboard')
 
 
+class T_FeedForm(forms.ModelForm):
+    class Meta:
+        model = T_Feed
+        fields = ['language', 'translate_title']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['language'].disabled = True
 class T_FeedInline(admin.TabularInline):
     model = T_Feed
-    fields = ["language", "status", "feed_url", "translate_title", "size_in_kb", "total_tokens",
-              "total_characters"]
-    readonly_fields = ("feed_url", "status", "size_in_kb", "total_tokens", "total_characters")
+    form = T_FeedForm
+    fields = ["language", "obj_status", "feed_url", "translate_title", "total_tokens",
+              "total_characters", "size_in_kb"]
+    readonly_fields = ("feed_url", "obj_status", "size_in_kb", "total_tokens", "total_characters")
     extra = 1
 
     def feed_url(self, obj):
@@ -54,6 +64,23 @@ class T_FeedInline(admin.TabularInline):
 
     size_in_kb.short_description = 'Size(KB)'
 
+    def obj_status(self, obj):
+        if not obj.pk:
+            return ''
+        if obj.status is None:
+            return format_html(
+                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
+            )
+        elif obj.status is True:
+            return format_html(
+                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
+            )
+        else:
+            return format_html(
+                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
+            )
+
+    obj_status.short_description = 'Status'
     def get_formset(self, request, obj=None, **kwargs):
         # Store the request for use in feed_url
         self.request = request
@@ -106,7 +133,7 @@ class O_FeedAdmin(admin.ModelAdmin):
     form = O_FeedForm
     # fields = ['feed_url', 'content_type','object_id']
     inlines = [T_FeedInline]
-    list_display = ["name", "valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
+    list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
                     "update_frequency", "modified"]
     search_fields = ["name", "feed_url"]
     actions = ['force_update']
@@ -115,6 +142,7 @@ class O_FeedAdmin(admin.ModelAdmin):
         instances = formset.save(commit=False)
         for instance in instances:
             if instance.o_feed.pk:  # 不保存o_feed为空的T_Feed实例
+                # instance.valid = None  # 没有必要了，因为保存后无法再修改了
                 instance.save()
                 self.revoke_tasks_by_arg(instance.sid)
                 update_translated_feed(instance.sid)
@@ -157,6 +185,21 @@ class O_FeedAdmin(admin.ModelAdmin):
 
     size_in_kb.short_description = 'Size(KB)'
 
+    def is_valid(self, obj):
+        if obj.valid is None:
+            return format_html(
+                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
+            )
+        elif obj.valid is True:
+            return format_html(
+                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
+            )
+        else:
+            return format_html(
+                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
+            )
+
+    is_valid.short_description = 'Valid'
     @admin.display(description="feed_url")
     def show_feed_url(self, obj):
         if obj.feed_url:
