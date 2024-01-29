@@ -4,11 +4,11 @@
 </div>
 <br/>
 
-[中文](README.md) | [Demo](https://demo.rsstranslator.com) |
+---
+
+| [中文](README.md) | [Demo](https://demo.rsstranslator.com) | [Telegram Group](https://t.me/rsstranslator) | [Development Progress](https://github.com/orgs/rss-translator/projects/2/views/1)
 
 ---
-Telegram Group: https://t.me/rsstranslator \
-Development Progress: https://github.com/orgs/rss-translator/projects/2/views/1
 
 The main reason for development was to solve personal needs. I followed many foreign bloggers, but the English titles were not conducive to quick filtering, so I made an RSS translator.
 ### Table of Contents

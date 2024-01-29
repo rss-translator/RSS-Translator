@@ -6,10 +6,9 @@
 
 ---
 
-[English](README_EN.md) | [Demo](https://demo.rsstranslator.com) |
+| [English](README_EN.md) | [Demo](https://demo.rsstranslator.com) | [Telegram交流群](https://t.me/rsstranslator) | [开发进度](ttps://github.com/orgs/rss-translator/projects/2/views/1)
 
-Telegram交流群: https://t.me/rsstranslator \
-开发进度：https://github.com/orgs/rss-translator/projects/2/views/1
+---
 
 开发的主要原因是解决个人需求，关注了很多国外的博主，但英文标题不利于快速筛选，因此做了RSS翻译器。
 ### 目录
