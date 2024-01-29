@@ -4,8 +4,6 @@
 </div>
 <br/>
 
----
-
 | [中文](README.md) | [Demo](https://demo.rsstranslator.com) | [Telegram Group](https://t.me/rsstranslator) | [Development Progress](https://github.com/orgs/rss-translator/projects/2/views/1)
 
 ---
