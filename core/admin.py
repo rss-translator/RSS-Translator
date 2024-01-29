@@ -125,6 +125,7 @@ class O_FeedAdmin(admin.ModelAdmin):
         instances = formset.save(commit=False)
         for instance in instances:
             if instance.o_feed.pk:  # 不保存o_feed为空的T_Feed实例
+                # instance.valid = None  # 没有必要了，因为保存后无法再修改了
                 instance.save()
                 self.revoke_tasks_by_arg(instance.sid)
                 update_translated_feed(instance.sid)
