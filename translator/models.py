@@ -1,6 +1,7 @@
 import logging
 import uuid
 import json
+from time import sleep
 
 import cityhash
 import deepl
@@ -84,7 +85,7 @@ class OpenAITranslator(TranslatorEngine):
     class Meta:
         verbose_name = "OpenAI"
         verbose_name_plural = "OpenAI"
-    
+
     def _init(self):
         return OpenAI(
                     api_key=self.api_key,
@@ -148,7 +149,7 @@ class AzureAITranslator(TranslatorEngine):
     class Meta:
         verbose_name = "Azure OpenAI"
         verbose_name_plural = "Azure OpenAI"
-    
+
     def _init(self):
         return AzureOpenAI(
                     api_key=self.api_key,
@@ -196,7 +197,6 @@ class AzureAITranslator(TranslatorEngine):
             logging.error("AzureAITranslator->%s: %s", text, e)
 
         return {'result': translated_text, "tokens": tokens, "characters": len(text)}
-    
 
 
 class DeepLTranslator(TranslatorEngine):
@@ -308,7 +308,9 @@ class DeepLXTranslator(TranslatorEngine):
             translated_text = resp.json()["data"]
         except Exception as e:
             logging.error("DeepLXTranslator->%s: %s", text, e)
-        return {'result': translated_text, "characters": len(text)}
+        finally:
+            sleep(2)
+            return {'result': translated_text, "characters": len(text)}
 
 
 class MicrosoftTranslator(TranslatorEngine):
