@@ -26,10 +26,20 @@ admin.site.site_title = _('RSS Translator')
 admin.site.index_title = _('Dashboard')
 
 
+class T_FeedForm(forms.ModelForm):
+    class Meta:
+        model = T_Feed
+        fields = ['language', 'translate_title']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['language'].disabled = True
 class T_FeedInline(admin.TabularInline):
     model = T_Feed
-    fields = ["language", "status", "feed_url", "translate_title", "size_in_kb", "total_tokens",
-              "total_characters"]
+    form = T_FeedForm
+    fields = ["language", "status", "feed_url", "translate_title", "total_tokens",
+              "total_characters", "size_in_kb"]
     readonly_fields = ("feed_url", "status", "size_in_kb", "total_tokens", "total_characters")
     extra = 1
 
