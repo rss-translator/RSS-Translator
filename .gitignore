@@ -1,5 +1,5 @@
 # Project
-static/
+/static
 data/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
@@ -18,7 +18,6 @@ __pycache__/
 *.so
 
 # Distribution / packaging
-.Python
 build/
 develop-eggs/
 dist/
@@ -115,7 +114,6 @@ celerybeat.pid
 
 # Environments
 .env
-.venv
 env/
 venv/
 ENV/
