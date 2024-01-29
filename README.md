@@ -23,7 +23,7 @@
 - [使用说明](#使用说明)
 - [赞助](#赞助)
 - [贡献](#贡献)
-
+- [Star历史图](#Star历史图)
 
 ### 功能：
 1. 可添加并翻译RSS源的标题(内容翻译正在开发中)
@@ -185,3 +185,8 @@ sudo systemctl reload caddy
 [爱发电](https://afdian.net/a/versun)
 ### 贡献
 [请查看Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
+
+### Star历史图
+
+[![Star History Chart](https://api.star-history.com/svg?repos=rss-translator/RSS-Translator&type=Date)](https://star-history.com/#rss-translator/RSS-Translator&Date)
+

@@ -23,6 +23,7 @@ The main reason for development was to solve personal needs. I followed many for
 - [Usage Guide](#usage-guide)
 - [Sponsorship](#sponsorship)
 - [Contribution](#contribution)
+- [Star History](#star-history)
 
 ### Functions:
 1. Ability to add and translate the titles of RSS sources (content translation is under development).
@@ -178,3 +179,8 @@ Thank you for your sponsorship\
 [AFDIAN](https://afdian.net/a/versun)
 ### Contribution
 [Please check the Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=rss-translator/RSS-Translator&type=Date)](https://star-history.com/#rss-translator/RSS-Translator&Date)
+
