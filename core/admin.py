@@ -38,9 +38,9 @@ class T_FeedForm(forms.ModelForm):
 class T_FeedInline(admin.TabularInline):
     model = T_Feed
     form = T_FeedForm
-    fields = ["language", "status", "feed_url", "translate_title", "total_tokens",
+    fields = ["language", "obj_status", "feed_url", "translate_title", "total_tokens",
               "total_characters", "size_in_kb"]
-    readonly_fields = ("feed_url", "status", "size_in_kb", "total_tokens", "total_characters")
+    readonly_fields = ("feed_url", "obj_status", "size_in_kb", "total_tokens", "total_characters")
     extra = 1
 
     def feed_url(self, obj):
@@ -64,6 +64,19 @@ class T_FeedInline(admin.TabularInline):
 
     size_in_kb.short_description = 'Size(KB)'
 
+    def obj_status(self, obj):
+        if not obj.pk:
+            return ''
+        if obj.status is None:
+            return format_html(
+                "<img src='/static/img/icon-loading.svg' alt='True'>"
+            )
+        elif obj.status is True:
+            return True
+        else:
+            return False
+
+    obj_status.short_description = 'Status'
     def get_formset(self, request, obj=None, **kwargs):
         # Store the request for use in feed_url
         self.request = request
@@ -116,7 +129,7 @@ class O_FeedAdmin(admin.ModelAdmin):
     form = O_FeedForm
     # fields = ['feed_url', 'content_type','object_id']
     inlines = [T_FeedInline]
-    list_display = ["name", "valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
+    list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
                     "update_frequency", "modified"]
     search_fields = ["name", "feed_url"]
     actions = ['force_update']
@@ -168,6 +181,17 @@ class O_FeedAdmin(admin.ModelAdmin):
 
     size_in_kb.short_description = 'Size(KB)'
 
+    def is_valid(self, obj):
+        if obj.valid is None:
+            return format_html(
+                "<img src='/static/img/icon-loading.svg' alt='True'>"
+            )
+        elif obj.valid is True:
+            return True
+        else:
+            return False
+
+    is_valid.short_description = 'Valid'
     @admin.display(description="feed_url")
     def show_feed_url(self, obj):
         if obj.feed_url:
