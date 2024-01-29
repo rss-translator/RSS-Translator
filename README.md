@@ -6,6 +6,8 @@
 
 [English](README_EN.md)
 
+可查看[Demo](https://demo.rsstranslator.com)
+
 Telegram交流群: https://t.me/rsstranslator \
 开发进度：https://github.com/orgs/rss-translator/projects/2/views/1
 
