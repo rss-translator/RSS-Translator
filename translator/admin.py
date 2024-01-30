@@ -2,81 +2,67 @@ import logging
 
 from django.contrib import admin
 from django.conf import settings
+from django.utils.html import format_html
 
 from .models import Translated_Content, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
     DeepLXTranslator, CaiYunTranslator
 from .tasks import translator_validate
 
-@admin.register(OpenAITranslator)
-class OpenAITranslatorAdmin(admin.ModelAdmin):
-    fields = ["name", "api_key", "base_url", "model", "prompt", "temperature", "top_p","frequency_penalty","presence_penalty","max_tokens"]
-    list_display = ["name", "valid", "api_key", "model", "prompt", "max_tokens","base_url"]
 
+class BaseTranslatorAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         logging.debug("Call save_model: %s", obj)
         obj.valid = None
         obj.save()
         translator_validate(obj)  # 会执行一次obj.save()
 
+    def is_valid(self, obj):
+        if obj.valid is None:
+            return format_html(
+                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
+            )
+        elif obj.valid is True:
+            return format_html(
+                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
+            )
+        else:
+            return format_html(
+                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
+            )
+
+    is_valid.short_description = 'Valid'
+
+
+@admin.register(OpenAITranslator)
+class OpenAITranslatorAdmin(BaseTranslatorAdmin):
+    fields = ["name", "api_key", "base_url", "model", "prompt", "temperature", "top_p", "frequency_penalty",
+              "presence_penalty", "max_tokens"]
+    list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens", "base_url"]
 
 @admin.register(AzureAITranslator)
-class AzureAITranslatorAdmin(admin.ModelAdmin):
+class AzureAITranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "api_key", "endpoint", "version","deloyment_name", "prompt", "temperature", "top_p","frequency_penalty","presence_penalty","max_tokens"]
-    list_display = ["name", "valid", "api_key", "deloyment_name", "version", "prompt", "max_tokens","endpoint"]
-
-    def save_model(self, request, obj, form, change):
-        logging.debug("Call save_model: %s", obj)
-        obj.valid = None
-        obj.save()
-        translator_validate(obj)  # 会执行一次obj.save()
+    list_display = ["name", "is_valid", "api_key", "deloyment_name", "version", "prompt", "max_tokens", "endpoint"]
 
 @admin.register(DeepLTranslator)
-class DeepLTranslatorAdmin(admin.ModelAdmin):
+class DeepLTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "api_key"]
-    list_display = ["name", "valid", "api_key"]
-
-    def save_model(self, request, obj, form, change):
-        logging.debug("Call save_model: %s", obj)
-        obj.valid = None
-        obj.save()
-        translator_validate(obj)  # 会执行一次obj.save()
-
+    list_display = ["name", "is_valid", "api_key"]
 
 @admin.register(DeepLXTranslator)
-class DeepLXTranslatorAdmin(admin.ModelAdmin):
+class DeepLXTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "deeplx_api"]
-    list_display = ["name", "valid", "deeplx_api"]
-
-    def save_model(self, request, obj, form, change):
-        logging.debug("Call save_model: %s", obj)
-        obj.valid = None
-        obj.save()
-        translator_validate(obj)  # 会执行一次obj.save()
-
+    list_display = ["name", "is_valid", "deeplx_api"]
 
 @admin.register(MicrosoftTranslator)
-class MicrosoftTranslatorAdmin(admin.ModelAdmin):
+class MicrosoftTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "api_key", "location", "endpoint"]
-    list_display = ["name", "valid", "api_key", "location", "endpoint"]
-
-    def save_model(self, request, obj, form, change):
-        logging.debug("Call save_model: %s", obj)
-        obj.valid = None
-        obj.save()
-        translator_validate(obj)  # 会执行一次obj.save()
-
+    list_display = ["name", "is_valid", "api_key", "location", "endpoint"]
 
 @admin.register(CaiYunTranslator)
-class CaiYunTranslatorAdmin(admin.ModelAdmin):
+class CaiYunTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "token", "url"]
-    list_display = ["name", "valid", "token", "url"]
-
-    def save_model(self, request, obj, form, change):
-        logging.debug("Call save_model: %s", obj)
-        obj.valid = None
-        obj.save()
-        translator_validate(obj)  # 会执行一次obj.save()
-
+    list_display = ["name", "is_valid", "token", "url"]
 
 class Translated_ContentAdmin(admin.ModelAdmin):
     # not permission to change anythin
