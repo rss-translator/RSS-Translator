@@ -32,7 +32,7 @@ def rss(request, feed_sid):
         response = StreamingHttpResponse(file_iterator(feed_file_path),
                                          content_type='application/xml')
         response['Content-Disposition'] = f'inline; filename="{os.path.basename(feed_file_path)}"'
-        logging.debug("Feed file served: %s", feed_file_path)
+        logging.info("Feed file served: %s", feed_file_path)
         return response
     except IOError as e:
         # Log the exception and return an appropriate error response
