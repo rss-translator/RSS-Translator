@@ -4,14 +4,14 @@ from django.contrib import admin
 from django.conf import settings
 from django.utils.html import format_html
 
-from .models import Translated_Content, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
+from .models import OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
     DeepLXTranslator, CaiYunTranslator
 from .tasks import translator_validate
 
 
 class BaseTranslatorAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        logging.debug("Call save_model: %s", obj)
+        logging.info("Call save_model: %s", obj)
         obj.valid = None
         obj.save()
         translator_validate(obj)  # 会执行一次obj.save()
@@ -64,11 +64,19 @@ class CaiYunTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "token", "url"]
     list_display = ["name", "is_valid", "token", "url"]
 
-class Translated_ContentAdmin(admin.ModelAdmin):
-    # not permission to change anythin
-    fields = ["original_content", "translated_content", "translated_language", "tokens", "characters"]
-    list_display = ["original_content", "translated_language", "translated_content", "tokens", "characters"]
-
 
 if settings.DEBUG:
-    admin.site.register(Translated_Content, Translated_ContentAdmin)
+    from .models import Translated_Content, TestTranslator
+
+
+    @admin.register(Translated_Content)
+    class Translated_ContentAdmin(admin.ModelAdmin):
+        # not permission to change anythin
+        fields = ["original_content", "translated_content", "translated_language", "tokens", "characters"]
+        list_display = ["original_content", "translated_language", "translated_content", "tokens", "characters"]
+
+
+    @admin.register(TestTranslator)
+    class TestTranslatorAdmin(BaseTranslatorAdmin):
+        fields = ["name", "translated_text", "max_characters"]
+        list_display = ["name", "is_valid", "translated_text", "max_characters"]

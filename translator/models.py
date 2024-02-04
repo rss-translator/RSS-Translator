@@ -12,7 +12,6 @@ from openai import OpenAI, AzureOpenAI
 from django.utils.translation import gettext_lazy as _
 
 
-
 class Translated_Content(models.Model):
     hash = models.BinaryField(max_length=8, unique=True)
     original_content = models.TextField()
@@ -26,7 +25,6 @@ class Translated_Content(models.Model):
     def __str__(self):
         return self.original_content
 
-
 class TranslatorEngine(models.Model):
     name = models.CharField(_("Name"), max_length=100, unique=True)
     valid = models.BooleanField(_("Valid"),null=True)
@@ -36,6 +34,19 @@ class TranslatorEngine(models.Model):
             "subclasses of TranslatorEngine must provide a translate() method"
         )
 
+    def min_size(self):
+        if hasattr(self, "max_characters"):
+            return self.max_characters * 0.7
+        if hasattr(self, "max_tokens"):
+            return self.max_tokens * 0.7
+        return 0
+
+    def max_size(self):
+        if hasattr(self, "max_characters"):
+            return self.max_characters * 0.9
+        if hasattr(self, "max_tokens"):
+            return self.max_tokens * 0.9
+        return 0
     def validate(self) -> bool:
         raise NotImplementedError(
             "subclasses of TranslatorEngine must provide a validate() method"
@@ -46,14 +57,14 @@ class TranslatorEngine(models.Model):
         text_hash = cityhash.CityHash64(f"{text}{target_language}").to_bytes(8, byteorder='little')
         try:
             content = Translated_Content.objects.get(hash=text_hash)
-            # logging.debug("Using cached translations:%s", text)
+            # logging.info("Using cached translations:%s", text)
             return {
                 'result': content.translated_content,
                 'tokens': content.tokens,
                 'characters': content.characters
             }
         except Translated_Content.DoesNotExist:
-            logging.debug("Does not exist in cache:%s", text)
+            logging.info("Does not exist in cache:%s", text)
             return None
 
     class Meta:
@@ -62,6 +73,21 @@ class TranslatorEngine(models.Model):
     def __str__(self):
         return self.name
 
+
+class TestTranslator(TranslatorEngine):
+    translated_text = models.TextField(default="@@Translated Text@@")
+    max_characters = models.IntegerField(default=50000)
+
+    class Meta:
+        verbose_name = "Test"
+        verbose_name_plural = "Test"
+
+    def validate(self):
+        return True
+
+    def translate(self, text, target_language):
+        logging.info(">>> Test Translate [%s]: %s", target_language, text)
+        return {'result': self.translated_text, "tokens": 0, "characters": len(text)}
 
 class OpenAITranslator(TranslatorEngine):
     # https://platform.openai.com/docs/api-reference/chat
@@ -75,7 +101,8 @@ class OpenAITranslator(TranslatorEngine):
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
     model = models.CharField(max_length=100, default="gpt-3.5-turbo", choices=[(x, x) for x in openai_models])
-    prompt = models.TextField(default="Translate the following to {target_language},only returns translations.\n{text}")
+    prompt = models.TextField(
+        default="Translate only the text from the following into {target_language},only returns translations.\n{text}")
     temperature = models.FloatField(default=0.5)
     top_p = models.FloatField(default=0.95)
     frequency_penalty = models.FloatField(default=0)
@@ -107,10 +134,10 @@ class OpenAITranslator(TranslatorEngine):
                 return False
 
     def translate(self, text, target_language):
-        logging.debug(">>> OpenAI Translate [%s]:", target_language)
+        logging.info(">>> OpenAI Translate [%s]:", target_language)
         client = self._init()
         tokens = 0
-        translated_text = ""
+        translated_text = ''
         try:
             prompt = self.prompt.format(target_language=target_language, text=text)
             res = client.with_options(max_retries=3).chat.completions.create(
@@ -125,13 +152,13 @@ class OpenAITranslator(TranslatorEngine):
             if res.choices[0].finish_reason == "stop":
                 translated_text = res.choices[0].message.content
             else:
-                translated_text = text
+                translated_text = ''
                 logging.info("OpenAITranslator->%s: finish_reason: %s", text, res.choices[0].finish_reason)
             tokens = res.usage.total_tokens
         except Exception as e:
             logging.error("OpenAITranslator->%s: %s", text, e)
 
-        return {'result': translated_text, "tokens": tokens, "characters": len(text)}
+        return {'result': translated_text, "tokens": tokens}
 
 class AzureAITranslator(TranslatorEngine):
     # https://learn.microsoft.com/azure/ai-services/openai/
@@ -172,10 +199,10 @@ class AzureAITranslator(TranslatorEngine):
                 return False
 
     def translate(self, text, target_language):
-        logging.debug(">>> AzureAI Translate [%s]:", target_language)
+        logging.info(">>> AzureAI Translate [%s]:", target_language)
         client = self._init()
         tokens = 0
-        translated_text = ""
+        translated_text = ''
         try:
             prompt = self.prompt.format(target_language=target_language, text=text)
             res = client.with_options(max_retries=3).chat.completions.create(
@@ -190,7 +217,7 @@ class AzureAITranslator(TranslatorEngine):
             if res.choices[0].finish_reason == "stop":
                 translated_text = res.choices[0].message.content
             else:
-                translated_text = text
+                translated_text = ''
                 logging.info("AzureAITranslator->%s: finish_reason: %s", text, res.choices[0].finish_reason)
             tokens = res.usage.total_tokens
         except Exception as e:
@@ -202,6 +229,7 @@ class AzureAITranslator(TranslatorEngine):
 class DeepLTranslator(TranslatorEngine):
     # https://github.com/DeepLcom/deepl-python
     api_key = EncryptedCharField(_("API Key"), max_length=255)
+    max_characters = models.IntegerField(default=5000)
     # url = models.CharField(max_length=255, default="https://api-free.deepl.com/v2/translate")
     language_code_map = {
         "English": "EN-US",
@@ -238,14 +266,15 @@ class DeepLTranslator(TranslatorEngine):
             return False
 
     def translate(self, text, target_language):
-        logging.debug(">>> DeepL Translate [%s]: %s", target_language, text)
+        logging.info(">>> DeepL Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
-        translated_text = ""
+        translated_text = ''
         try:
             if target_code is None:
                 logging.error("DeepLTranslator->%s: Not support target language", text)
             translator = deepl.Translator(self.api_key)
-            resp = translator.translate_text(text, target_lang=target_code)
+            resp = translator.translate_text(text, target_lang=target_code, preserve_formatting=True,
+                                             split_sentences='nonewlines')
             translated_text = resp.text
         except Exception as e:
             logging.error("DeepLTranslator->%s: %s", text, e)
@@ -255,6 +284,7 @@ class DeepLTranslator(TranslatorEngine):
 class DeepLXTranslator(TranslatorEngine):
     # https://github.com/OwO-Network/DeepLX
     deeplx_api = models.CharField(max_length=255, default="http://127.0.0.1:1188/translate")
+    max_characters = models.IntegerField(default=50000)
     language_code_map = {
         "English": "EN-US",
         "Chinese Simplified": "ZH",
@@ -289,9 +319,9 @@ class DeepLXTranslator(TranslatorEngine):
             return False
 
     def translate(self, text, target_language):
-        logging.debug(">>> DeepLX Translate [%s]: %s", target_language, text)
+        logging.info(">>> DeepLX Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
-        translated_text = ""
+        translated_text = ''
         try:
             if target_code is None:
                 logging.error("DeepLXTranslator->%s: Not support target language", text)
@@ -318,6 +348,7 @@ class MicrosoftTranslator(TranslatorEngine):
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     location = models.CharField(max_length=100)
     endpoint = models.CharField(max_length=255, default="https://api.cognitive.microsofttranslator.com")
+    max_characters = models.IntegerField(default=5000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh-Hans",
@@ -350,9 +381,9 @@ class MicrosoftTranslator(TranslatorEngine):
         return result.get("result") != ""
 
     def translate(self, text, target_language) -> dict:
-        logging.debug(">>> Microsoft Translate [%s]: %s", target_language, text)
+        logging.info(">>> Microsoft Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
-        translated_text = ""
+        translated_text = ''
         try:
             if target_code is None:
                 logging.error("MicrosoftTranslator->%s: Not support target language", text)
@@ -384,6 +415,7 @@ class CaiYunTranslator(TranslatorEngine):
     # https://docs.caiyunapp.com/blog/2018/09/03/lingocloud-api/
     token = EncryptedCharField(max_length=255)
     url = models.URLField(max_length=255, default="http://api.interpreter.caiyunai.com/v1/translator")
+    max_characters = models.IntegerField(default=5000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh",
@@ -403,9 +435,9 @@ class CaiYunTranslator(TranslatorEngine):
         return result.get("result") != ""
 
     def translate(self, text: str, target_language) -> dict:
-        logging.debug(">>> CaiYun Translate [%s]: %s", target_language, text)
+        logging.info(">>> CaiYun Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
-        translated_text = ""
+        translated_text = ''
         try:
             if target_code is None:
                 logging.error("CaiYunTranslator->%s: Not support target language", text)
