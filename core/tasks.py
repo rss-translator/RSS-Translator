@@ -6,11 +6,11 @@ import feedparser
 from django.conf import settings
 from django.utils import timezone
 from huey.contrib.djhuey import HUEY as huey
-from huey.contrib.djhuey import on_startup, db_task, on_shutdown, task
+from huey.contrib.djhuey import on_startup, on_shutdown, task
 from translator.tasks import translate_feed
 
 from .models import O_Feed, T_Feed
-from .utils.feed_action import fetch_feed, generate_atom_feed
+from utils.feed_action import fetch_feed, generate_atom_feed
 
 # from huey_monitor.models import TaskModel
 
@@ -41,7 +41,7 @@ def update_original_feed(sid: str):
     except O_Feed.DoesNotExist:
         return False
 
-    log.debug("Call task update_original_feed: %s", obj.feed_url)
+    log.info("Call task update_original_feed: %s", obj.feed_url)
     feed_dir_path = Path(settings.DATA_FOLDER) / "feeds"
 
     if not os.path.exists(feed_dir_path):
@@ -54,12 +54,12 @@ def update_original_feed(sid: str):
         if fetch_feed_results['error']:
             raise Exception(f"Fetch Original Feed Failed: ({obj.sid}){obj.feed_url}")
         elif not fetch_feed_results.get("update"):
-            log.debug("Original Feed is up to date, Skip fetch:(%s)%s", obj.sid, obj.feed_url)
+            log.info("Original Feed is up to date, Skip fetch:(%s)%s", obj.sid, obj.feed_url)
         else:
             with open(original_feed_file_path, "w", encoding="utf-8") as f:
                 f.write(fetch_feed_results.get("xml"))
             feed = fetch_feed_results.get("feed")
-            obj.name = feed.feed.title
+            obj.name = feed.feed.get('title') or feed.feed.get('subtitle')
             obj.size = os.path.getsize(original_feed_file_path)
             obj.modified = feed.get(
                 "modified",
@@ -82,18 +82,18 @@ def update_original_feed(sid: str):
 
 
 @task(retries=3)
-def update_translated_feed(sid: str):
+def update_translated_feed(sid: str, force=False):
     try:
         obj = T_Feed.objects.get(sid=sid)
     except T_Feed.DoesNotExist:
         return False
-    log.debug("Call task update_translated_feed: (%s)(%s)", obj.language, obj.o_feed.feed_url)
+    log.info("Call task update_translated_feed: (%s)(%s)", obj.language, obj.o_feed.feed_url)
 
     if obj.o_feed.pk is None:
         log.error("Unable translate feed, because Original Feed is None: (%s)%s", obj.language, obj.o_feed.feed_url)
         return False
-    if obj.modified == obj.o_feed.modified:
-        log.debug("Translated Feed is up to date, Skip translation: (%s)%s", obj.language, obj.o_feed.feed_url)
+    if not force and obj.modified == obj.o_feed.modified:
+        log.info("Translated Feed is up to date, Skip translation: (%s)%s", obj.language, obj.o_feed.feed_url)
         return False
 
     feed_dir_path = f"{settings.DATA_FOLDER}/feeds"
@@ -105,13 +105,16 @@ def update_translated_feed(sid: str):
         obj.o_feed.update()
 
     translated_feed_file_path = f"{feed_dir_path}/{obj.sid}.xml"
+    if not os.path.exists(translated_feed_file_path):
+        with open(translated_feed_file_path, "w", encoding="utf-8") as f:
+            f.write("Translation in progress...")
 
     original_feed = feedparser.parse(original_feed_file_path)
 
     try:
-        if original_feed:
+        if original_feed.entries:
             engine = obj.o_feed.translator
-            # log.debug("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
+            # log.info("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
             results = translate_feed.call_local(
                 feed=original_feed,
                 target_language=obj.language,
@@ -126,7 +129,13 @@ def update_translated_feed(sid: str):
                 feed = results.get("feed")
                 total_tokens = results.get("tokens")
                 translated_characters = results.get("characters")
-            xml_str = generate_atom_feed(feed)  # ???feed is feedparser object
+            xml_str = generate_atom_feed(obj.o_feed.feed_url, feed)  # feed is a feedparser object
+
+            if xml_str is None:
+                log.error("generate_atom_feed returned None")
+                return False
+            with open(translated_feed_file_path, "w", encoding="utf-8") as f:
+                f.write(xml_str)
 
             # There can only be one billing method at a time, either token or character count.
             if total_tokens > 0:
@@ -135,8 +144,6 @@ def update_translated_feed(sid: str):
                 obj.total_characters += translated_characters
 
             obj.modified = obj.o_feed.modified
-            with open(translated_feed_file_path, "w", encoding="utf-8") as f:
-                f.write(xml_str)
             obj.size = os.path.getsize(translated_feed_file_path)
             obj.status = True
     except Exception as e:

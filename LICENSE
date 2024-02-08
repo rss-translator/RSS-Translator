@@ -1,6 +1,7 @@
+# LICENSE
 MIT License
 
-Copyright (c) 2023 Versun
+Copyright (c) 2023 RSS Translator
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,73 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+## Third Party Licenses
+This project also includes the following third party libraries:
+Library Name: django
+License: BSD
+URL: https://pypi.org/project/Django/
+
+Library Name: django-encrypted-model-fields
+License: MIT
+URL: https://pypi.org/project/django-encrypted-model-fields/
+
+Library Name: openai
+License: Apache
+URL: https://pypi.org/project/openai/
+
+Library Name: tiktoken
+License: MIT
+URL: https://pypi.org/project/tiktoken/
+
+Library Name: feedparser
+License: BSD
+URL: https://pypi.org/project/feedparser/
+
+Library Name: feedgen
+License: FreeBSD / LGPLv3+
+URL: https://pypi.org/project/feedgen/
+
+Library Name: httpx
+License: BSD
+URL: https://pypi.org/project/httpx/
+
+Library Name: dateutils
+License: BSD
+URL: https://pypi.org/project/dateutils/
+
+Library Name: deepl
+License: MIT
+URL: https://pypi.org/project/deepl/
+
+Library Name: huey
+License: MIT
+URL: https://pypi.org/project/huey/
+
+Library Name: gevent
+License: MIT
+URL: https://pypi.org/project/gevent/
+
+Library Name: cityhash
+License: MIT
+URL: https://pypi.org/project/cityhash/
+
+Library Name: django-debug-toolbar
+License: BSD
+URL: https://pypi.org/project/django-debug-toolbar/
+
+Library Name: django-huey-monitor
+License: GPL-3.0-or-later
+URL: https://pypi.org/project/django-huey-monitor/
+
+Library Name: whitenoise
+License: MIT
+URL: https://pypi.org/project/whitenoise/
+
+Library Name: uvicorn
+License: BSD
+URL: https://pypi.org/project/uvicorn/
+
+
+

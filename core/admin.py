@@ -15,7 +15,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
 
 from huey.contrib.djhuey import HUEY as huey
-from translator.models import OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
+from translator.models import TestTranslator, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
     DeepLXTranslator, CaiYunTranslator
 
 from .models import O_Feed, T_Feed
@@ -38,7 +38,7 @@ class T_FeedForm(forms.ModelForm):
 class T_FeedInline(admin.TabularInline):
     model = T_Feed
     form = T_FeedForm
-    fields = ["language", "obj_status", "feed_url", "translate_title", "total_tokens",
+    fields = ["language", "obj_status", "feed_url", "translate_title", "translate_content", "total_tokens",
               "total_characters", "size_in_kb"]
     readonly_fields = ("feed_url", "obj_status", "size_in_kb", "total_tokens", "total_characters")
     extra = 1
@@ -93,7 +93,7 @@ class O_FeedForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(O_FeedForm, self).__init__(*args, **kwargs)
-        translator_models = [OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator,
+        translator_models = [TestTranslator, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator,
                              DeepLXTranslator, CaiYunTranslator]
         # Cache ContentTypes to avoid repetitive database calls
         content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
@@ -142,17 +142,18 @@ class O_FeedAdmin(admin.ModelAdmin):
         instances = formset.save(commit=False)
         for instance in instances:
             if instance.o_feed.pk:  # 不保存o_feed为空的T_Feed实例
-                # instance.valid = None  # 没有必要了，因为保存后无法再修改了
+                instance.status = None
                 instance.save()
                 self.revoke_tasks_by_arg(instance.sid)
-                update_translated_feed(instance.sid)
+                update_translated_feed(instance.sid, force=True)
 
         for instance in formset.deleted_objects:
+            self.revoke_tasks_by_arg(instance.sid)
             instance.delete()
         formset.save_m2m()
 
     def save_model(self, request, obj, form, change):
-        logging.debug("Call O_Feed save_model: %s", obj)
+        logging.info("Call O_Feed save_model: %s", obj)
         feed_url_changed = 'feed_url' in form.changed_data
         frequency_changed = 'update_frequency' in form.changed_data
         # translator_changed = 'content_type' in form.changed_data or 'object_id' in form.changed_data
@@ -171,7 +172,7 @@ class O_FeedAdmin(admin.ModelAdmin):
         for task in huey.scheduled():
             # Assuming the first argument is the one we're interested in (e.g., obj.pk)
             if task.args and task.args[0] == arg_to_match:
-                logging.debug("Revoke task: %s", task)
+                logging.info("Revoke task: %s", task)
                 huey.revoke_by_id(task)
                 # delete TaskModel data
                 if settings.DEBUG:
@@ -218,7 +219,7 @@ class O_FeedAdmin(admin.ModelAdmin):
         return ''
     @admin.action(description=_('Force Update'))
     def force_update(self, request, queryset):
-        logging.debug("Call force_update: %s", queryset)
+        logging.info("Call force_update: %s", queryset)
         with transaction.atomic():
             for instance in queryset:
                 instance.etag = ''

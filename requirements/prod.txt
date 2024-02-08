@@ -1,7 +1,9 @@
 django==5.0.1
 django-encrypted-model-fields
 openai
+tiktoken
 feedparser
+feedgen
 httpx
 dateutils
 deepl

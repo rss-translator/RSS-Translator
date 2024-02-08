@@ -26,7 +26,8 @@
 - [Star历史图](#Star历史图)
 
 ### 功能：
-1. 可添加并翻译RSS源的标题(内容翻译正在开发中)
+
+1. 可添加RSS源并选择翻译标题或内容
 2. 可订阅翻译后的RSS，也可仅代理原来的RSS
 3. 可添加多种翻译引擎，每个源都可以指定一个翻译引擎
 4. 可控制每个源的更新频率和查看翻译状态
@@ -134,6 +135,7 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 ### 卸载
 `sudo ./home/rsstranslator/deploy/uninstall.sh`
 注意：该卸载脚本并不会删除/tmp目录下的数据备份文件，以防万一
+
 ---
 ### 开启SSL
 建议使用caddy并配合cloudflare的dns代理使用\
