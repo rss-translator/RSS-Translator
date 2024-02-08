@@ -26,7 +26,8 @@ The main reason for development was to solve personal needs. I followed many for
 - [Star History](#star-history)
 
 ### Functions:
-1. Ability to add and translate the titles of RSS sources (content translation is under development).
+
+1. Ability to add and translate the titles or content of RSS sources.
 2. Ability to subscribe to translated RSS or simply proxy the original RSS.
 3. Support for multiple translation engines, with each source being able to specify a translation engine.
 4. Control over the update frequency for each source and the ability to view translation status.
@@ -129,6 +130,7 @@ Installation complete, visit [http://127.0.0.1:8000](http://127.0.0.1:8000)
 ### Uninstall
 `sudo . /home/rsstranslator/deploy/uninstall.sh`
 Note: This uninstall script does not delete the data backup files in the /tmp directory, just in case!
+
 ---
 ### Enable SSL
 It is recommended to use caddy with cloudflare's dns proxy.
