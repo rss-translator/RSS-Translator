@@ -49,8 +49,10 @@ We will add more translation engines soon.
 Django 5
 
 ### Installation Requirements
-Ubuntu 22.04 LTS / Debian 12 (Memory recommendation of 512M above)\
-Python >= 3.10
+
+System: (Ubuntu 22.04 LTS / Debian 12 / Fedora 37) or later\
+Memory: Recommended 512M or more \
+Python: >= 3.10
 
 ### Installation Method
 #### Automatic Installation (Recommended)

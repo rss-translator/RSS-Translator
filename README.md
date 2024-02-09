@@ -48,9 +48,11 @@
 ### 技术栈
 Django 5
 
-### 安装要求
-Ubuntu 22.04 LTS / Debian 12 (内存建议512M以上)\
-Python >= 3.10
+### 最低安装要求
+
+系统: Ubuntu 22.04 LTS / Debian 12 / Fedora 37 \
+内存: 建议512M以上
+Python: >= 3.10
 
 ### 安装方法
 #### 自动安装（推荐）
