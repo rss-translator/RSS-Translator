@@ -25,11 +25,19 @@ if [[ "$script_dir" == /home/rsstranslator* ]]; then
     exit 0
 fi
 
-#apt update and upgrade
-apt update && apt upgrade -y
-
-# install python3-venv
-apt install python3-venv git zip -y
+# Detect the package manager and install dependencies
+if command -v yum >/dev/null  2>&1; then
+    # For systems with yum like CentOS, Fedora, or RHEL
+    yum update -y
+    yum install python-virtualenv git zip -y
+elif command -v apt-get >/dev/null  2>&1; then
+    # For systems with apt like Debian or Ubuntu
+    apt update && apt upgrade -y
+    apt install python3-venv git zip -y
+else
+    echo "Unsupported package manager. Only yum and apt are supported."
+    exit  1
+fi
 
 #backup data
 if [ -d /home/rsstranslator/data  ] && [ "$(ls -A /home/rsstranslator/data)" ]; then
@@ -90,8 +98,26 @@ echo "----- Enable rsstranslator.service to start on boot -----"
 systemctl daemon-reload
 systemctl enable rsstranslator.service
 
+show_progress() {
+    local width=50
+    local percent=$((100 * $1 / $2))
+    local filled=$((width * $1 / $2))
+    local empty=$((width - filled))
+    local bar=$(printf "%${filled}s" '' | tr ' ' '#')
+    local empty_bar=$(printf "%${empty}s" '' | tr ' ' '-')
+    echo -ne "\rProgress: [${bar}${empty_bar}] ${percent}% \r"
+}
+
 echo "----- Initialize virtualenv -----"
-sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/pip install -q -r /home/rsstranslator/requirements/prod.txt"
+total_packages=$(grep -v '^$' /home/rsstranslator/requirements/prod.txt | wc -l)
+counter=0
+while read package; do
+    if [ ! -z "$package" ]; then
+        sudo -u rsstranslator /home/rsstranslator/.venv/bin/pip install -q "$package" > /dev/null 2>&1
+        let counter+=1
+        show_progress $counter $total_packages
+    fi
+done < <(grep -v '^$' /home/rsstranslator/requirements/prod.txt)
 
 if [ -d /tmp/rsstranslator_data ] && [ "$(ls -A /tmp/rsstranslator_data)" ]; then
     echo "----- Restore db -----"
