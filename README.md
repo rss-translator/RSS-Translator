@@ -51,7 +51,7 @@ Django 5
 ### 最低安装要求
 
 系统: Ubuntu 22.04 LTS / Debian 12 / Fedora 37 \
-内存: 建议512M以上
+内存: 建议512M以上 \
 Python: >= 3.10
 
 ### 安装方法
