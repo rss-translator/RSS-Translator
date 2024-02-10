@@ -5,7 +5,7 @@ from django.conf import settings
 from django.utils.html import format_html
 
 from .models import OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
-    DeepLXTranslator, CaiYunTranslator
+    DeepLXTranslator, CaiYunTranslator, GeminiTranslator
 from .tasks import translator_validate
 
 
@@ -63,6 +63,12 @@ class MicrosoftTranslatorAdmin(BaseTranslatorAdmin):
 class CaiYunTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "token", "url"]
     list_display = ["name", "is_valid", "token", "url"]
+
+
+@admin.register(GeminiTranslator)
+class GeminiTranslatorAdmin(BaseTranslatorAdmin):
+    fields = ["name", "api_key", "model", "prompt", "temperature", "top_p", "top_k", "max_tokens"]
+    list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens"]
 
 
 if settings.DEBUG:

@@ -78,6 +78,8 @@ def update_original_feed(sid: str):
     # Update T_Feeds
     t_feeds = obj.t_feed_set.all()
     for t_feed in t_feeds:
+        t_feed.status = None
+        t_feed.save()
         update_translated_feed.schedule(args=(t_feed.sid,), delay=1)
 
 

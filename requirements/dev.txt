@@ -1,6 +1,7 @@
 django==5.0.1
 django-encrypted-model-fields
 openai
+google-generativeai
 tiktoken
 feedparser
 feedgen
