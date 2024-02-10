@@ -40,6 +40,7 @@ Currently supported translation engines:
 - DeepLX
 - OpenAI
 - Azure OpenAI
+- Google Gemini
 - Microsoft Translate API
 - Caiyun API
 
