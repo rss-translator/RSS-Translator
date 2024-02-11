@@ -14,7 +14,8 @@
 - [技术栈](#技术栈)
 - [安装要求](#安装要求)
 - [安装方法](#安装方法)
-  - [自动安装](#自动安装推荐)
+  - [脚本自动安装](#脚本自动安装推荐)
+  - [一键部署](#一键部署)
   - [通过Docker安装](#通过docker安装)
   - [手动安装](#手动安装)
 - [升级](#升级)
@@ -57,7 +58,8 @@ Django 5
 Python: >= 3.10
 
 ### 安装方法
-#### 自动安装（推荐）
+
+#### 脚本自动安装（推荐）
 下载安装脚本[install_update.sh](https://github.com/rss-translator/RSS-Translator/blob/main/deploy/install_update.sh)\
 `wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/install_update.sh"`
 
@@ -74,6 +76,11 @@ sudo ./install_update.sh
 
 ---
 
+#### 一键部署
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/EBvM5C?referralCode=QWy2ii)
+
+---
 #### 通过Docker安装
 
 **使用Docker Compose(推荐)**\

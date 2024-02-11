@@ -14,9 +14,10 @@ The main reason for development was to solve personal needs. I followed many for
 - [Technology Stack](#technology-stack)
 - [Installation Requirements](#installation-requirements)
 - [Installation Method](#installation-method)
- - [Automatic Installation](#automatic-installation-recommended)
-- [Install via Docker](#install-via-docker)
- - [Manual Installation](#manual-installation)
+        - [Automatic Installation](#automatic-installation-recommended)
+        - [One-click Deployment](#one-click-deployment)
+        - [Install via Docker](#install-via-docker)
+        - [Manual Installation](#manual-installation)
 - [Upgrade](#upgrade)
 - [Uninstall](#uninstall)
 - [Enable SSL](#enable-ssl)
@@ -75,6 +76,12 @@ If you need to enable SSL (https), please refer to [here](#enable-ssl)
 
 ---
 
+#### One-click Deployment
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/EBvM5C?referralCode=QWy2ii)
+
+
+---
 #### Install via Docker
 
 **Use Docker Compose (Recommended)**\
