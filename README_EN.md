@@ -15,6 +15,7 @@ The main reason for development was to solve personal needs. I followed many for
 - [Installation Requirements](#installation-requirements)
 - [Installation Method](#installation-method)
  - [Automatic Installation](#automatic-installation-recommended)
+- [Install via Docker](#install-via-docker)
  - [Manual Installation](#manual-installation)
 - [Upgrade](#upgrade)
 - [Uninstall](#uninstall)
@@ -71,6 +72,28 @@ Default account: admin\
 Default password: rsstranslator\
 Please change your password after logging in\
 If you need to enable SSL (https), please refer to [here](#enable-ssl)
+
+---
+
+#### Install via Docker
+
+**Use Docker Compose (Recommended)**\
+Download the [docker-compose.yml](deploy/docker-compose.yml) file\
+`wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/docker-compose.yml"` \
+Run `docker-compose -f docker-compose.yml up -d`\
+Installation complete, visit http://127.0.0.1:8000
+
+**Use Docker**
+
+```
+docker run -d \
+  -v data:/home/rsstranslator/data \
+  -p 8000:8000 --restart always \
+  rsstranslator/rsstranslator \
+  bash -c "python manage.py init_server && python manage.py run_huey & uvicorn config.asgi:application --host  0.0.0.0"
+```
+
+Installation complete, visit http://127.0.0.1:8000
 
 ---
 #### Manual Installation

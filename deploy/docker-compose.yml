@@ -2,13 +2,12 @@ version: '3'
 services:
   rsstranslator:
     image: rsstranslator/rsstranslator
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
     volumes:
       - ./data:/home/rsstranslator/data
     ports:
       - 8000:8000
-    command: >
-      bash -c "python manage.py collectstatic --no-input &&
-               python manage.py makemigrations &&
-               python manage.py migrate &&
-               python manage.py create_default_superuser &&
-               python manage.py run_huey & uvicorn config.asgi:application --host 0.0.0.0"
+    restart: always
+    command: bash -c "python manage.py init_server && python manage.py run_huey & uvicorn config.asgi:application --host 0.0.0.0"
