@@ -15,6 +15,7 @@
 - [安装要求](#安装要求)
 - [安装方法](#安装方法)
   - [自动安装](#自动安装推荐)
+  - [通过Docker安装](#通过docker安装)
   - [手动安装](#手动安装)
 - [升级](#升级)
 - [卸载](#卸载)
@@ -70,6 +71,28 @@ sudo ./install_update.sh
 默认密码：rsstranslator\
 请登录后立即修改你的密码\
 如需开启SSL(https)，请参考[这里](#开启SSL)
+
+---
+
+#### 通过Docker安装
+
+**使用Docker Compose(推荐)**\
+下载[docker-compose.yml](deploy/docker-compose.yml)文件\
+`wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/docker-compose.yml"` \
+运行`docker-compose -f docker-compose.yml up -d`\
+安装完成，访问 http://127.0.0.1:8000
+
+**使用Docker**
+
+```
+docker run -d \
+  -v data:/home/rsstranslator/data \
+  -p 8000:8000 --restart always \
+  rsstranslator/rsstranslator \
+  bash -c "python manage.py init_server && python manage.py run_huey & uvicorn config.asgi:application --host  0.0.0.0"
+```
+
+安装完成，访问 http://127.0.0.1:8000
 
 ---
 #### 手动安装
