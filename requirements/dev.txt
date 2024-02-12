@@ -1,4 +1,4 @@
-django==5.0.1
+django>=5.0.2
 django-encrypted-model-fields
 openai
 google-generativeai
