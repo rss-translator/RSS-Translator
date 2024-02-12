@@ -36,6 +36,10 @@ Library Name: openai
 License: Apache
 URL: https://pypi.org/project/openai/
 
+Library Name: google-generativeai
+License: Apache
+URL: https://pypi.org/project/google-generativeai/
+
 Library Name: tiktoken
 License: MIT
 URL: https://pypi.org/project/tiktoken/
