@@ -231,7 +231,8 @@ class DeepLTranslator(TranslatorEngine):
     # https://github.com/DeepLcom/deepl-python
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     max_characters = models.IntegerField(default=5000)
-    # url = models.CharField(max_length=255, default="https://api-free.deepl.com/v2/translate")
+    server_url = models.URLField(_("API URL(optional)"), null=True, blank=True)
+    proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True)
     language_code_map = {
         "English": "EN-US",
         "Chinese Simplified": "ZH",
@@ -258,9 +259,12 @@ class DeepLTranslator(TranslatorEngine):
         verbose_name = "DeepL"
         verbose_name_plural = "DeepL"
 
+    def _init(self):
+        return deepl.Translator(self.api_key, server_url=self.server_url, proxy=self.proxy)
+
     def validate(self) -> bool:
         try:
-            translator = deepl.Translator(self.api_key)
+            translator = self._init()
             usage = translator.get_usage()
             return usage.character.valid
         except Exception as e:
@@ -273,7 +277,7 @@ class DeepLTranslator(TranslatorEngine):
         try:
             if target_code is None:
                 logging.error("DeepLTranslator->%s: Not support target language", text)
-            translator = deepl.Translator(self.api_key)
+            translator = self._init()
             resp = translator.translate_text(text, target_lang=target_code, preserve_formatting=True,
                                              split_sentences='nonewlines')
             translated_text = resp.text

@@ -46,8 +46,8 @@ class AzureAITranslatorAdmin(BaseTranslatorAdmin):
 
 @admin.register(DeepLTranslator)
 class DeepLTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "api_key"]
-    list_display = ["name", "is_valid", "api_key"]
+    fields = ["name", "api_key", "server_url", "proxy"]
+    list_display = ["name", "is_valid", "api_key", "server_url", "proxy"]
 
 @admin.register(DeepLXTranslator)
 class DeepLXTranslatorAdmin(BaseTranslatorAdmin):
