@@ -79,7 +79,7 @@ sudo ./install_update.sh
 
 #### 一键部署
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/EBvM5C?referralCode=QWy2ii)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/EBvM5C?referralCode=QWy2ii)\
 [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=docker&image=docker.io/rsstranslator/rsstranslator&name=rss-translator&env[CSRF_TRUSTED_ORIGINS]=https://*.koyeb.app)
 
 ---
