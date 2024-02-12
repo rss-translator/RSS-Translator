@@ -18,6 +18,7 @@
   - [一键部署](#一键部署)
   - [通过Docker安装](#通过docker安装)
   - [手动安装](#手动安装)
+  - [报错:CSRF验证失败](#报错CSRF验证失败)
 - [升级](#升级)
 - [卸载](#卸载)
 - [开启SSL](#开启ssl)
@@ -163,6 +164,15 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 查看服务状态\
 `systemctl status rsstranslator.service`\
 安装完成，访问 http://127.0.0.1:8000
+
+---
+
+#### 报错:CSRF验证失败
+
+如果在登录后出现403 CSRF验证失败的错误，则需要设置环境变量`CSRF_TRUSTED_ORIGINS`
+,值为域名或IP地址:`https://*.example.com`\
+
+---
 ### 升级
 `sudo ./home/rsstranslator/deploy/install_update.sh`
 ### 卸载

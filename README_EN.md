@@ -18,6 +18,7 @@ The main reason for development was to solve personal needs. I followed many for
         - [One-click Deployment](#one-click-deployment)
         - [Install via Docker](#install-via-docker)
         - [Manual Installation](#manual-installation)
+        - [Error: CSRF Verification Failed](#error-csrf-verification-failed)
 - [Upgrade](#upgrade)
 - [Uninstall](#uninstall)
 - [Enable SSL](#enable-ssl)
@@ -158,6 +159,15 @@ Start the service\
 Check the service status\
 `systemctl status rsstranslator.service`
 Installation complete, visit [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+---
+
+#### Error: CSRF Verification Failed
+
+If you encounter a 403 CSRF verification failed error after logging in, you need to set the environment
+variable `CSRF_TRUSTED_ORIGINS`, the value is the domain name or IP address: `https://*.example.com`
+
+---
 ### Upgrade
 `sudo . /home/rsstranslator/deploy/install_update.sh`
 ### Uninstall
