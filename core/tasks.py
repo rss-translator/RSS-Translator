@@ -59,7 +59,8 @@ def update_original_feed(sid: str):
             with open(original_feed_file_path, "w", encoding="utf-8") as f:
                 f.write(fetch_feed_results.get("xml"))
             feed = fetch_feed_results.get("feed")
-            obj.name = feed.feed.get('title') or feed.feed.get('subtitle')
+            if obj.name in ["Loading", "Empty", None]:
+                obj.name = feed.feed.get('title') or feed.feed.get('subtitle')
             obj.size = os.path.getsize(original_feed_file_path)
             obj.modified = feed.get(
                 "modified",

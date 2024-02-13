@@ -9,12 +9,13 @@
 FROM python:3.11-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED 0
 ENV DockerHOME=/home/rsstranslator
 RUN mkdir -p $DockerHOME/data
 WORKDIR $DockerHOME
 COPY . $DockerHOME
-RUN pip install -r requirements/prod.txt --no-cache-dir && \
+#RUN pip config set global.index-url http://127.0.0.1:8000/simple
+RUN pip install -r requirements/dev.txt --no-cache-dir && \
     python manage.py init_server && \
     find $DockerHOME -type d -name "__pycache__" -exec rm -r {} + && \
     rm -rf $DockerHOME/.cache/pip \

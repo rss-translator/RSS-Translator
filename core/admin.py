@@ -113,7 +113,7 @@ class O_FeedForm(forms.ModelForm):
 
     class Meta:
         model = O_Feed
-        fields = ['feed_url', 'translator_engine', 'update_frequency']
+        fields = ['feed_url', 'update_frequency', 'translator_engine', 'name']
 
     # 重写save方法，以处理自定义字段的数据
     def save(self, commit=True):
@@ -155,10 +155,12 @@ class O_FeedAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         logging.info("Call O_Feed save_model: %s", obj)
         feed_url_changed = 'feed_url' in form.changed_data
+        feed_name_changed = 'name' in form.changed_data
         frequency_changed = 'update_frequency' in form.changed_data
         # translator_changed = 'content_type' in form.changed_data or 'object_id' in form.changed_data
         if feed_url_changed:
             obj.valid = None
+            obj.name = "Loading" if not obj.name else obj.name
             obj.save()
             update_original_feed(obj.sid)  # 会执行一次save() # 不放在model的save里是为了排除translator的更新，省流量
         elif frequency_changed:
@@ -166,6 +168,7 @@ class O_FeedAdmin(admin.ModelAdmin):
             self.revoke_tasks_by_arg(obj.sid)
             update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
         else:
+            obj.name = "Empty" if not obj.name else obj.name
             obj.save()
 
     def revoke_tasks_by_arg(self, arg_to_match):
@@ -241,7 +244,8 @@ class T_FeedAdmin(admin.ModelAdmin):
 
     size_in_kb.short_description = 'Size(KB)'
 
-if not settings.MULTIPLE_USERS:
+
+if not settings.USER_MANAGEMENT:
     admin.site.unregister(User)
     admin.site.unregister(Group)
 

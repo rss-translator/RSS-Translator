@@ -21,6 +21,16 @@ from django.views.generic.base import RedirectView
 
 favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
+if settings.DEMO:
+    from django.contrib import admin
+
+
+    class AccessUser:
+        has_module_perms = has_perm = __getattr__ = lambda s, *a, **kw: True
+
+
+    admin.site.has_permission = lambda r: setattr(r, 'user', AccessUser()) or True
+
 if settings.DEBUG:
     urlpatterns = [
     path("favicon.ico", favicon_view),

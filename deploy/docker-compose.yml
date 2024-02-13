@@ -3,8 +3,12 @@ services:
   rsstranslator:
     image: rsstranslator/rsstranslator
     environment:
-      - PYTHONUNBUFFERED=1
+      - PYTHONUNBUFFERED=0
       - PYTHONDONTWRITEBYTECODE=1
+      - DEBUG=0
+      - DEMO=0
+      - USER_MANAGEMENT=0
+      - CSRF_TRUSTED_ORIGINS=http://127.0.0.1
     volumes:
       - ./data:/home/rsstranslator/data
     ports:

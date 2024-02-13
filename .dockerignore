@@ -27,7 +27,6 @@ pip_dist/
 assets/
 static/
 docker/
-deploy/
 
 data/
 output/
