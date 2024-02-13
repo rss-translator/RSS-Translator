@@ -6,9 +6,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         User = get_user_model()
-        if not User.objects.filter(username='admin').exists():
+        # if not User.objects.filter(username='admin').exists():
+        if User.objects.count() == 0:
             User.objects.create_superuser('admin', 'admin@example.com', 'rsstranslator')
             self.stdout.write(self.style.SUCCESS('Successfully created a new superuser: admin, Password: rsstranslator'))
 
         else:
-            self.stdout.write(self.style.SUCCESS('Superuser already exists'))
+            self.stdout.write(self.style.SUCCESS(
+                'Superuser already exists, but you can change the password by running "python manage.py changepassword admin" command.'))

@@ -241,7 +241,8 @@ class T_FeedAdmin(admin.ModelAdmin):
 
     size_in_kb.short_description = 'Size(KB)'
 
-if not settings.MULTIPLE_USERS:
+
+if not settings.USER_MANAGEMENT:
     admin.site.unregister(User)
     admin.site.unregister(Group)
 
