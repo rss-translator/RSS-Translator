@@ -1,5 +1,5 @@
 <div align="center">
-<em><img src="https://github.com/rss-translator/RSS-Translator/assets/2398708/8f10db75-d5b4-4cdd-9fd6-7d319d20079f" height="90px"></em>
+<em><img src="https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/core/static/favicon.ico" height="90px"></em>
 <h1>RSS翻译器<br/><sub>开源、简洁、可自部署</sub></h1>
 </div>
 <br/>
