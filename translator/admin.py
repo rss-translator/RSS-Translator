@@ -74,8 +74,8 @@ class CaiYunTranslatorAdmin(BaseTranslatorAdmin):
 
 @admin.register(GeminiTranslator)
 class GeminiTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "api_key", "model", "prompt", "temperature", "top_p", "top_k", "max_tokens"]
-    list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens"]
+    fields = ["name", "api_key", "model", "prompt", "temperature", "top_p", "top_k", "max_tokens", "interval"]
+    list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens", "interval"]
 
 
 @admin.register(GoogleTranslateWebTranslator)

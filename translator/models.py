@@ -483,6 +483,7 @@ class GeminiTranslator(TranslatorEngine):
     top_p = models.FloatField(default=1)
     top_k = models.IntegerField(default=1)
     max_tokens = models.IntegerField(default=1000)
+    interval = models.IntegerField(_("Request Interval(s)"), default=3)
 
     class Meta:
         verbose_name = "Google Gemini"
@@ -525,7 +526,7 @@ class GeminiTranslator(TranslatorEngine):
         except Exception as e:
             logging.error("GeminiTranslator->%s: %s", text, e)
         finally:
-            sleep(3)
+            sleep(self.interval)
 
         return {'result': translated_text, "tokens": tokens}
 
