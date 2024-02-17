@@ -15,8 +15,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
 
 from huey.contrib.djhuey import HUEY as huey
-from translator.models import TestTranslator, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
-    DeepLXTranslator, CaiYunTranslator, GeminiTranslator
+from translator.models import TranslatorEngine
 
 from .models import O_Feed, T_Feed
 from .tasks import update_original_feed, update_translated_feed
@@ -93,8 +92,9 @@ class O_FeedForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(O_FeedForm, self).__init__(*args, **kwargs)
-        translator_models = [TestTranslator, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator,
-                             DeepLXTranslator, CaiYunTranslator, GeminiTranslator]
+        translator_models = TranslatorEngine.__subclasses__()
+        # translator_models = [TestTranslator, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator,
+        #                      DeepLXTranslator, CaiYunTranslator, GeminiTranslator, ClaudeTranslator]
         # Cache ContentTypes to avoid repetitive database calls
         content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
 

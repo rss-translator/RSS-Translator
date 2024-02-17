@@ -4,8 +4,9 @@ from django.contrib import admin
 from django.conf import settings
 from django.utils.html import format_html
 
-from .models import OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
-    DeepLXTranslator, CaiYunTranslator, GeminiTranslator
+# from .models import OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator, \
+#    DeepLXTranslator, CaiYunTranslator, GeminiTranslator, ClaudeTranslator
+from .models import *
 from .tasks import translator_validate
 
 
@@ -39,25 +40,31 @@ class OpenAITranslatorAdmin(BaseTranslatorAdmin):
               "presence_penalty", "max_tokens"]
     list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens", "base_url"]
 
+
 @admin.register(AzureAITranslator)
 class AzureAITranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "api_key", "endpoint", "version","deloyment_name", "prompt", "temperature", "top_p","frequency_penalty","presence_penalty","max_tokens"]
+    fields = ["name", "api_key", "endpoint", "version", "deloyment_name", "prompt", "temperature", "top_p",
+              "frequency_penalty", "presence_penalty", "max_tokens"]
     list_display = ["name", "is_valid", "api_key", "deloyment_name", "version", "prompt", "max_tokens", "endpoint"]
+
 
 @admin.register(DeepLTranslator)
 class DeepLTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "api_key", "server_url", "proxy"]
     list_display = ["name", "is_valid", "api_key", "server_url", "proxy"]
 
+
 @admin.register(DeepLXTranslator)
 class DeepLXTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "deeplx_api"]
-    list_display = ["name", "is_valid", "deeplx_api"]
+    fields = ["name", "deeplx_api", "interval"]
+    list_display = ["name", "is_valid", "deeplx_api", "interval"]
+
 
 @admin.register(MicrosoftTranslator)
 class MicrosoftTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "api_key", "location", "endpoint"]
     list_display = ["name", "is_valid", "api_key", "location", "endpoint"]
+
 
 @admin.register(CaiYunTranslator)
 class CaiYunTranslatorAdmin(BaseTranslatorAdmin):
@@ -67,14 +74,22 @@ class CaiYunTranslatorAdmin(BaseTranslatorAdmin):
 
 @admin.register(GeminiTranslator)
 class GeminiTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "api_key", "model", "prompt", "temperature", "top_p", "top_k", "max_tokens"]
-    list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens"]
+    fields = ["name", "api_key", "model", "prompt", "temperature", "top_p", "top_k", "max_tokens", "interval"]
+    list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens", "interval"]
+
+
+@admin.register(GoogleTranslateWebTranslator)
+class GoogleTranslateWebTranslatorAdmin(BaseTranslatorAdmin):
+    fields = ["name", "base_url", "interval", "proxy"]
+    list_display = ["name", "is_valid", "base_url", "proxy", "interval"]
+
+@admin.register(ClaudeTranslator)
+class ClaudeTranslatorAdmin(BaseTranslatorAdmin):
+    fields = ["name", "api_key", "base_url", "model", "prompt", "temperature", "top_p", "top_k", "max_tokens", "proxy"]
+    list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens", "base_url"]
 
 
 if settings.DEBUG:
-    from .models import Translated_Content, TestTranslator
-
-
     @admin.register(Translated_Content)
     class Translated_ContentAdmin(admin.ModelAdmin):
         # not permission to change anythin
