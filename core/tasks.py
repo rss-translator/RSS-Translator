@@ -105,7 +105,8 @@ def update_translated_feed(sid: str, force=False):
 
     original_feed_file_path = f"{feed_dir_path}/{obj.o_feed.sid}.xml"
     if not os.path.exists(original_feed_file_path):
-        obj.o_feed.update()
+        update_original_feed(obj.o_feed.sid)
+        return False
 
     translated_feed_file_path = f"{feed_dir_path}/{obj.sid}.xml"
     if not os.path.exists(translated_feed_file_path):
