@@ -56,8 +56,8 @@ class DeepLTranslatorAdmin(BaseTranslatorAdmin):
 
 @admin.register(DeepLXTranslator)
 class DeepLXTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "deeplx_api"]
-    list_display = ["name", "is_valid", "deeplx_api"]
+    fields = ["name", "deeplx_api", "interval"]
+    list_display = ["name", "is_valid", "deeplx_api", "interval"]
 
 
 @admin.register(MicrosoftTranslator)
@@ -77,6 +77,11 @@ class GeminiTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "api_key", "model", "prompt", "temperature", "top_p", "top_k", "max_tokens"]
     list_display = ["name", "is_valid", "api_key", "model", "prompt", "max_tokens"]
 
+
+@admin.register(GoogleTranslateWebTranslator)
+class GoogleTranslateWebTranslatorAdmin(BaseTranslatorAdmin):
+    fields = ["name", "base_url", "interval", "proxy"]
+    list_display = ["name", "is_valid", "base_url", "proxy", "interval"]
 
 @admin.register(ClaudeTranslator)
 class ClaudeTranslatorAdmin(BaseTranslatorAdmin):

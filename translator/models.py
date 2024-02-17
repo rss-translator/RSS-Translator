@@ -291,6 +291,7 @@ class DeepLXTranslator(TranslatorEngine):
     # https://github.com/OwO-Network/DeepLX
     deeplx_api = models.CharField(max_length=255, default="http://127.0.0.1:1188/translate")
     max_characters = models.IntegerField(default=50000)
+    interval = models.IntegerField(_("Request Interval(s)"), default=3)
     language_code_map = {
         "English": "EN-US",
         "Chinese Simplified": "ZH",
@@ -345,7 +346,7 @@ class DeepLXTranslator(TranslatorEngine):
         except Exception as e:
             logging.error("DeepLXTranslator->%s: %s", text, e)
         finally:
-            sleep(2)
+            sleep(self.interval)
             return {'result': translated_text, "characters": len(text)}
 
 
@@ -585,3 +586,64 @@ class ClaudeTranslator(TranslatorEngine):
             logging.error("ClaudeTranslator->%s: %s", text, e)
         finally:
             return {'result': translated_text, "tokens": tokens}
+
+
+class GoogleTranslateWebTranslator(TranslatorEngine):
+    base_url = models.URLField(_("URL"), default="https://translate.googleapis.com/translate_a/t")
+    proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
+    interval = models.IntegerField(_("Request Interval(s)"), default=3)
+
+    language_code_map = {
+        "English": "en",
+        "Chinese Simplified": "zh-CN",
+        "Chinese Traditional": "zh-TW",
+        "Russian": "ru",
+        "Japanese": "ja",
+        "Korean": "ko",
+        "Czech": "cs",
+        "Danish": "da",
+        "German": "de",
+        "Spanish": "es",
+        "French": "fr",
+        "Indonesian": "id",
+        "Italian": "it",
+        "Hungarian": "hu",
+        "Norwegian Bokmål": "no",
+        "Dutch": "nl",
+        "Polish": "pl",
+        "Portuguese": "pt",
+        "Swedish": "sv",
+        "Turkish": "tr",
+    }
+
+    class Meta:
+        verbose_name = "Google Translate(Web)"
+        verbose_name_plural = "Google Translate(Web)"
+
+    def validate(self):
+        results = self.translate("hi", "Chinese Simplified")
+        return results.get("result") != ""
+
+    def translate(self, text, target_language):
+        logging.info(">>> Google Translate Web Translate [%s]:", target_language)
+        target_language = self.language_code_map.get(target_language)
+        translated_text = ''
+        if target_language is None:
+            logging.error("GoogleTranslateWebTranslator->%s: Not support target language", text)
+            return {'result': translated_text, "characters": len(text)}
+        try:
+            params = {
+                "client": "gtx",
+                "sl": "auto",
+                "tl": target_language,
+                "dt": "t",
+                "q": text,
+            }
+            resp = httpx.get(self.base_url, params=params, timeout=10, proxy=self.proxy)
+            resp.raise_for_status()
+            translated_text = resp.json()[0][0]
+        except Exception as e:
+            logging.error("GoogleTranslateWebTranslator->%s: %s", text, e)
+        finally:
+            sleep(self.interval)
+            return {'result': translated_text, "characters": len(text)}
