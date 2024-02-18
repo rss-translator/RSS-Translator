@@ -60,7 +60,7 @@ class DeepLXTranslatorAdmin(BaseTranslatorAdmin):
     list_display = ["name", "is_valid", "deeplx_api", "interval"]
 
 
-@admin.register(DeepLWebTranslator)
+# @admin.register(DeepLWebTranslator)
 class DeepLWebTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "interval", "proxy"]
     list_display = ["name", "is_valid", "interval", "proxy"]
