@@ -5,6 +5,7 @@ from time import sleep
 
 import cityhash
 import deepl
+from PyDeepLX import PyDeepLX
 import anthropic
 import httpx
 from django.db import models
@@ -349,6 +350,60 @@ class DeepLXTranslator(TranslatorEngine):
             sleep(self.interval)
             return {'result': translated_text, "characters": len(text)}
 
+
+class DeepLWebTranslator(TranslatorEngine):
+    # https://github.com/OwO-Network/PyDeepLX
+    max_characters = models.IntegerField(default=50000)
+    interval = models.IntegerField(_("Request Interval(s)"), default=5)
+    proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
+    language_code_map = {
+        "English": "EN-US",
+        "Chinese Simplified": "ZH",
+        "Russian": "RU",
+        "Japanese": "JA",
+        "Korean": "KO",
+        "Czech": "CS",
+        "Danish": "DA",
+        "German": "DE",
+        "Spanish": "ES",
+        "French": "FR",
+        "Indonesian": "ID",
+        "Italian": "IT",
+        "Hungarian": "HU",
+        "Norwegian Bokmål": "NB",
+        "Dutch": "NL",
+        "Polish": "PL",
+        "Portuguese": "PT-PT",
+        "Swedish": "SV",
+        "Turkish": "TR",
+    }
+
+    class Meta:
+        verbose_name = "DeepL Web"
+        verbose_name_plural = "DeepL Web"
+
+    def validate(self) -> bool:
+        try:
+            resp = self.translate("Hello World", "Chinese Simplified")
+            return resp.get("result") != ""
+        except Exception as e:
+            return False
+
+    def translate(self, text, target_language):
+        logging.info(">>> DeepL Web Translate [%s]: %s", target_language, text)
+        target_code = self.language_code_map.get(target_language, None)
+        translated_text = ''
+        try:
+            if target_code is None:
+                logging.error("DeepLWebTranslator->%s: Not support target language", text)
+
+            translated_text = PyDeepLX.translate(text=text, targetLang=target_code, sourceLang="auto",
+                                                 proxies=self.proxy)
+        except Exception as e:
+            logging.error("DeepLWebTranslator->%s: %s", text, e)
+        finally:
+            sleep(self.interval)
+            return {'result': translated_text, "characters": len(text)}
 
 class MicrosoftTranslator(TranslatorEngine):
     # https://learn.microsoft.com/en-us/azure/ai-services/translator/language-support

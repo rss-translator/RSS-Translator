@@ -9,6 +9,7 @@ feedgen
 httpx
 dateutils
 deepl
+PyDeepLX
 huey
 gevent
 cityhash
