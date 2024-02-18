@@ -49,6 +49,7 @@ def update_original_feed(sid: str):
 
     original_feed_file_path = feed_dir_path / f"{obj.sid}.xml"
     try:
+        obj.valid = False
         fetch_feed_results = fetch_feed(obj.feed_url, obj.modified, obj.etag)
 
         if fetch_feed_results['error']:
@@ -69,12 +70,11 @@ def update_original_feed(sid: str):
             obj.etag = feed.get("etag", '')
 
         obj.valid = True
+        update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
     except Exception as e:
-        obj.valid = False
         log.error("task update_original_feed error: %s", str(e))
     finally:
         obj.save()
-        update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
 
     # Update T_Feeds
     t_feeds = obj.t_feed_set.all()
