@@ -8,7 +8,6 @@ from django.db import IntegrityError
 
 from .models import TranslatorEngine, Translated_Content
 from utils import chunk_handler
-from utils.feed_action import get_first_non_none
 
 log = logging.getLogger('huey')
 
@@ -36,33 +35,42 @@ def translate_feed(
     translated_characters = 0
     need_cache_objs = {}
 
+    unique_tasks = set()
+
     try:
         for entry in translated_feed.entries:
             # Translate title
             if translate_title:
                 title = entry["title"]
-                cached = engine.is_translated(entry["title"], target_language)
-                if not cached:
-                    original_content = title
-                    results = engine.translate(original_content, target_language=target_language)
-                    entry["title"] = results["result"] if results["result"] else original_content
-                    total_tokens += results.get("tokens", 0)
-                    translated_characters += len(original_content)
+                cache_key = f"title_{title}_{target_language}"
 
-                    if original_content and results["result"]:
-                        log.info("Save to cache:%s", results["result"])
-                        hash64 = cityhash.CityHash64(
-                            f"{original_content}{target_language}")  # 在同一次翻译中，可能存在重复的情况，但几率很小，所以重复翻译不影响
-                        need_cache_objs[hash64] = Translated_Content(
-                            hash=hash64.to_bytes(8, byteorder='little'),
-                            original_content=original_content,
-                            translated_language=target_language,
-                            translated_content=results["result"],
-                            tokens=results.get("tokens", 0),
-                            characters=results.get("characters", 0),
-                        )
-                else:
-                    entry["title"] = cached["result"]
+                # 任务去重
+                if cache_key not in unique_tasks:
+                    unique_tasks.add(cache_key)
+                    cached = engine.is_translated(title, target_language)  # check cache db
+
+                    if not cached:
+                        results = engine.translate(title, target_language=target_language)
+                        translated_text = results["result"] if results["result"] else title
+                        total_tokens += results.get("tokens", 0)
+                        translated_characters += len(title)
+                        entry["title"] = translated_text
+
+                        if title and translated_text:
+                            log.info("Will cache:%s", results["result"])
+                            hash64 = cityhash.CityHash64(
+                                f"{title}{target_language}")
+                            need_cache_objs[hash64] = Translated_Content(
+                                hash=hash64.to_bytes(8, byteorder='little'),
+                                original_content=title,
+                                translated_language=target_language,
+                                translated_content=results["result"],
+                                tokens=results.get("tokens", 0),
+                                characters=results.get("characters", 0),
+                            )
+                    else:
+                        log.info("Use db cache:%s", cached["result"])
+                        entry["title"] = cached["result"]
 
             # Translate content
             if translate_content:
@@ -70,26 +78,35 @@ def translate_feed(
                 original_content = entry['content'][0].value if entry.get('content') else None  # description, content
 
                 if original_description:
-                    translated_summary, tokens, characters, need_cache = chunk_translate(original_description,
-                                                                                         target_language, engine)
-                    total_tokens += tokens
-                    translated_characters += characters
-                    need_cache_objs.update(need_cache)
-                    entry["summary"] = "".join(translated_summary)
+                    cache_key = f"content_{original_description}_{target_language}"
+                    # 任务去重
+                    if cache_key not in unique_tasks:
+                        unique_tasks.add(cache_key)
+                        translated_summary, tokens, characters, need_cache = chunk_translate(original_description,
+                                                                                             target_language, engine)
+                        total_tokens += tokens
+                        translated_characters += characters
+                        need_cache_objs.update(need_cache)
+                        entry["summary"] = "".join(translated_summary)
 
                 if original_content:
-                    translated_content, tokens, characters, need_cache = chunk_translate(original_content,
-                                                                                         target_language, engine)
-                    total_tokens += tokens
-                    translated_characters += characters
-                    need_cache_objs.update(need_cache)
-                    entry['content'][0].value = "".join(translated_content)
+                    cache_key = f"content_{original_content}_{target_language}"
+                    # 任务去重
+                    if cache_key not in unique_tasks:
+                        unique_tasks.add(cache_key)
+                        translated_content, tokens, characters, need_cache = chunk_translate(original_content,
+                                                                                             target_language, engine)
+                        total_tokens += tokens
+                        translated_characters += characters
+                        need_cache_objs.update(need_cache)
+                        entry['content'][0].value = "".join(translated_content)
 
 
     except Exception as e:
         log.error("translate_feed: %s", str(e))
     finally:
         try:
+            log.info("Save caches to db")
             if need_cache_objs:
                 Translated_Content.objects.bulk_create(need_cache_objs.values())
         except IntegrityError:
