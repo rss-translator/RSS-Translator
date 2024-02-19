@@ -80,6 +80,7 @@ class TranslatorEngine(models.Model):
 class TestTranslator(TranslatorEngine):
     translated_text = models.TextField(default="@@Translated Text@@")
     max_characters = models.IntegerField(default=50000)
+    interval = models.IntegerField(_("Request Interval(s)"), default=3)
 
     class Meta:
         verbose_name = "Test"
@@ -90,7 +91,8 @@ class TestTranslator(TranslatorEngine):
 
     def translate(self, text, target_language):
         logging.info(">>> Test Translate [%s]: %s", target_language, text)
-        return {'result': self.translated_text, "tokens": 0, "characters": len(text)}
+        sleep(self.interval)
+        return {'result': f"{target_language} {self.translated_text} {text}", "tokens": 0, "characters": len(text)}
 
 class OpenAITranslator(TranslatorEngine):
     # https://platform.openai.com/docs/api-reference/chat

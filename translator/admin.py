@@ -104,5 +104,5 @@ if settings.DEBUG:
 
     @admin.register(TestTranslator)
     class TestTranslatorAdmin(BaseTranslatorAdmin):
-        fields = ["name", "translated_text", "max_characters"]
-        list_display = ["name", "is_valid", "translated_text", "max_characters"]
+        fields = ["name", "translated_text", "max_characters", "interval"]
+        list_display = ["name", "is_valid", "translated_text", "max_characters", "interval"]
