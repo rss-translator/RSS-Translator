@@ -10,6 +10,7 @@ WorkingDirectory=/home/rsstranslator/
 ExecStart=/home/rsstranslator/deploy/start.sh
 Restart=always
 RestartSec=2
+#Environment="DEBUG=1"
 
 [Install]
 WantedBy=multi-user.target
