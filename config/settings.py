@@ -121,8 +121,8 @@ HUEY = {
     'huey_class': 'huey.SqliteHuey',
     'filename': DATA_FOLDER / "huey.sqlite3",
     'consumer': {
-        'workers': 1,
-        'worker_type': 'thread',
+        'workers': 20,
+        'worker_type': 'greenlet',
     },
     "immediate": False,
 }
