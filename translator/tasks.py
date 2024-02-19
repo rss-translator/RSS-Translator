@@ -4,6 +4,7 @@ import logging
 import cityhash
 import feedparser
 from huey.contrib.djhuey import task, db_task
+from django.db import IntegrityError
 
 from .models import TranslatorEngine, Translated_Content
 from utils import chunk_handler
@@ -86,13 +87,15 @@ def translate_feed(
 
 
     except Exception as e:
-        log.error("translate_feed Error: %s", str(e))
+        log.error("translate_feed: %s", str(e))
     finally:
         try:
             if need_cache_objs:
                 Translated_Content.objects.bulk_create(need_cache_objs.values())
+        except IntegrityError:
+            log.warning("Save cache: A record with this hash value already exists.")
         except Exception as e:
-            log.error("Save cache Error: %s", str(e))
+            log.error("Save cache: %s", str(e))
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}
 

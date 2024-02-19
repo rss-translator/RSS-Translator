@@ -72,7 +72,7 @@ def update_original_feed(sid: str):
         obj.valid = True
         update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
     except Exception as e:
-        log.error("task update_original_feed error %s: %s", obj.feed_url, str(e))
+        log.error("task update_original_feed %s: %s", obj.feed_url, str(e))
     finally:
         obj.save()
 

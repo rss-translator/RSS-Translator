@@ -468,7 +468,7 @@ class MicrosoftTranslator(TranslatorEngine):
                 translated_text = resp.json()[0]["translations"][0]["text"]
             # [{'detectedLanguage': {'language': 'en', 'score': 1.0}, 'translations': [{'text': '你好，我叫约翰。', 'to': 'zh-Hans'}]}]
         except Exception as e:
-            logging.error("MicrosoftTranslator Error ->%s:%s", text, e)
+            logging.error("MicrosoftTranslator->%s:%s", text, e)
         finally:
             return {'result': translated_text, "characters": len(text)}
 
@@ -520,7 +520,7 @@ class CaiYunTranslator(TranslatorEngine):
             resp.raise_for_status()
             translated_text = resp.json()["target"]
         except Exception as e:
-            logging.error("CaiYunTranslator Error ->%s:%s", text, e)
+            logging.error("CaiYunTranslator->%s:%s", text, e)
         finally:
             return {'result': translated_text, "characters": len(text)}
 
