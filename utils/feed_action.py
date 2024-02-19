@@ -19,14 +19,7 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
         'If-Modified-Since': modified
     }
 
-    def log_request(request):
-        logging.info("Request: %s %s - Waiting for response", request.method, request.url)
-
-    def log_response(response):
-        request = response.request
-        logging.info("Response: %s %s - Status %s", request.method, request.url, response.status_code)
-
-    client = httpx.Client(event_hooks={'request': [log_request], 'response': [log_response]})
+    client = httpx.Client()
 
     try:
         response = client.get(url, headers=headers, timeout=30, follow_redirects=True)
