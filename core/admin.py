@@ -236,8 +236,8 @@ class O_FeedAdmin(admin.ModelAdmin):
 
 class T_FeedAdmin(admin.ModelAdmin):
     list_display = ["o_feed", "language", "total_tokens", "total_characters", "modified", "size_in_kb", "sid"]
-    list_filter = ["o_feed", "language", "total_tokens", "total_characters", "size"]
-    search_fields = ["o_feed", "language", "name"]
+    # list_filter = ["o_feed", "language", "total_tokens", "total_characters", "size"]
+    search_fields = ["o_feed", "language"]
     readonly_fields = ["o_feed", "total_tokens", "total_characters", "modified", "size"]
 
     def size_in_kb(self, obj):
