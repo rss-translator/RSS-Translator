@@ -136,6 +136,7 @@ class O_FeedAdmin(admin.ModelAdmin):
     list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
                     "update_frequency", "modified"]
     search_fields = ["name", "feed_url"]
+    list_filter = ["valid"]
     actions = ['force_update']
 
     def save_formset(self, request, form, formset, change):
@@ -236,7 +237,7 @@ class O_FeedAdmin(admin.ModelAdmin):
 class T_FeedAdmin(admin.ModelAdmin):
     list_display = ["o_feed", "language", "total_tokens", "total_characters", "modified", "size_in_kb", "sid"]
     list_filter = ["o_feed", "language", "total_tokens", "total_characters", "size"]
-    search_fields = ["o_feed", "language"]
+    search_fields = ["o_feed", "language", "name"]
     readonly_fields = ["o_feed", "total_tokens", "total_characters", "modified", "size"]
 
     def size_in_kb(self, obj):
@@ -251,4 +252,4 @@ if not settings.USER_MANAGEMENT:
 
 #if in debug, then register debug_toolbar
 if settings.DEBUG:
-    admin.site.register(T_Feed)
+    admin.site.register(T_Feed, T_FeedAdmin)
