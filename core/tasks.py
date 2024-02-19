@@ -53,9 +53,9 @@ def update_original_feed(sid: str):
         fetch_feed_results = fetch_feed(obj.feed_url, obj.modified, obj.etag)
 
         if fetch_feed_results['error']:
-            raise Exception(f"Fetch Original Feed Failed: ({obj.sid}){obj.feed_url}:{fetch_feed_results['error']}")
+            raise Exception(f"Fetch Original Feed Failed: {fetch_feed_results['error']}")
         elif not fetch_feed_results.get("update"):
-            log.info("Original Feed is up to date, Skip fetch:(%s)%s", obj.sid, obj.feed_url)
+            log.info("Original Feed is up to date, Skip:%s",obj.feed_url)
         else:
             with open(original_feed_file_path, "w", encoding="utf-8") as f:
                 f.write(fetch_feed_results.get("xml"))
