@@ -72,7 +72,7 @@ def update_original_feed(sid: str):
         obj.valid = True
         update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
     except Exception as e:
-        log.error("task update_original_feed error: %s", str(e))
+        log.error("task update_original_feed error %s: %s", obj.feed_url, str(e))
     finally:
         obj.save()
 
@@ -151,7 +151,7 @@ def update_translated_feed(sid: str, force=False):
             obj.size = os.path.getsize(translated_feed_file_path)
             obj.status = True
     except Exception as e:
-        log.error("task update_translated_feed error: %s", str(e))
+        log.error("task update_translated_feed error %s: %s", obj.o_feed.feed_url,str(e))
         obj.status = False
     finally:
         obj.save()
