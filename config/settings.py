@@ -204,6 +204,12 @@ LOG_LEVEL= "ERROR" if not DEBUG else "INFO"
 LOGGING = {
    'version': 1,
    'disable_existing_loggers': False,
+   'formatters':{
+       'verbose':{
+           'format': '{asctime} {message}',
+           'style': '{',
+           },
+       },
    'handlers': {
        'logfile': {
            'level': LOG_LEVEL,
@@ -211,6 +217,7 @@ LOGGING = {
            'filename': DATA_FOLDER / 'app.log',
            'maxBytes': 1024 * 1024 * 10,  # 10 MB
            'encoding': 'utf-8',
+           'formatter': 'verbose',
        },
    },
    'root': {
