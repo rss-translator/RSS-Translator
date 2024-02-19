@@ -89,33 +89,34 @@ def update_translated_feed(sid: str, force=False):
     try:
         obj = T_Feed.objects.get(sid=sid)
     except T_Feed.DoesNotExist:
+        log.error(f"T_Feed Not Found: {sid}")
         return False
-    log.info("Call task update_translated_feed: (%s)(%s)", obj.language, obj.o_feed.feed_url)
-
-    if obj.o_feed.pk is None:
-        log.error("Unable translate feed, because Original Feed is None: (%s)%s", obj.language, obj.o_feed.feed_url)
-        return False
-    if not force and obj.modified == obj.o_feed.modified:
-        log.info("Translated Feed is up to date, Skip translation: (%s)%s", obj.language, obj.o_feed.feed_url)
-        return False
-
-    feed_dir_path = f"{settings.DATA_FOLDER}/feeds"
-    if not os.path.exists(feed_dir_path):
-        os.makedirs(feed_dir_path)
-
-    original_feed_file_path = f"{feed_dir_path}/{obj.o_feed.sid}.xml"
-    if not os.path.exists(original_feed_file_path):
-        update_original_feed(obj.o_feed.sid)
-        return False
-
-    translated_feed_file_path = f"{feed_dir_path}/{obj.sid}.xml"
-    if not os.path.exists(translated_feed_file_path):
-        with open(translated_feed_file_path, "w", encoding="utf-8") as f:
-            f.write("Translation in progress...")
-
-    original_feed = feedparser.parse(original_feed_file_path)
 
     try:
+        log.info("Call task update_translated_feed")
+
+        if obj.o_feed.pk is None:
+            raise Exception("Unable translate feed, because Original Feed is None")
+
+        if not force and obj.modified == obj.o_feed.modified:
+            raise Exception("Translated Feed is up to date, Skip translation")
+
+        feed_dir_path = f"{settings.DATA_FOLDER}/feeds"
+        if not os.path.exists(feed_dir_path):
+            os.makedirs(feed_dir_path)
+
+        original_feed_file_path = f"{feed_dir_path}/{obj.o_feed.sid}.xml"
+        if not os.path.exists(original_feed_file_path):
+            update_original_feed(obj.o_feed.sid)
+            return False
+
+        translated_feed_file_path = f"{feed_dir_path}/{obj.sid}.xml"
+        if not os.path.exists(translated_feed_file_path):
+            with open(translated_feed_file_path, "w", encoding="utf-8") as f:
+                f.write("Translation in progress...")
+
+        original_feed = feedparser.parse(original_feed_file_path)
+
         if original_feed.entries:
             engine = obj.o_feed.translator
             # log.info("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
@@ -128,7 +129,7 @@ def update_translated_feed(sid: str, force=False):
             )
 
             if not results:
-                return False
+                raise Exception("Translate Feed Failed")
             else:
                 feed = results.get("feed")
                 total_tokens = results.get("tokens")
@@ -136,9 +137,7 @@ def update_translated_feed(sid: str, force=False):
             xml_str = generate_atom_feed(obj.o_feed.feed_url, feed)  # feed is a feedparser object
 
             if xml_str is None:
-                obj.status = False
-                log.error("generate_atom_feed returned None")
-                return False
+                raise Exception("generate_atom_feed returned None")
             with open(translated_feed_file_path, "w", encoding="utf-8") as f:
                 f.write(xml_str)
 
@@ -152,7 +151,7 @@ def update_translated_feed(sid: str, force=False):
             obj.size = os.path.getsize(translated_feed_file_path)
             obj.status = True
     except Exception as e:
-        log.error("task update_translated_feed error %s: %s", obj.o_feed.feed_url,str(e))
+        log.error("task update_translated_feed error (%s)%s: %s", obj.language, obj.o_feed.feed_url, str(e))
         obj.status = False
     finally:
         obj.save()
