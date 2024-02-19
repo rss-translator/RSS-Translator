@@ -99,7 +99,10 @@ def update_translated_feed(sid: str, force=False):
             raise Exception("Unable translate feed, because Original Feed is None")
 
         if not force and obj.modified == obj.o_feed.modified:
-            raise Exception("Translated Feed is up to date, Skip translation")
+            log.warning("Translated Feed is up to date, Skip translation")
+            obj.status = True
+            obj.save()
+            return True
 
         feed_dir_path = f"{settings.DATA_FOLDER}/feeds"
         if not os.path.exists(feed_dir_path):
@@ -151,7 +154,7 @@ def update_translated_feed(sid: str, force=False):
             obj.size = os.path.getsize(translated_feed_file_path)
             obj.status = True
     except Exception as e:
-        log.error("task update_translated_feed error (%s)%s: %s", obj.language, obj.o_feed.feed_url, str(e))
+        log.error("task update_translated_feed (%s)%s: %s", obj.language, obj.o_feed.feed_url, str(e))
         obj.status = False
     finally:
         obj.save()
