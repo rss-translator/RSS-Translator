@@ -5,9 +5,14 @@ from django.conf import settings
 from django.http import HttpResponse, Http404, StreamingHttpResponse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
+from django.views.decorators.http import etag
+from .models import T_Feed
 
+def get_modified(request, feed_sid):
+    return T_Feed.objects.get(sid=feed_sid).modified
 
 #@cache_page(60 * 15)  # Cache this view for 15 minutes
+@etag(get_modified)
 def rss(request, feed_sid):
     # Sanitize the feed_sid to prevent path traversal attacks
     feed_sid = smart_str(feed_sid)
