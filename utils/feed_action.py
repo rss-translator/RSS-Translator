@@ -113,7 +113,7 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         atom_string = fg.atom_str(pretty=False)
 
     except Exception as e:
-        logging.error("generate_atom_feed error: %s", str(e))
+        logging.error("generate_atom_feed error %s: %s", feed_url, str(e))
         return None
 
     dom = xml.dom.minidom.parseString(atom_string)
