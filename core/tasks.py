@@ -136,6 +136,7 @@ def update_translated_feed(sid: str, force=False):
             xml_str = generate_atom_feed(obj.o_feed.feed_url, feed)  # feed is a feedparser object
 
             if xml_str is None:
+                obj.status = False
                 log.error("generate_atom_feed returned None")
                 return False
             with open(translated_feed_file_path, "w", encoding="utf-8") as f:
