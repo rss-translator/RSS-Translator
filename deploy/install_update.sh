@@ -118,7 +118,7 @@ while read package; do
         show_progress $counter $total_packages
     fi
 done < <(grep -v '^$' /home/rsstranslator/requirements/prod.txt)
-
+echo -ne "\n"
 if [ -d /tmp/rsstranslator_data ] && [ "$(ls -A /tmp/rsstranslator_data)" ]; then
     echo "----- Restore db -----"
     cp -rf /tmp/rsstranslator_data/* /home/rsstranslator/data/
@@ -147,14 +147,19 @@ rm -rf rsstranslator_install_update.sh
 rm -rf /home/rsstranslator/.git
 
 echo "------------------------------"
-echo "If you want to change address or port, please edit /home/rsstranslator/deploy/start.sh"
-echo "And then run 'systemctl restart rsstranslator'"
+echo "| If you want to change address or port, please edit /home/rsstranslator/deploy/start.sh"
+echo "| And then run 'systemctl restart rsstranslator'"
 echo "------------------------------"
-echo "If you want enable https, Please install caddy first: https://caddyserver.com/docs/install#debian-ubuntu-raspbian"
-echo "Then edit /home/rsstranslator/deploy/Caddyfile to change domain name"
-echo "And cp /home/rsstranslator/deploy/Caddyfile to /etc/caddy/Caddyfile"
-echo "Finally run 'systemctl restart caddy'"
+echo "| If you want enable https, Please install caddy first: https://caddyserver.com/docs/install#debian-ubuntu-raspbian"
+echo "| Then edit /home/rsstranslator/deploy/Caddyfile to change domain name"
+echo "| And cp /home/rsstranslator/deploy/Caddyfile to /etc/caddy/Caddyfile"
+echo "| Finally run 'systemctl restart caddy'"
 echo "------------------------------"
-echo "Default admin user: admin, Password: rsstranslator"
-echo "Please change admin password after login"
-echo "Success install RSS Translator, service run on 0.0.0.0:8000 (http)"
+echo "| INFO: Default admin user: admin, Password: rsstranslator"
+echo "| Please change admin password after login"
+echo "------------------------------"
+echo "| You can check service status by run 'systemctl status rsstranslator'"
+echo "| And check log by run 'journalctl -u rsstranslator' or check /home/rsstranslator/data/app.log"
+echo "| INFO: Success install RSS Translator, service run on 0.0.0.0:8000 (http)"
+echo "------------------------------"
+
