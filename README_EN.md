@@ -79,8 +79,7 @@ If you need to enable SSL (https), please refer to [here](#enable-ssl)
 
 #### One-click Deployment
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/KnVkVX?referralCode=QWy2ii)\
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=docker&image=docker.io/rsstranslator/rsstranslator&name=rss-translator&env[CSRF_TRUSTED_ORIGINS]=https://*.koyeb.app)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/KnVkVX?referralCode=QWy2ii)
 
 
 ---
