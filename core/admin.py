@@ -3,10 +3,6 @@ import logging
 from django import forms
 from django.contrib import admin
 from django.conf import settings
-from django.db import transaction
-
-if settings.DEBUG:
-    from huey_monitor.models import TaskModel
 
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
@@ -14,11 +10,11 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
 
-from huey.contrib.djhuey import HUEY as huey
 from translator.models import TranslatorEngine
 
 from .models import O_Feed, T_Feed
 from .tasks import update_original_feed, update_translated_feed
+from utils.modelAdmin_actions import ExportMixin, ForceUpdateMixin
 
 admin.site.site_header = _('RSS Translator Admin')
 admin.site.site_title = _('RSS Translator')
@@ -127,7 +123,7 @@ class O_FeedForm(forms.ModelForm):
 
 
 @admin.register(O_Feed)
-class O_FeedAdmin(admin.ModelAdmin):
+class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     form = O_FeedForm
     # fields = ['feed_url', 'content_type','object_id']
     inlines = [T_FeedInline]
@@ -135,7 +131,7 @@ class O_FeedAdmin(admin.ModelAdmin):
                     "update_frequency", "modified"]
     search_fields = ["name", "feed_url"]
     list_filter = ["valid"]
-    actions = ['force_update']
+    actions = ['o_feed_force_update', 'o_feed_export_as_opml']
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
@@ -170,16 +166,6 @@ class O_FeedAdmin(admin.ModelAdmin):
             obj.name = "Empty" if not obj.name else obj.name
             obj.save()
 
-    def revoke_tasks_by_arg(self, arg_to_match):
-        for task in huey.scheduled():
-            # Assuming the first argument is the one we're interested in (e.g., obj.pk)
-            if task.args and task.args[0] == arg_to_match:
-                logging.info("Revoke task: %s", task)
-                huey.revoke_by_id(task)
-                # delete TaskModel data
-                if settings.DEBUG:
-                    TaskModel.objects.filter(task_id=task.id).delete()
-
     def translated_language(self, obj):
         return ", ".join(t_feed.language for t_feed in obj.t_feed_set.all())
 
@@ -203,6 +189,7 @@ class O_FeedAdmin(admin.ModelAdmin):
             )
 
     is_valid.short_description = 'Valid'
+
     @admin.display(description="feed_url")
     def show_feed_url(self, obj):
         if obj.feed_url:
@@ -219,24 +206,14 @@ class O_FeedAdmin(admin.ModelAdmin):
                 obj.sid
             )
         return ''
-    @admin.action(description=_('Force Update'))
-    def force_update(self, request, queryset):
-        logging.info("Call force_update: %s", queryset)
-        with transaction.atomic():
-            for instance in queryset:
-                instance.etag = ''
-                instance.modified = ''
-                instance.valid = None
-                instance.save()
-                self.revoke_tasks_by_arg(instance.sid)
-                update_original_feed.schedule(args=(instance.sid,), delay=1)  # 会执行一次save()
 
 @admin.register(T_Feed)
-class T_FeedAdmin(admin.ModelAdmin):
-    list_display = ["id", "feed_url", "o_feed", "status", "language", "translate_title", "translate_content", "total_tokens", "total_characters", "size_in_kb", "modified"]
+class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
+    list_display = ["id", "feed_url", "o_feed", "status_icon", "language", "translate_title", "translate_content", "total_tokens", "total_characters", "size_in_kb", "modified"]
     list_filter = ["status", "translate_title", "translate_content"]
     search_fields = ["sid"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
+    actions = ['t_feed_force_update', 't_feed_export_as_opml']
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
@@ -259,6 +236,22 @@ class T_FeedAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+    
+    def status_icon(self, obj):
+        if obj.status is None:
+            return format_html(
+                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
+            )
+        elif obj.status is True:
+            return format_html(
+                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
+            )
+        else:
+            return format_html(
+                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
+            )
+
+    status_icon.short_description = 'Status'
 
 if not settings.USER_MANAGEMENT:
     admin.site.unregister(User)
