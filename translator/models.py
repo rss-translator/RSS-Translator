@@ -650,7 +650,7 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
     base_url = models.URLField(_("URL"), default="https://translate.googleapis.com/translate_a/t")
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
     interval = models.IntegerField(_("Request Interval(s)"), default=3)
-
+    max_characters = models.IntegerField(default=5000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh-CN",
