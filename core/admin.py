@@ -93,8 +93,6 @@ class O_FeedForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(O_FeedForm, self).__init__(*args, **kwargs)
         translator_models = TranslatorEngine.__subclasses__()
-        # translator_models = [TestTranslator, OpenAITranslator, DeepLTranslator, MicrosoftTranslator, AzureAITranslator,
-        #                      DeepLXTranslator, CaiYunTranslator, GeminiTranslator, ClaudeTranslator]
         # Cache ContentTypes to avoid repetitive database calls
         content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
 
@@ -236,10 +234,16 @@ class O_FeedAdmin(admin.ModelAdmin):
 @admin.register(T_Feed)
 class T_FeedAdmin(admin.ModelAdmin):
     list_display = ["id", "feed_url", "o_feed", "status", "language", "translate_title", "translate_content", "total_tokens", "total_characters", "size_in_kb", "modified"]
-    list_filter = ["status", "language", "translate_title", "translate_content"]
-    # search_fields = ["o_feed", "language"]
+    list_filter = ["status", "translate_title", "translate_content"]
+    search_fields = ["sid"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
 
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        queryset |= self.model.objects.filter(o_feed__feed_url__icontains=search_term)
+        return queryset, use_distinct
+        
+    
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
 
