@@ -26,8 +26,8 @@ class O_Feed(models.Model):
         return self.feed_url
 
     class Meta:
-        verbose_name = _("Feed")
-        verbose_name_plural = _("Feeds")
+        verbose_name = _("Original Feed")
+        verbose_name_plural = _("Original Feeds")
 
 
     def save(self, *args, **kwargs):
@@ -52,7 +52,7 @@ class T_Feed(models.Model):
     size = models.IntegerField(_("Size"), default=0)
 
     class Meta:
-        verbose_name = _("Translate Feed")
+        verbose_name = _("Translated Feed")
         constraints = [
             models.UniqueConstraint(fields=['o_feed', 'language'], name='unique_o_feed_lang')
         ]

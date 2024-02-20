@@ -233,23 +233,29 @@ class O_FeedAdmin(admin.ModelAdmin):
                 self.revoke_tasks_by_arg(instance.sid)
                 update_original_feed.schedule(args=(instance.sid,), delay=1)  # 会执行一次save()
 
-
+@admin.register(T_Feed)
 class T_FeedAdmin(admin.ModelAdmin):
-    list_display = ["o_feed", "language", "total_tokens", "total_characters", "modified", "size_in_kb", "sid"]
-    # list_filter = ["o_feed", "language", "total_tokens", "total_characters", "size"]
+    list_display = ["id", "feed_url", "o_feed", "status", "language", "translate_title", "translate_content", "total_tokens", "total_characters", "size_in_kb", "modified"]
+    list_filter = ["status", "language", "translate_title", "translate_content"]
     # search_fields = ["o_feed", "language"]
-    readonly_fields = ["o_feed", "total_tokens", "total_characters", "modified", "size"]
+    readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
 
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
 
     size_in_kb.short_description = 'Size(KB)'
 
+    def feed_url(self, obj):
+        if obj.sid:
+            return format_html(
+                "<a href='/rss/{0}' target='_blank'>{0}  </a>",
+               obj.sid
+            )
+        return ''
+
+    def has_add_permission(self, request):
+        return False
 
 if not settings.USER_MANAGEMENT:
     admin.site.unregister(User)
     admin.site.unregister(Group)
-
-#if in debug, then register debug_toolbar
-if settings.DEBUG:
-    admin.site.register(T_Feed, T_FeedAdmin)
