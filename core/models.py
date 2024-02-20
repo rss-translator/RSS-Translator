@@ -39,7 +39,7 @@ class O_Feed(models.Model):
 class T_Feed(models.Model):
     sid = models.CharField(max_length=255, unique=True)  # sid for feed_url and file name
     language = models.CharField(_("Language"), choices=settings.TRANSLATION_LANGUAGES, max_length=50)
-    o_feed = models.ForeignKey(O_Feed, on_delete=models.CASCADE)
+    o_feed = models.ForeignKey(O_Feed, on_delete=models.CASCADE, verbose_name=_("Original Feed"))
     status = models.BooleanField(_("Translation Status"), null=True)
 
     translate_title = models.BooleanField(_("Translate Title"), default=True)
