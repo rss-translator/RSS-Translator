@@ -20,4 +20,4 @@ RUN pip install -r requirements/dev.txt --no-cache-dir && \
     find $DockerHOME -type d -name "__pycache__" -exec rm -r {} + && \
     rm -rf $DockerHOME/.cache/pip \
 EXPOSE 8000
-CMD python manage.py run_huey & uvicorn config.asgi:application --host 0.0.0.0
+CMD python manage.py init_server && python manage.py run_huey & uvicorn config.asgi:application --host 0.0.0.0
