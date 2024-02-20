@@ -200,7 +200,7 @@ TRANSLATION_LANGUAGES = [
    ("Swedish", "Swedish"),
    ("Turkish", "Turkish"),
 ]
-LOG_LEVEL= "ERROR" if not DEBUG else "INFO"
+LOG_LEVEL = os.environ.get('LOG_LEVEL',"ERROR") # DEBUG > INFO > WARNING > ERROR > CRITICAL
 LOGGING = {
    'version': 1,
    'disable_existing_loggers': False,
