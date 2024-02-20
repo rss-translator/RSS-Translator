@@ -75,8 +75,8 @@ def translate_feed(
             # Translate content
             if translate_content:
                 original_description = entry.get('summary', None)  # summary, description
-                original_content = entry['content'][0].value if entry.get('content') else None  # description, content
-
+                original_content = entry['content'][0].value if entry['content'] else None  # description, content
+                
                 if original_description:
                     cache_key = f"content_{original_description}_{target_language}"
                     # 任务去重
