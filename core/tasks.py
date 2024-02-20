@@ -99,7 +99,7 @@ def update_translated_feed(sid: str, force=False):
             raise Exception("Unable translate feed, because Original Feed is None")
 
         if not force and obj.modified == obj.o_feed.modified:
-            log.warning("Translated Feed is up to date, Skip translation")
+            log.info("Translated Feed is up to date, Skip translation: %s",obj.o_feed.feed_url)
             obj.status = True
             obj.save()
             return True
@@ -122,7 +122,7 @@ def update_translated_feed(sid: str, force=False):
 
         if original_feed.entries:
             engine = obj.o_feed.translator
-            # log.info("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
+            log.info("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
             results = translate_feed.call_local(
                 feed=original_feed,
                 target_language=obj.language,
