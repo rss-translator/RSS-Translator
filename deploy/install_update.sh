@@ -18,7 +18,7 @@ fi
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 if [[ "$script_dir" == /home/rsstranslator* ]]; then
-    echo "----- Get last install_update.sh from ${repo_url}/deploy/install_update.sh -----"
+    echo "----- Get last install_update.sh from ${repo_url}/deploy/install_update.sh"
     wget "https://raw.githubusercontent.com/${repo_author}/${repo_name}/main/deploy/install_update.sh" -O /tmp/rsstranslator_install_update.sh
     chmod +x /tmp/rsstranslator_install_update.sh
     exec /tmp/rsstranslator_install_update.sh
@@ -41,18 +41,18 @@ fi
 
 #backup data
 if [ -d /home/rsstranslator/data  ] && [ "$(ls -A /home/rsstranslator/data)" ]; then
-    echo "----- Backup current data to /tmp/rsstranslator_data -----"
+    echo "----- Backup current data to /tmp/rsstranslator_data"
     cp -rf /home/rsstranslator/data /tmp/rsstranslator_data
 fi
 
-echo "----- Create a nologin user: rsstranslator if not exist -----"
+echo "----- Create a nologin user: rsstranslator if not exist"
 if ! id -u rsstranslator >/dev/null 2>&1; then
     useradd -r -s /sbin/nologin rsstranslator
 fi
 
 #check if repo_name-main.zip exist
 if [ ! -f "${repo_name}-main.zip" ]; then
-    echo "----- Download ${repo_name} from ${repo_url} -----"
+    echo "----- Download ${repo_name} from ${repo_url}"
     if [ -d ${repo_name} ]; then
         rm -rf ${repo_name}
     fi
@@ -60,7 +60,7 @@ if [ ! -f "${repo_name}-main.zip" ]; then
     cp -rf ${repo_name} rsstranslator
     cp -rf rsstranslator /home/
 else
-    echo "----- Unzip ${repo_name}-main.zip -----"
+    echo "----- Unzip ${repo_name}-main.zip"
     unzip -oq "${repo_name}-main.zip"
     cp -rf ${repo_name}-main rsstranslator
     cp -rf rsstranslator /home/
@@ -70,11 +70,11 @@ rm -rf ${repo_name}-main
 rm -rf rsstranslator
 
 if [ ! -d /home/rsstranslator/data ]; then
-    echo "----- Create data folder -----"
+    echo "----- Create data folder"
     mkdir -p /home/rsstranslator/data
 fi
 
-echo "----- Correct folder permission  -----"
+echo "----- Correct folder permission "
 if [ -d /home/rsstranslator ]; then
     chown -R rsstranslator:rsstranslator /home/rsstranslator
     chmod -R 775 /home/rsstranslator
@@ -84,17 +84,17 @@ else
     exit 1
 fi
 
-echo "----- Create a virtualenv: /home/rsstranslator/.venv if not exist -----"
+echo "----- Create a virtualenv: /home/rsstranslator/.venv if not exist"
 if [ ! -d /home/rsstranslator/.venv ]; then
     sudo -u rsstranslator /bin/bash -c "python3 -m venv /home/rsstranslator/.venv"
 fi
 
-echo "----- Create rsstranslator.service to /etc/systemd/system/ if not exist -----"
+echo "----- Create rsstranslator.service to /etc/systemd/system/ if not exist"
 if [ ! -f /etc/systemd/system/rsstranslator.service ]; then
     cp /home/rsstranslator/deploy/rsstranslator.service /etc/systemd/system/
 fi
 
-echo "----- Enable rsstranslator.service to start on boot -----"
+echo "----- Enable rsstranslator.service to start on boot"
 systemctl daemon-reload
 systemctl enable rsstranslator.service
 
@@ -108,7 +108,7 @@ show_progress() {
     echo -ne "\rProgress: [${bar}${empty_bar}] ${percent}% \r"
 }
 
-echo "----- Initialize virtualenv -----"
+echo "----- Initialize virtualenv"
 total_packages=$(grep -v '^$' /home/rsstranslator/requirements/prod.txt | wc -l)
 counter=0
 while read package; do
@@ -120,28 +120,28 @@ while read package; do
 done < <(grep -v '^$' /home/rsstranslator/requirements/prod.txt)
 echo -ne "\n"
 if [ -d /tmp/rsstranslator_data ] && [ "$(ls -A /tmp/rsstranslator_data)" ]; then
-    echo "----- Restore db -----"
+    echo "----- Restore db"
     cp -rf /tmp/rsstranslator_data/* /home/rsstranslator/data/
     chown -R rsstranslator:rsstranslator /home/rsstranslator/data/
     chmod -R 775 /home/rsstranslator/data/
 fi
 
-echo "----- Migrate db -----"
+echo "----- Migrate db"
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py makemigrations"
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py migrate"
 
-echo "----- Create static files -----"
+echo "----- Create static files"
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py collectstatic --noinput"
 
-echo "----- Check default admin user -----"
+echo "----- Check default admin user"
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py create_default_superuser"
 
-echo "----- Start rsstranslator.service -----"
+echo "----- Start rsstranslator.service"
 systemctl restart rsstranslator.service
 
-#echo "----- Check rsstranslator.service status -----"
+#echo "----- Check rsstranslator.service status"
 #systemctl status rsstranslator.service
-echo "----- Clean useless files -----"
+echo "----- Clean useless files"
 rm -rf /tmp/rsstranslator_data
 rm -rf rsstranslator_install_update.sh
 rm -rf /home/rsstranslator/.git
