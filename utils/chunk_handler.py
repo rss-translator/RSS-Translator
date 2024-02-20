@@ -1,6 +1,6 @@
 import logging
 from itertools import groupby
-
+import html2text
 import tiktoken
 
 
@@ -9,8 +9,9 @@ def content_split(content: str) -> dict:
     # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
     encoding = tiktoken.get_encoding("cl100k_base")
 
-    # TODO 检查content是否是html格式，如果是，需要先去除html标签并保持格式
-
+    h = html2text.HTML2Text()
+    h.mark_code = True
+    content = h.handle(content)
     chunks = content.split('\n\n')
     tokens = []
     characters = []

@@ -18,3 +18,4 @@ cityhash
 django-huey-monitor
 uvicorn
 whitenoise
+html2text
