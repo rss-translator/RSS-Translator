@@ -15,10 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.views.generic.base import RedirectView
-from core.views import rss, log
 
 favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
@@ -35,8 +34,7 @@ if settings.DEMO:
 if settings.DEBUG:
     urlpatterns = [
     path("favicon.ico", favicon_view),
-    path("rss/", rss),
-    path("log/", log),
+    re_path(r'^(rss|log)/', include("core.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
     path("",admin.site.urls),
     
@@ -44,8 +42,6 @@ if settings.DEBUG:
 else:
     urlpatterns = [
     path("favicon.ico", favicon_view),
-    path("rss/", rss),
-    path("log/", log),
+    re_path(r'^(rss|log)/', include("core.urls")),
     path("",admin.site.urls),
-]
-
+    ]
