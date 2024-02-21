@@ -50,31 +50,31 @@ class AzureAITranslatorAdmin(BaseTranslatorAdmin):
 
 @admin.register(DeepLTranslator)
 class DeepLTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "api_key", "server_url", "proxy"]
-    list_display = ["name", "is_valid", "api_key", "server_url", "proxy"]
+    fields = ["name", "api_key", "server_url", "proxy", "max_characters"]
+    list_display = ["name", "is_valid", "api_key", "server_url", "proxy", "max_characters"]
 
 
 @admin.register(DeepLXTranslator)
 class DeepLXTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "deeplx_api", "interval"]
-    list_display = ["name", "is_valid", "deeplx_api", "interval"]
+    fields = ["name", "deeplx_api", "interval", "max_characters"]
+    list_display = ["name", "is_valid", "deeplx_api", "interval", "max_characters"]
 
 
 # @admin.register(DeepLWebTranslator)
 class DeepLWebTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "interval", "proxy"]
-    list_display = ["name", "is_valid", "interval", "proxy"]
+    fields = ["name", "interval", "proxy", "max_characters"]
+    list_display = ["name", "is_valid", "interval", "proxy", "max_characters"]
 
 @admin.register(MicrosoftTranslator)
 class MicrosoftTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "api_key", "location", "endpoint"]
-    list_display = ["name", "is_valid", "api_key", "location", "endpoint"]
+    fields = ["name", "api_key", "location", "endpoint", "max_characters"]
+    list_display = ["name", "is_valid", "api_key", "location", "endpoint", "max_characters"]
 
 
 @admin.register(CaiYunTranslator)
 class CaiYunTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "token", "url"]
-    list_display = ["name", "is_valid", "token", "url"]
+    fields = ["name", "token", "url", "max_characters"]
+    list_display = ["name", "is_valid", "token", "url", "max_characters"]
 
 
 @admin.register(GeminiTranslator)
@@ -85,8 +85,8 @@ class GeminiTranslatorAdmin(BaseTranslatorAdmin):
 
 @admin.register(GoogleTranslateWebTranslator)
 class GoogleTranslateWebTranslatorAdmin(BaseTranslatorAdmin):
-    fields = ["name", "base_url", "interval", "proxy"]
-    list_display = ["name", "is_valid", "base_url", "proxy", "interval"]
+    fields = ["name", "base_url", "interval", "proxy", "max_characters"]
+    list_display = ["name", "is_valid", "base_url", "proxy", "interval", "max_characters"]
 
 @admin.register(ClaudeTranslator)
 class ClaudeTranslatorAdmin(BaseTranslatorAdmin):

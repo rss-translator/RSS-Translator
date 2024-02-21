@@ -293,7 +293,7 @@ class DeepLTranslator(TranslatorEngine):
 class DeepLXTranslator(TranslatorEngine):
     # https://github.com/OwO-Network/DeepLX
     deeplx_api = models.CharField(max_length=255, default="http://127.0.0.1:1188/translate")
-    max_characters = models.IntegerField(default=50000)
+    max_characters = models.IntegerField(default=5000)
     interval = models.IntegerField(_("Request Interval(s)"), default=3)
     language_code_map = {
         "English": "EN",
@@ -355,7 +355,7 @@ class DeepLXTranslator(TranslatorEngine):
 
 class DeepLWebTranslator(TranslatorEngine):
     # https://github.com/OwO-Network/PyDeepLX
-    max_characters = models.IntegerField(default=50000)
+    max_characters = models.IntegerField(default=5000)
     interval = models.IntegerField(_("Request Interval(s)"), default=5)
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
     language_code_map = {
@@ -650,7 +650,7 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
     base_url = models.URLField(_("URL"), default="https://translate.googleapis.com/translate_a/t")
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
     interval = models.IntegerField(_("Request Interval(s)"), default=3)
-    max_characters = models.IntegerField(default=5000)
+    max_characters = models.IntegerField(default=1000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh-CN",
