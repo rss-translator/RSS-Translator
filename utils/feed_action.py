@@ -13,7 +13,7 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
     update = False
     feed = {}
     error = None
-
+    response = None
     headers = {
         'If-None-Match': etag,
         'If-Modified-Since': modified
