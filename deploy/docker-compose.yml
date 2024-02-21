@@ -8,7 +8,8 @@ services:
       - DEBUG=0
       - DEMO=0
       - USER_MANAGEMENT=0
-      - CSRF_TRUSTED_ORIGINS=http://127.0.0.1
+      - LOG_LEVEL=ERROR
+      - CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000
     volumes:
       - ./data:/home/rsstranslator/data
     ports:
