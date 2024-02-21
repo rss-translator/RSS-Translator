@@ -14,12 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.views.generic.base import RedirectView
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+
 
 favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
+@login_required
+def log(request):
+    log_file = os.path.join(settings.DATA_FOLDER, 'app.log')
+    with open(log_file, 'r') as file:
+        log_content = file.read()
+    return HttpResponse(log_content, content_type='text/plain')
+
 
 if settings.DEMO:
     from django.contrib import admin
@@ -34,6 +45,7 @@ if settings.DEMO:
 if settings.DEBUG:
     urlpatterns = [
     path("favicon.ico", favicon_view),
+    path("log/", log, name="log"),
     path("rss/", include("core.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
     path("",admin.site.urls),
@@ -42,6 +54,7 @@ if settings.DEBUG:
 else:
     urlpatterns = [
     path("favicon.ico", favicon_view),
+    path("log/", log, name="log"),
     path("rss/", include("core.urls")),
     path("",admin.site.urls),
     ]
