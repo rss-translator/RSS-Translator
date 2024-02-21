@@ -34,7 +34,7 @@ if settings.DEMO:
 if settings.DEBUG:
     urlpatterns = [
     path("favicon.ico", favicon_view),
-    re_path(r'^(rss|log)/', include("core.urls")),
+    path("rss/", include("core.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
     path("",admin.site.urls),
     
@@ -42,6 +42,6 @@ if settings.DEBUG:
 else:
     urlpatterns = [
     path("favicon.ico", favicon_view),
-    re_path(r'^(rss|log)/', include("core.urls")),
+    path("rss/", include("core.urls")),
     path("",admin.site.urls),
     ]
