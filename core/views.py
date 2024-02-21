@@ -7,6 +7,7 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import etag
 from .models import T_Feed
+from django.contrib.auth.decorators import login_required
 
 def get_modified(request, feed_sid):
     return T_Feed.objects.get(sid=feed_sid).modified
@@ -43,3 +44,10 @@ def rss(request, feed_sid):
         # Log the exception and return an appropriate error response
         logging.exception("Failed to read the feed file: %s / %s", feed_file_path, str(e))
         return HttpResponse(status=500)
+
+@login_required
+def log(request):
+    log_file = os.path.join(settings.DATA_FOLDER, 'app.log')
+    with open(log_file, 'r') as file:
+        log_content = file.read()
+    return HttpResponse(log_content, content_type='text/plain')

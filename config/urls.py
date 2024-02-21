@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.views.generic.base import RedirectView
+from core.views import rss, log
 
 favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
@@ -34,7 +35,8 @@ if settings.DEMO:
 if settings.DEBUG:
     urlpatterns = [
     path("favicon.ico", favicon_view),
-    path("rss/", include("core.urls")),
+    path("rss/", rss),
+    path("log/", log),
     path("__debug__/", include("debug_toolbar.urls")),
     path("",admin.site.urls),
     
@@ -42,7 +44,8 @@ if settings.DEBUG:
 else:
     urlpatterns = [
     path("favicon.ico", favicon_view),
-    path("rss/", include("core.urls")),
+    path("rss/", rss),
+    path("log/", log),
     path("",admin.site.urls),
 ]
 
