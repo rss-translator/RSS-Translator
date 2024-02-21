@@ -63,4 +63,6 @@ class T_Feed(models.Model):
     def save(self, *args, **kwargs):
         if not self.sid:
             self.sid = f"{self.o_feed.sid}_{re.sub('[^a-z]', '_', self.language.lower())}"
+        else:
+            self.sid = f"{re.sub('[^a-z]', '_', self.sid)}"
         super(T_Feed, self).save(*args, **kwargs)
