@@ -189,6 +189,8 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
             )
 
     is_valid.short_description = 'Valid'
+    is_valid.admin_order_field = 'valid'
+    size_in_kb.admin_order_field = 'size'
 
     @admin.display(description="feed_url")
     def show_feed_url(self, obj):
@@ -213,7 +215,6 @@ class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     list_filter = ["status", "translate_title", "translate_content"]
     search_fields = ["sid"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
-    actions = ['t_feed_force_update', 't_feed_export_as_opml']
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
@@ -252,6 +253,7 @@ class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
             )
 
     status_icon.short_description = 'Status'
+    status_icon.admin_order_field = 'status'
 
 if not settings.USER_MANAGEMENT:
     admin.site.unregister(User)
