@@ -28,6 +28,7 @@ class T_FeedForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['sid'].required = False
         if self.instance.pk:
             self.fields['language'].disabled = True
             self.fields['sid'].disabled = True
