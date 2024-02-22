@@ -14,8 +14,6 @@ from utils.feed_action import fetch_feed, generate_atom_feed
 
 # from huey_monitor.models import TaskModel
 
-log = logging.getLogger('huey')
-
 # @periodic_task(crontab( minute='*/1'))
 @on_startup()
 def schedule_update():
@@ -43,7 +41,7 @@ def update_original_feed(sid: str):
     except O_Feed.DoesNotExist:
         return False
 
-    log.info("Call task update_original_feed: %s", obj.feed_url)
+    logging.info("Call task update_original_feed: %s", obj.feed_url)
     feed_dir_path = Path(settings.DATA_FOLDER) / "feeds"
 
     if not os.path.exists(feed_dir_path):
@@ -57,7 +55,7 @@ def update_original_feed(sid: str):
         if fetch_feed_results['error']:
             raise Exception(f"Fetch Original Feed Failed: {fetch_feed_results['error']}")
         elif not fetch_feed_results.get("update"):
-            log.info("Original Feed is up to date, Skip:%s",obj.feed_url)
+            logging.info("Original Feed is up to date, Skip:%s",obj.feed_url)
         else:
             with open(original_feed_file_path, "w", encoding="utf-8") as f:
                 f.write(fetch_feed_results.get("xml"))
@@ -74,7 +72,7 @@ def update_original_feed(sid: str):
         obj.valid = True
         update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
     except Exception as e:
-        log.error("task update_original_feed %s: %s", obj.feed_url, str(e))
+        logging.error("task update_original_feed %s: %s", obj.feed_url, str(e))
     finally:
         obj.save()
 
@@ -91,17 +89,17 @@ def update_translated_feed(sid: str, force=False):
     try:
         obj = T_Feed.objects.get(sid=sid)
     except T_Feed.DoesNotExist:
-        log.error(f"T_Feed Not Found: {sid}")
+        logging.error(f"T_Feed Not Found: {sid}")
         return False
 
     try:
-        log.info("Call task update_translated_feed")
+        logging.info("Call task update_translated_feed")
 
         if obj.o_feed.pk is None:
             raise Exception("Unable translate feed, because Original Feed is None")
 
         if not force and obj.modified == obj.o_feed.modified:
-            log.info("Translated Feed is up to date, Skip translation: %s",obj.o_feed.feed_url)
+            logging.info("Translated Feed is up to date, Skip translation: %s",obj.o_feed.feed_url)
             obj.status = True
             obj.save()
             return True
@@ -124,7 +122,7 @@ def update_translated_feed(sid: str, force=False):
 
         if original_feed.entries:
             engine = obj.o_feed.translator
-            log.info("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
+            logging.info("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
             results = translate_feed.call_local(
                 feed=original_feed,
                 target_language=obj.language,
@@ -156,7 +154,7 @@ def update_translated_feed(sid: str, force=False):
             obj.size = os.path.getsize(translated_feed_file_path)
             obj.status = True
     except Exception as e:
-        log.error("task update_translated_feed (%s)%s: %s", obj.language, obj.o_feed.feed_url, str(e))
+        logging.error("task update_translated_feed (%s)%s: %s", obj.language, obj.o_feed.feed_url, str(e))
         obj.status = False
     finally:
         obj.save()

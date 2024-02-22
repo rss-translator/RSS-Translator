@@ -9,9 +9,6 @@ from django.db import IntegrityError
 from .models import TranslatorEngine, Translated_Content
 from utils import chunk_handler
 
-log = logging.getLogger('huey')
-
-
 @task(retries=3)
 def translator_validate(obj: TranslatorEngine):  # TODO ?
     try:
@@ -29,7 +26,7 @@ def translate_feed(
         translate_title: bool,
         translate_content: bool,
         engine: TranslatorEngine) -> dict:
-    log.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
+    logging.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
     translated_feed = feed
     total_tokens = 0
     translated_characters = 0
@@ -57,7 +54,7 @@ def translate_feed(
                         entry["title"] = translated_text
 
                         if title and translated_text:
-                            log.info("Will cache:%s", results["result"])
+                            logging.info("Will cache:%s", results["result"])
                             hash64 = cityhash.CityHash64(
                                 f"{title}{target_language}")
                             need_cache_objs[hash64] = Translated_Content(
@@ -69,7 +66,7 @@ def translate_feed(
                                 characters=results.get("characters", 0),
                             )
                     else:
-                        log.info("Use db cache:%s", cached["result"])
+                        logging.info("Use db cache:%s", cached["result"])
                         entry["title"] = cached["result"]
 
             # Translate content
@@ -103,16 +100,16 @@ def translate_feed(
 
 
     except Exception as e:
-        log.error("translate_feed: %s", str(e))
+        logging.error("translate_feed: %s", str(e))
     finally:
         try:
-            log.info("Save caches to db")
+            logging.info("Save caches to db")
             if need_cache_objs:
                 Translated_Content.objects.bulk_create(need_cache_objs.values())
         except IntegrityError:
-            log.warning("Save cache: A record with this hash value already exists.")
+            logging.warning("Save cache: A record with this hash value already exists.")
         except Exception as e:
-            log.error("Save cache: %s", str(e))
+            logging.error("Save cache: %s", str(e))
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}
 
@@ -137,7 +134,7 @@ def chunk_translate(original_content: str, target_language: str, engine: Transla
             total_characters += len(chunk)
 
             if chunk and results["result"]:
-                log.info("Save to cache:%s", results["result"])
+                logging.info("Save to cache:%s", results["result"])
                 hash64 = cityhash.CityHash64(
                     f"{chunk}{target_language}")
                 need_cache_objs[hash64] = Translated_Content(
