@@ -76,6 +76,13 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         fg.updated(source_feed.get('updated'))
         fg.pubDate(source_feed.get('published'))
 
+        if not fg.title():
+            fg.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
+        if not fg.updated():
+            fg.updated(datetime.now())
+        if not fg.id():
+            fg.id(fg.title())
+
         for entry in feed_dict['entries']:
             pubdate = entry.get('published_parsed')
             pubdate = datetime(*pubdate[:6]) if pubdate else ''
@@ -83,7 +90,7 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             updated = entry.get('updated_parsed')
             updated = datetime(*updated[:6]) if updated else ''
 
-            title = entry.get('title', '')
+            title = entry.get('title')
             link = get_first_non_none(entry, 'link')
             unique_id = entry.get('id', link)
 
@@ -100,7 +107,15 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.updated(entry.get('updated'))
             fe.pubDate(entry.get('published'))
             fe.summary(summary)
-        # add a xml-stylesheet
+            
+            # id, title, updated are required
+            if not fe.title():
+                fe.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
+            if not fe.updated():
+                fe.updated(datetime.now())
+            if not fe.id():
+                fe.id(fe.title())
+
 
         # fg.atom_file(file_path, extensions=True, pretty=True, encoding='UTF-8', xml_declaration=True)
         atom_string = fg.atom_str(pretty=False)
