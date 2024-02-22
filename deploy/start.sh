@@ -10,7 +10,7 @@ if ! command -v .venv/bin/uvicorn > /dev/null; then
 fi
 
 {
-.venv/bin/uvicorn config.asgi:application --host 0.0.0.0 &
 .venv/bin/python manage.py run_huey &
+.venv/bin/uvicorn config.asgi:application --host 0.0.0.0 &
 }
 wait
