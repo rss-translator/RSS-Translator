@@ -16,20 +16,22 @@ from utils.feed_action import fetch_feed, generate_atom_feed
 
 log = logging.getLogger('huey')
 
-
 # @periodic_task(crontab( minute='*/1'))
 @on_startup()
 def schedule_update():
     feeds = O_Feed.objects.all()
+    tasks = huey.scheduled() + huey.pending()
+    task_feeds = {task.args[0] for task in tasks if task.args}
+
     for feed in feeds:
-        update_original_feed.schedule(args=(feed.sid,), delay=feed.update_frequency * 60)
+        if feed.sid not in task_feeds:
+            update_original_feed.schedule(args=(feed.sid,), delay=feed.update_frequency * 60)
 
-
-@on_shutdown()
-def flush_all():
-    huey.storage.flush_queue()
-    huey.storage.flush_schedule()
-    huey.storage.flush_results()
+#@on_shutdown()
+# def flush_all():
+#     huey.storage.flush_queue()
+#     huey.storage.flush_schedule()
+#     huey.storage.flush_results()
     # clean TaskModel all data
     # TaskModel.objects.all().delete()
 
