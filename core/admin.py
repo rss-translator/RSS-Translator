@@ -218,6 +218,7 @@ class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     list_filter = ["status", "translate_title", "translate_content"]
     search_fields = ["sid"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
+    actions = ['t_feed_force_update', 't_feed_export_as_opml']
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
