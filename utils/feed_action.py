@@ -56,10 +56,10 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
     try:
         source_feed = feed_dict['feed']
         pubdate = mktime(source_feed.get('published_parsed'))
-        pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else ''
+        pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else None
 
         updated = mktime(source_feed.get('updated_parsed'))
-        updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else ''
+        updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else None
 
         title = get_first_non_none(source_feed, 'title', 'subtitle', 'info')
         subtitle = get_first_non_none(source_feed, 'subtitle')
@@ -75,8 +75,8 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         fg.link(href=link, rel='alternate')
         fg.subtitle(subtitle)
         fg.language(language)
-        fg.updated(source_feed.get('updated'))
-        fg.pubDate(source_feed.get('published'))
+        fg.updated(updated)
+        fg.pubDate(pubdate)
 
         if not fg.title():
             fg.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
@@ -87,10 +87,10 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 
         for entry in feed_dict['entries']:
             pubdate = mktime(entry.get('published_parsed'))
-            pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else ''
+            pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else None
 
             updated = mktime(entry.get('updated_parsed'))
-            updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else ''
+            updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else None
 
             title = entry.get('title')
             link = get_first_non_none(entry, 'link')
@@ -106,8 +106,8 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.author({'name': author_name})
             fe.id(unique_id)
             fe.content(content)
-            fe.updated(entry.get('updated'))
-            fe.pubDate(entry.get('published'))
+            fe.updated(updated)
+            fe.pubDate(pubdate)
             fe.summary(summary)
             
             # id, title, updated are required
