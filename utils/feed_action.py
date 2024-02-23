@@ -1,6 +1,8 @@
 import logging
 import xml.dom.minidom
-from datetime import datetime
+from datetime import datetime, timezone
+from time import mktime
+
 from typing import Dict
 
 import feedparser
@@ -53,11 +55,11 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         return None
     try:
         source_feed = feed_dict['feed']
-        pubdate = source_feed.get('published_parsed')
-        pubdate = datetime(*pubdate[:6]) if pubdate else ''
+        pubdate = mktime(source_feed.get('published_parsed'))
+        pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else ''
 
-        updated = source_feed.get('updated_parsed')
-        updated = datetime(*updated[:6]) if updated else ''
+        updated = mktime(source_feed.get('updated_parsed'))
+        updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else ''
 
         title = get_first_non_none(source_feed, 'title', 'subtitle', 'info')
         subtitle = get_first_non_none(source_feed, 'subtitle')
@@ -79,16 +81,16 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         if not fg.title():
             fg.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
         if not fg.updated():
-            fg.updated(datetime.now())
+            fg.updated(datetime.now(timezone.utc))
         if not fg.id():
             fg.id(fg.title())
 
         for entry in feed_dict['entries']:
-            pubdate = entry.get('published_parsed')
-            pubdate = datetime(*pubdate[:6]) if pubdate else ''
+            pubdate = mktime(entry.get('published_parsed'))
+            pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else ''
 
-            updated = entry.get('updated_parsed')
-            updated = datetime(*updated[:6]) if updated else ''
+            updated = mktime(entry.get('updated_parsed'))
+            updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else ''
 
             title = entry.get('title')
             link = get_first_non_none(entry, 'link')
@@ -112,7 +114,7 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             if not fe.title():
                 fe.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
             if not fe.updated():
-                fe.updated(datetime.now())
+                fe.updated(datetime.now(timezone.utc))
             if not fe.id():
                 fe.id(fe.title())
 
