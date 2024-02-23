@@ -12,6 +12,7 @@ Restart=always
 RestartSec=2
 #Environment="DEBUG=1"
 #Environment="LOG_LEVEL=INFO"
+#Environment="HUEY_WORKERS=10"
 
 [Install]
 WantedBy=multi-user.target
