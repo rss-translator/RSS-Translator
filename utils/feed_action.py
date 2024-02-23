@@ -55,11 +55,11 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         return None
     try:
         source_feed = feed_dict['feed']
-        pubdate = mktime(source_feed.get('published_parsed'))
-        pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else None
+        pubdate = source_feed.get('published_parsed')
+        pubdate = datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc) if pubdate else None
 
-        updated = mktime(source_feed.get('updated_parsed'))
-        updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else None
+        updated = source_feed.get('updated_parsed')
+        updated = datetime.fromtimestamp(mktime(updated), tz=timezone.utc) if updated else None
 
         title = get_first_non_none(source_feed, 'title', 'subtitle', 'info')
         subtitle = get_first_non_none(source_feed, 'subtitle')
@@ -86,11 +86,11 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fg.id(fg.title())
 
         for entry in feed_dict['entries']:
-            pubdate = mktime(entry.get('published_parsed'))
-            pubdate = datetime.fromtimestamp(pubdate, tz=timezone.utc) if pubdate else None
+            pubdate = source_feed.get('published_parsed')
+            pubdate = datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc) if pubdate else None
 
-            updated = mktime(entry.get('updated_parsed'))
-            updated = datetime.fromtimestamp(updated, tz=timezone.utc) if updated else None
+            updated = source_feed.get('updated_parsed')
+            updated = datetime.fromtimestamp(mktime(updated), tz=timezone.utc) if updated else None
 
             title = entry.get('title')
             link = get_first_non_none(entry, 'link')
