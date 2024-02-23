@@ -145,6 +145,7 @@ echo "----- Clean useless files"
 rm -rf /tmp/rsstranslator_data
 rm -rf rsstranslator_install_update.sh
 rm -rf /home/rsstranslator/.git
+rm -rf /home/rsstranslator/data/app.log
 
 echo "------------------------------"
 echo "| If you want to change address or port, please edit /home/rsstranslator/deploy/start.sh"
