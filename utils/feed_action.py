@@ -9,17 +9,18 @@ import feedparser
 import httpx
 # from django.utils.feedgenerator import Atom1Feed
 from feedgen.feed import FeedGenerator
-
+from fake_useragent import UserAgent
 
 def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
     update = False
     feed = {}
     error = None
     response = None
+    ua = UserAgent()
     headers = {
         'If-None-Match': etag,
         'If-Modified-Since': modified,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': ua.random
     }
 
     client = httpx.Client()

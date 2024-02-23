@@ -20,3 +20,4 @@ django-huey-monitor
 whitenoise
 uvicorn
 html2text
+fake-useragent
