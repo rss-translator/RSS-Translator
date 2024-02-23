@@ -574,11 +574,12 @@ class GeminiTranslator(TranslatorEngine):
                 max_output_tokens=self.max_tokens
             )
             res = model.generate_content(prompt, generation_config=generation_config)
-            if res.candidates[0].finish_reason.name == "STOP":
+            finish_reason = res.candidates[0].finish_reason.name if res.candidates else None
+            if finish_reason == "STOP":
                 translated_text = res.text
             else:
                 translated_text = ''
-                logging.info("GeminiTranslator->%s: %s", res.candidates[0].finish_reason.name, text)
+                logging.info("GeminiTranslator finish_reason->%s: %s", finish_reason, text)
             tokens = model.count_tokens(prompt).total_tokens
         except Exception as e:
             logging.error("GeminiTranslator->%s: %s", e, text)
