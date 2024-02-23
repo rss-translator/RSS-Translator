@@ -226,8 +226,15 @@ sudo systemctl reload caddy
 ![no](https://github.com/rss-translator/RSS-Translator/assets/2398708/6a6a5fdc-ac8b-4e7a-b3ae-5093adcf9021)：处理失败\
 目前状态不会自动更新，请刷新页面以获取最新状态
 ### 赞助
-感谢您的赞助\
-[爱发电](https://afdian.net/a/versun)
+非常感谢以下读者的支持。如有余力，请考虑成为[赞助者](https://afdian.net/a/versun)
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg">
+    <img src='https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg'/>
+  </a>
+</p>
+
+> 说明： 通过[爱发电](https://afdian.net/a/versun)赞助的同学，你的头像将会隔天出现在这里噢。
 ### 贡献
 [请查看Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
 
