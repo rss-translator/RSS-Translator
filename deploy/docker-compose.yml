@@ -9,6 +9,7 @@ services:
       - DEMO=0
       - USER_MANAGEMENT=0
       - LOG_LEVEL=ERROR
+      - HUEY_WORKERS=10
       - CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000
     volumes:
       - ./data:/home/rsstranslator/data

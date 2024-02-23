@@ -121,7 +121,7 @@ HUEY = {
     'huey_class': 'huey.SqliteHuey',
     'filename': DATA_FOLDER / "huey.sqlite3",
     'consumer': {
-        'workers': 20,
+        'workers': int(os.environ.get('HUEY_WORKERS', 10)),
         'worker_type': 'greenlet',
     },
     "immediate": False,
