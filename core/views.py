@@ -9,7 +9,12 @@ from django.views.decorators.http import etag
 from .models import T_Feed
 
 def get_modified(request, feed_sid):
-    return T_Feed.objects.get(sid=feed_sid).modified
+    try:
+        modified = T_Feed.objects.get(sid=feed_sid).modified
+    except T_Feed.DoesNotExist:
+        logging.error("Translated feed not found, Maybe still in progress, Please confirm it's exist: %s", feed_sid)
+        modified = None
+    return modified
 
 #@cache_page(60 * 15)  # Cache this view for 15 minutes
 @etag(get_modified)
