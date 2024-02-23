@@ -72,8 +72,8 @@ def translate_feed(
             # Translate content
             if translate_content:
                 original_description = entry.get('summary', None)  # summary, description
-                original_content = entry['content'][0].value if entry['content'] else None  # description, content
-                
+                original_content = entry.get('content', None)
+
                 if original_description:
                     cache_key = f"content_{original_description}_{target_language}"
                     # 任务去重
@@ -86,7 +86,8 @@ def translate_feed(
                         need_cache_objs.update(need_cache)
                         entry["summary"] = "".join(translated_summary)
 
-                if original_content:
+                if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
+                    original_content = original_content[0].value
                     cache_key = f"content_{original_content}_{target_language}"
                     # 任务去重
                     if cache_key not in unique_tasks:
