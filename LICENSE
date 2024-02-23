@@ -92,5 +92,28 @@ Library Name: uvicorn
 License: BSD
 URL: https://pypi.org/project/uvicorn/
 
+Library Name: fake-useragent
+License: Apache
+URL: https://pypi.org/project/fake-useragent/
+
+Library Name: html2text
+License: GPL-3.0
+URL: https://pypi.org/project/html2text/
+
+Library Name: anthropic
+License: MIT
+URL: https://pypi.org/project/anthropic/
+
+Library Name: opyml
+License: MIT / Apache-2.0
+URL: https://pypi.org/project/opyml/
+
+Library Name: langdetect
+License: Apache
+URL: https://pypi.org/project/langdetect/
+
+Library Name: PyDeepLX
+License: MIT
+URL: https://pypi.org/project/PyDeepLX/
 
 
