@@ -11,6 +11,7 @@ import httpx
 from feedgen.feed import FeedGenerator
 from fake_useragent import UserAgent
 
+
 def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
     update = False
     feed = {}
@@ -27,13 +28,14 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
 
     try:
         response = client.get(url, headers=headers, timeout=30, follow_redirects=True)
-        response.raise_for_status()
 
         if response.status_code == 200:
             feed = feedparser.parse(response.text)
             update = True
         elif response.status_code == 304:
             update = False
+        else:
+            response.raise_for_status()
 
     except httpx.HTTPStatusError as exc:
         error = f"HTTP status error while requesting {url}: {exc.response.status_code}"
@@ -111,7 +113,7 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.updated(updated)
             fe.pubDate(pubdate)
             fe.summary(summary)
-            
+
             # id, title, updated are required
             if not fe.title():
                 fe.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
@@ -119,7 +121,6 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
                 fe.updated(datetime.now(timezone.utc))
             if not fe.id():
                 fe.id(fe.title())
-
 
         # fg.atom_file(file_path, extensions=True, pretty=True, encoding='UTF-8', xml_declaration=True)
         atom_string = fg.atom_str(pretty=False)
