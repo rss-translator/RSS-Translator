@@ -45,7 +45,6 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
         error = f"Error while requesting {url}: {str(e)}"
 
     if feed:
-        feed["entries"] = feed["entries"][:1000]
         if feed.bozo and not feed.entries:
             logging.warning("Get feed %s %s", url, feed.get("bozo_exception"))
             error = feed.get("bozo_exception")
