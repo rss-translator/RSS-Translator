@@ -38,7 +38,7 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
             response.raise_for_status()
 
     except httpx.HTTPStatusError as exc:
-        error = f"HTTP status error while requesting {url}: {exc.response.status_code}"
+        error = f"HTTP status error while requesting {url}: {exc.response.status_code} {exc.response.reason_phrase}"
     except httpx.TimeoutException:
         error = f"Timeout while requesting {url}"
     except Exception as e:
