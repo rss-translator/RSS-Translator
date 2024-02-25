@@ -110,7 +110,7 @@ class O_FeedForm(forms.ModelForm):
 
     class Meta:
         model = O_Feed
-        fields = ['feed_url', 'update_frequency', 'translator_engine', 'name']
+        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator_engine', 'name']
 
     # 重写save方法，以处理自定义字段的数据
     def save(self, commit=True):
@@ -128,7 +128,6 @@ class O_FeedForm(forms.ModelForm):
 @admin.register(O_Feed)
 class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     form = O_FeedForm
-    # fields = ['feed_url', 'content_type','object_id']
     inlines = [T_FeedInline]
     list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
                     "update_frequency", "modified"]

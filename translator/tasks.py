@@ -25,7 +25,8 @@ def translate_feed(
         target_language: str,
         translate_title: bool,
         translate_content: bool,
-        engine: TranslatorEngine) -> dict:
+        engine: TranslatorEngine,
+        max_posts: int = 20) -> dict:
     logging.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
     translated_feed = feed
     total_tokens = 0
@@ -35,7 +36,7 @@ def translate_feed(
     unique_tasks = set()
 
     try:
-        for entry in translated_feed.entries:
+        for entry in translated_feed.entries[:max_posts]:
             # Translate title
             if translate_title:
                 title = entry["title"]

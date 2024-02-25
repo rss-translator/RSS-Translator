@@ -50,7 +50,7 @@ def update_original_feed(sid: str):
     original_feed_file_path = feed_dir_path / f"{obj.sid}.xml"
     try:
         obj.valid = False
-        fetch_feed_results = fetch_feed(obj.feed_url, obj.modified, obj.etag)
+        fetch_feed_results = fetch_feed(url=obj.feed_url, modified=obj.modified, etag=obj.etag)
 
         if fetch_feed_results['error']:
             raise Exception(f"Fetch Original Feed Failed: {fetch_feed_results['error']}")
@@ -129,6 +129,7 @@ def update_translated_feed(sid: str, force=False):
                 engine=engine,
                 translate_title=obj.translate_title,
                 translate_content=obj.translate_content,
+                max_posts=obj.o_feed.max_posts
             )
 
             if not results:

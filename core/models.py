@@ -17,6 +17,7 @@ class O_Feed(models.Model):
     size = models.IntegerField(_("Size"), default=0)
     valid = models.BooleanField(_("Valid"), null=True,)
     update_frequency = models.IntegerField(_("Update Frequency(minutes)"), default=30,)
+    max_posts = models.IntegerField(_("Max Posts"), default=20, )
 
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
     object_id = models.PositiveIntegerField(null=True)
@@ -50,6 +51,8 @@ class T_Feed(models.Model):
 
     modified = models.CharField(_("Last Modified"), max_length=255, default="")
     size = models.IntegerField(_("Size"), default=0)
+
+    # translate_paragraphs = models.IntegerField(_("Translate Paragraphs"), default=0)
 
     class Meta:
         verbose_name = _("Translated Feed")
