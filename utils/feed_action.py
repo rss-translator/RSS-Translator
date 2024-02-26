@@ -12,7 +12,7 @@ from feedgen.feed import FeedGenerator
 from fake_useragent import UserAgent
 
 
-def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
+def fetch_feed(url: str, etag: str = "") -> Dict:
     update = False
     feed = {}
     error = None
@@ -20,7 +20,7 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
     ua = UserAgent()
     headers = {
         'If-None-Match': etag,
-        'If-Modified-Since': modified,
+        #'If-Modified-Since': modified,
         'User-Agent': ua.random
     }
 
@@ -89,10 +89,10 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fg.id(fg.title())
 
         for entry in feed_dict['entries']:
-            pubdate = source_feed.get('published_parsed')
+            pubdate = entry.get('published_parsed')
             pubdate = datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc) if pubdate else None
 
-            updated = source_feed.get('updated_parsed')
+            updated = entry.get('updated_parsed')
             updated = datetime.fromtimestamp(mktime(updated), tz=timezone.utc) if updated else None
 
             title = entry.get('title')

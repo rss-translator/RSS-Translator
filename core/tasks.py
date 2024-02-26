@@ -1,10 +1,11 @@
+from datetime import datetime, timezone
 import logging
 import os
 from pathlib import Path
+from time import mktime
 
 import feedparser
 from django.conf import settings
-from django.utils import timezone
 from huey.contrib.djhuey import HUEY as huey
 from huey.contrib.djhuey import on_startup, on_shutdown, task
 from translator.tasks import translate_feed
@@ -50,7 +51,7 @@ def update_original_feed(sid: str):
     original_feed_file_path = feed_dir_path / f"{obj.sid}.xml"
     try:
         obj.valid = False
-        fetch_feed_results = fetch_feed(url=obj.feed_url, modified=obj.modified, etag=obj.etag)
+        fetch_feed_results = fetch_feed(url=obj.feed_url, etag=obj.etag)
 
         if fetch_feed_results['error']:
             raise Exception(f"Fetch Original Feed Failed: {fetch_feed_results['error']}")
@@ -63,10 +64,9 @@ def update_original_feed(sid: str):
             if obj.name in ["Loading", "Empty", None]:
                 obj.name = feed.feed.get('title') or feed.feed.get('subtitle')
             obj.size = os.path.getsize(original_feed_file_path)
-            obj.modified = feed.get(
-                "modified",
-                timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
-            )
+            update_time = feed.feed.get("updated_parsed")
+            obj.last_updated = datetime.fromtimestamp(mktime(update_time), tz=timezone.utc) if update_time else None
+            obj.last_pull = datetime.now(timezone.utc)
             obj.etag = feed.get("etag", '')
 
         obj.valid = True
@@ -98,7 +98,7 @@ def update_translated_feed(sid: str, force=False):
         if obj.o_feed.pk is None:
             raise Exception("Unable translate feed, because Original Feed is None")
 
-        if not force and obj.modified == obj.o_feed.modified:
+        if not force and obj.modified == obj.o_feed.last_pull:
             logging.info("Translated Feed is up to date, Skip translation: %s",obj.o_feed.feed_url)
             obj.status = True
             obj.save()
@@ -151,7 +151,7 @@ def update_translated_feed(sid: str, force=False):
             else:
                 obj.total_characters += translated_characters
 
-            obj.modified = obj.o_feed.modified
+            obj.modified = obj.o_feed.last_pull
             obj.size = os.path.getsize(translated_feed_file_path)
             obj.status = True
     except Exception as e:

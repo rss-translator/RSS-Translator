@@ -130,7 +130,7 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     form = O_FeedForm
     inlines = [T_FeedInline]
     list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
-                    "update_frequency", "modified"]
+                    "update_frequency", "last_updated", "last_pull"]
     search_fields = ["name", "feed_url"]
     list_filter = ["valid"]
     actions = ['o_feed_force_update', 'o_feed_export_as_opml']

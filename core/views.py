@@ -5,8 +5,9 @@ from django.conf import settings
 from django.http import HttpResponse, Http404, StreamingHttpResponse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
-from django.views.decorators.http import etag
+from django.views.decorators.http import condition
 from .models import T_Feed
+
 
 def get_modified(request, feed_sid):
     try:
@@ -16,8 +17,16 @@ def get_modified(request, feed_sid):
         modified = None
     return modified
 
+def get_etag(request, feed_sid):
+    try:
+        modified = T_Feed.objects.get(sid=feed_sid).modified
+    except T_Feed.DoesNotExist:
+        logging.error("Translated feed not found, Maybe still in progress, Please confirm it's exist: %s", feed_sid)
+        modified = None
+    return modified.strftime("%Y-%m-%d %H:%M:%S") if modified else None
+
 #@cache_page(60 * 15)  # Cache this view for 15 minutes
-@etag(get_modified)
+condition(etag_func=get_etag, last_modified_func=get_modified)
 def rss(request, feed_sid):
     # Sanitize the feed_sid to prevent path traversal attacks
     feed_sid = smart_str(feed_sid)
