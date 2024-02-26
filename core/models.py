@@ -17,7 +17,7 @@ class O_Feed(models.Model):
     size = models.IntegerField(_("Size"), default=0)
     valid = models.BooleanField(_("Valid"), null=True,)
     update_frequency = models.IntegerField(_("Update Frequency(minutes)"), default=30,)
-    max_posts = models.IntegerField(_("Max Posts"), default=20, )
+    max_posts = models.IntegerField(_("Max Posts"), default=20, help_text=_("Max number of posts to be translated"))
 
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
     object_id = models.PositiveIntegerField(null=True)
@@ -38,7 +38,7 @@ class O_Feed(models.Model):
 
 
 class T_Feed(models.Model):
-    sid = models.CharField(max_length=255, unique=True)  # sid for feed_url and file name
+    sid = models.CharField(_("SID(Optional)"), max_length=255, unique=True, help_text=_("http://example.com/rss/[SID]"))  # sid for feed_url and file name
     language = models.CharField(_("Language"), choices=settings.TRANSLATION_LANGUAGES, max_length=50)
     o_feed = models.ForeignKey(O_Feed, on_delete=models.CASCADE, verbose_name=_("Original Feed"))
     status = models.BooleanField(_("Translation Status"), null=True)
