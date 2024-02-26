@@ -6,7 +6,6 @@ from time import mktime
 
 import feedparser
 from django.conf import settings
-from django.utils import timezone
 from huey.contrib.djhuey import HUEY as huey
 from huey.contrib.djhuey import on_startup, on_shutdown, task
 from translator.tasks import translate_feed
@@ -67,7 +66,7 @@ def update_original_feed(sid: str):
             obj.size = os.path.getsize(original_feed_file_path)
             update_time = feed.feed.get("updated_parsed")
             obj.last_updated = datetime.fromtimestamp(mktime(update_time), tz=timezone.utc) if update_time else ''
-            obj.last_pull = timezone.now()
+            obj.last_pull = datetime.now(timezone.utc)
             obj.etag = feed.get("etag", '')
 
         obj.valid = True
