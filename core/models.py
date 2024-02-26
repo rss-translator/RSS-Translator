@@ -1,3 +1,4 @@
+import os
 import uuid
 import re
 
@@ -16,8 +17,8 @@ class O_Feed(models.Model):
     etag = models.CharField(max_length=255, default="")
     size = models.IntegerField(_("Size"), default=0)
     valid = models.BooleanField(_("Valid"), null=True,)
-    update_frequency = models.IntegerField(_("Update Frequency(minutes)"), default=30,)
-    max_posts = models.IntegerField(_("Max Posts"), default=20, help_text=_("Max number of posts to be translated"))
+    update_frequency = models.IntegerField(_("Update Frequency"), default=os.getenv("default_update_frequency", 30), help_text=_("Minutes"))
+    max_posts = models.IntegerField(_("Max Posts"), default=os.getenv("default_max_posts", 20), help_text=_("Max number of posts to be translated"))
 
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
     object_id = models.PositiveIntegerField(null=True)

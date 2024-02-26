@@ -11,6 +11,8 @@ services:
       - LOG_LEVEL=ERROR
       - HUEY_WORKERS=10
       - CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000
+      - default_update_frequency=30
+      - default_max_posts=20
     volumes:
       - ./data:/home/rsstranslator/data
     ports:
