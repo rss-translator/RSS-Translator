@@ -13,7 +13,7 @@ class O_Feed(models.Model):
     sid = models.CharField(max_length=255, unique=True)
     name = models.CharField(_("Name"), max_length=255, blank=True, null=True)
     feed_url = models.URLField(_("Feed URL"), unique=True,)
-    modified = models.CharField(_("Last Modified"), max_length=255, blank=True, null=True, help_text=_("Last Modified header from the original feed"))
+    modified = models.CharField(_("Last Modified"), max_length=255, default="", help_text=_("Last Modified header from the original feed"))
     last_pull = models.DateTimeField(_("Last Pull"), default=None, blank=True, null=True, help_text=_("Last time the feed was pulled"))
 
     etag = models.CharField(max_length=255, default="")
