@@ -12,7 +12,7 @@ from feedgen.feed import FeedGenerator
 from fake_useragent import UserAgent
 
 
-def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
+def fetch_feed(url: str, etag: str = "") -> Dict:
     update = False
     feed = {}
     error = None
@@ -20,7 +20,7 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
     ua = UserAgent()
     headers = {
         'If-None-Match': etag,
-        'If-Modified-Since': modified,
+        #'If-Modified-Since': modified,
         'User-Agent': ua.random
     }
 
