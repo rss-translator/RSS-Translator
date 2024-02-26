@@ -65,7 +65,7 @@ def update_original_feed(sid: str):
                 obj.name = feed.feed.get('title') or feed.feed.get('subtitle')
             obj.size = os.path.getsize(original_feed_file_path)
             update_time = feed.feed.get("updated_parsed")
-            obj.last_updated = datetime.fromtimestamp(mktime(update_time), tz=timezone.utc) if update_time else ''
+            obj.last_updated = datetime.fromtimestamp(mktime(update_time), tz=timezone.utc) if update_time else None
             obj.last_pull = datetime.now(timezone.utc)
             obj.etag = feed.get("etag", '')
 

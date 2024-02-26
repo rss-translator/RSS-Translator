@@ -13,7 +13,6 @@ class O_Feed(models.Model):
     sid = models.CharField(max_length=255, unique=True, editable=False,)
     name = models.CharField(_("Name"), max_length=255, blank=True, null=True)
     feed_url = models.URLField(_("Feed URL"), unique=True,)
-    # change modified to datetimefield
     last_updated = models.DateTimeField(_("Last Updated(UTC)"), default=None, blank=True, null=True, editable=False, help_text=_("Last updated from the original feed"))
     last_pull = models.DateTimeField(_("Last Pull(UTC)"), default=None, blank=True, null=True, editable=False, help_text=_("Last time the feed was pulled"))
 
