@@ -65,10 +65,10 @@
                                 <time>
                                     <xsl:choose>
                                         <xsl:when test="atom:updated">
-                                            <xsl:value-of select="substring(atom:updated, 0, 11)" />
+                                            <xsl:value-of select="substring(atom:updated, 0, 17)" />
                                         </xsl:when>
                                         <xsl:otherwise>
-                                            <xsl:value-of select="substring(atom:published, 0, 11)" />
+                                            <xsl:value-of select="substring(atom:published, 0, 17)" />
                                         </xsl:otherwise>
                                     </xsl:choose>
                                 </time> - 
@@ -78,7 +78,7 @@
                                     </xsl:attribute>
                                     <xsl:value-of select="atom:title"/>
                                 </a>
-                                <p>
+                                <!-- <p>
                                     <xsl:choose>
                                         <xsl:when test="atom:content">
                                             <xsl:value-of select="substring(atom:content, 1, 200)" />...
@@ -87,7 +87,7 @@
                                             <xsl:value-of select="substring(atom:summary, 1, 200)" />...
                                         </xsl:otherwise>
                                     </xsl:choose>
-                                </p>
+                                </p> -->
                             </li>
                             </xsl:for-each>
                             </ul>
