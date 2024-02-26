@@ -63,7 +63,14 @@
                             <xsl:for-each select="atom:feed/atom:entry">
                             <li>
                                 <time>
-                                    <xsl:value-of select="atom:published" />
+                                    <xsl:choose>
+                                        <xsl:when test="atom:updated">
+                                            <xsl:value-of select="substring(atom:updated, 0, 11)" />
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="substring(atom:published, 0, 11)" />
+                                        </xsl:otherwise>
+                                    </xsl:choose>
                                 </time> - 
                                 <a hreflang="en" target="_blank">
                                     <xsl:attribute name="href">
@@ -71,7 +78,17 @@
                                     </xsl:attribute>
                                     <xsl:value-of select="atom:title"/>
                                 </a>
-                                </li>
+                                <p>
+                                    <xsl:choose>
+                                        <xsl:when test="atom:content">
+                                            <xsl:value-of select="substring(atom:content, 1, 200)" />...
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="substring(atom:summary, 1, 200)" />...
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </p>
+                            </li>
                             </xsl:for-each>
                             </ul>
                         </main>

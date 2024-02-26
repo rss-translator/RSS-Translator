@@ -45,7 +45,6 @@ def fetch_feed(url: str, modified: str = "", etag: str = "") -> Dict:
         error = f"Error while requesting {url}: {str(e)}"
 
     if feed:
-        feed["entries"] = feed["entries"][:1000]
         if feed.bozo and not feed.entries:
             logging.warning("Get feed %s %s", url, feed.get("bozo_exception"))
             error = feed.get("bozo_exception")
@@ -82,10 +81,10 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         fg.updated(updated)
         fg.pubDate(pubdate)
 
+        if not fg.updated():
+            fg.updated(pubdate if pubdate else datetime.now(timezone.utc))
         if not fg.title():
             fg.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
-        if not fg.updated():
-            fg.updated(datetime.now(timezone.utc))
         if not fg.id():
             fg.id(fg.title())
 
@@ -115,10 +114,10 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.summary(summary)
 
             # id, title, updated are required
+            if not fe.updated():
+                fe.updated(pubdate if pubdate else datetime.now(timezone.utc))
             if not fe.title():
                 fe.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
-            if not fe.updated():
-                fe.updated(datetime.now(timezone.utc))
             if not fe.id():
                 fe.id(fe.title())
 
