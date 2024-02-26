@@ -10,15 +10,16 @@ from django.utils.translation import gettext_lazy as _
 
 
 class O_Feed(models.Model):
-    sid = models.CharField(max_length=255, unique=True)
+    sid = models.CharField(max_length=255, unique=True, editable=False,)
     name = models.CharField(_("Name"), max_length=255, blank=True, null=True)
     feed_url = models.URLField(_("Feed URL"), unique=True,)
-    modified = models.CharField(_("Last Modified"), max_length=255, default="", help_text=_("Last Modified header from the original feed"))
-    last_pull = models.DateTimeField(_("Last Pull"), default=None, blank=True, null=True, help_text=_("Last time the feed was pulled"))
+    # change modified to datetimefield
+    modified = models.CharField(_("Last Modified"), max_length=255, default="", editable=False, help_text=_("Last Modified header from the original feed"))
+    last_pull = models.DateTimeField(_("Last Pull(UTC)"), default=None, blank=True, null=True, editable=False, help_text=_("Last time the feed was pulled"))
 
-    etag = models.CharField(max_length=255, default="")
-    size = models.IntegerField(_("Size"), default=0)
-    valid = models.BooleanField(_("Valid"), null=True,)
+    etag = models.CharField(max_length=255, default="", editable=False, )
+    size = models.IntegerField(_("Size"), default=0, editable=False, )
+    valid = models.BooleanField(_("Valid"), null=True,editable=False, )
     update_frequency = models.IntegerField(_("Update Frequency"), default=os.getenv("default_update_frequency", 30), help_text=_("Minutes"))
     max_posts = models.IntegerField(_("Max Posts"), default=os.getenv("default_max_posts", 20), help_text=_("Max number of posts to be translated"))
 
@@ -44,7 +45,7 @@ class T_Feed(models.Model):
     sid = models.CharField(_("SID(Optional)"), max_length=255, unique=True, help_text=_("http://example.com/rss/[SID]"))  # sid for feed_url and file name
     language = models.CharField(_("Language"), choices=settings.TRANSLATION_LANGUAGES, max_length=50)
     o_feed = models.ForeignKey(O_Feed, on_delete=models.CASCADE, verbose_name=_("Original Feed"))
-    status = models.BooleanField(_("Translation Status"), null=True)
+    status = models.BooleanField(_("Translation Status"), null=True, editable=False,)
 
     translate_title = models.BooleanField(_("Translate Title"), default=True)
     translate_content = models.BooleanField(_("Translate Content"), default=False)
@@ -52,8 +53,8 @@ class T_Feed(models.Model):
     total_tokens = models.IntegerField(_("Tokens Cost"), default=0)
     total_characters = models.IntegerField(_("Characters Cost"), default=0)
 
-    modified = models.DateTimeField(_("Last Modified"), blank=True, null=True, help_text=_("Last time the feed was translated"))
-    size = models.IntegerField(_("Size"), default=0)
+    modified = models.DateTimeField(_("Last Modified"), blank=True, null=True, editable=False, help_text=_("Last time the feed was translated"))
+    size = models.IntegerField(_("Size"), default=0, editable=False,)
 
     # translate_paragraphs = models.IntegerField(_("Translate Paragraphs"), default=0)
 
