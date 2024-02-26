@@ -13,7 +13,9 @@ class O_Feed(models.Model):
     sid = models.CharField(max_length=255, unique=True)
     name = models.CharField(_("Name"), max_length=255, blank=True, null=True)
     feed_url = models.URLField(_("Feed URL"), unique=True,)
-    modified = models.CharField(_("Last Modified"), max_length=255, default="",)
+    modified = models.CharField(_("Last Modified"), max_length=255, blank=True, null=True, help_text=_("Last Modified header from the original feed"))
+    last_pull = models.DateTimeField(_("Last Pull"), default=None, blank=True, null=True, help_text=_("Last time the feed was pulled"))
+
     etag = models.CharField(max_length=255, default="")
     size = models.IntegerField(_("Size"), default=0)
     valid = models.BooleanField(_("Valid"), null=True,)
@@ -50,7 +52,7 @@ class T_Feed(models.Model):
     total_tokens = models.IntegerField(_("Tokens Cost"), default=0)
     total_characters = models.IntegerField(_("Characters Cost"), default=0)
 
-    modified = models.CharField(_("Last Modified"), max_length=255, default="")
+    modified = models.DateTimeField(_("Last Modified"), blank=True, null=True, help_text=_("Last time the feed was translated"))
     size = models.IntegerField(_("Size"), default=0)
 
     # translate_paragraphs = models.IntegerField(_("Translate Paragraphs"), default=0)

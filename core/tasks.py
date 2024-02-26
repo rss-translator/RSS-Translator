@@ -63,10 +63,8 @@ def update_original_feed(sid: str):
             if obj.name in ["Loading", "Empty", None]:
                 obj.name = feed.feed.get('title') or feed.feed.get('subtitle')
             obj.size = os.path.getsize(original_feed_file_path)
-            obj.modified = feed.get(
-                "modified",
-                timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
-            )
+            obj.modified = feed.get("modified")
+            obj.last_pull = timezone.now()
             obj.etag = feed.get("etag", '')
 
         obj.valid = True
@@ -98,7 +96,7 @@ def update_translated_feed(sid: str, force=False):
         if obj.o_feed.pk is None:
             raise Exception("Unable translate feed, because Original Feed is None")
 
-        if not force and obj.modified == obj.o_feed.modified:
+        if not force and obj.modified == obj.o_feed.last_pull:
             logging.info("Translated Feed is up to date, Skip translation: %s",obj.o_feed.feed_url)
             obj.status = True
             obj.save()
@@ -151,7 +149,7 @@ def update_translated_feed(sid: str, force=False):
             else:
                 obj.total_characters += translated_characters
 
-            obj.modified = obj.o_feed.modified
+            obj.modified = obj.o_feed.last_pull
             obj.size = os.path.getsize(translated_feed_file_path)
             obj.status = True
     except Exception as e:
