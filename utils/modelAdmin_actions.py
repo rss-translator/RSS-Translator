@@ -45,7 +45,6 @@ class ForceUpdateMixin:
         with transaction.atomic():
             for instance in queryset:
                 instance.etag = ''
-                instance.modified = ''
                 instance.valid = None
                 instance.save()
                 self.revoke_tasks_by_arg(instance.sid)
@@ -56,7 +55,7 @@ class ForceUpdateMixin:
         logging.info("Call t_feed_force_update: %s", queryset)
         with transaction.atomic():
             for instance in queryset:
-                instance.modified = ''
+                instance.modified = None
                 instance.status = None
                 instance.save()
                 self.revoke_tasks_by_arg(instance.sid)
