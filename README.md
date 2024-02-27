@@ -36,14 +36,16 @@
 4. 可控制每个源的更新频率和查看翻译状态
 5. 缓存所有翻译内容，尽可能减少翻译费用
 6. 可查看每个源所花费的Token/字符数
-   
+
 目前支持的翻译引擎：
 
 - DeepL
 - DeepLX
 - OpenAI
+- ClaudeAI
 - Azure OpenAI
 - Google Gemini
+- Google Translate(Web)
 - Microsoft Translate API
 - Caiyun API
 
@@ -182,7 +184,7 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 ---
 ### 开启SSL
 建议使用caddy并配合cloudflare的dns代理使用\
-安装Caddy: https://caddyserver.com/docs/install#debian-ubuntu-raspbian 
+安装Caddy: https://caddyserver.com/docs/install#debian-ubuntu-raspbian
 
 创建caddy配置文件\
 可参考[/home/rsstranslator/deploy/Caddyfile](deploy/Caddyfile)进行修改，正常只要修改第一行的域名即可\
@@ -241,4 +243,3 @@ sudo systemctl reload caddy
 ### Star历史图
 
 [![Star History Chart](https://api.star-history.com/svg?repos=rss-translator/RSS-Translator&type=Date)](https://star-history.com/#rss-translator/RSS-Translator&Date)
-

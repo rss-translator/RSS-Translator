@@ -36,14 +36,16 @@ The main reason for development was to solve personal needs. I followed many for
 4. Control over the update frequency for each source and the ability to view translation status.
 5. Caching of all translation content to minimize translation costs.
 6. Ability to view the number of tokens/characters used by each source.
-   
-Currently supported translation engines: 
+
+Currently supported translation engines:
 
 - DeepL
 - DeepLX
 - OpenAI
+- ClaudeAI
 - Azure OpenAI
 - Google Gemini
+- Google Translate(Web)
 - Microsoft Translate API
 - Caiyun API
 
@@ -177,7 +179,7 @@ Note: This uninstall script does not delete the data backup files in the /tmp di
 ---
 ### Enable SSL
 It is recommended to use caddy with cloudflare's dns proxy.
-Install Caddy: https://caddyserver.com/docs/install#debian-ubuntu-raspbian 
+Install Caddy: https://caddyserver.com/docs/install#debian-ubuntu-raspbian
 
 Create caddy configuration file\
 You can refer to [/home/rsstranslator/deploy/Caddyfile](deploy/Caddyfile) for modification, normally you just need to modify the domain name in the first line.
@@ -228,4 +230,3 @@ Thank you for your sponsorship\
 ### Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=rss-translator/RSS-Translator&type=Date)](https://star-history.com/#rss-translator/RSS-Translator&Date)
-
