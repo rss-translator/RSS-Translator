@@ -113,7 +113,7 @@ total_packages=$(grep -v '^$' /home/rsstranslator/requirements/prod.txt | wc -l)
 counter=0
 while read package; do
     if [ ! -z "$package" ]; then
-        sudo -u rsstranslator /home/rsstranslator/.venv/bin/pip install -q "$package" > /dev/null 2>&1
+        sudo -u rsstranslator /home/rsstranslator/.venv/bin/pip install -q -U "$package" > /dev/null 2>&1
         let counter+=1
         show_progress $counter $total_packages
     fi
