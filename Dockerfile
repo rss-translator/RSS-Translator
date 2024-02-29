@@ -15,7 +15,7 @@ RUN mkdir -p $DockerHOME/data
 WORKDIR $DockerHOME
 COPY . $DockerHOME
 #RUN pip config set global.index-url http://127.0.0.1:8000/simple
-RUN pip install -r requirements/dev.txt --no-cache-dir && \
+RUN pip install -r requirements/dev.txt --no-cache-dir -U && \
     python manage.py init_server && \
     find $DockerHOME -type d -name "__pycache__" -exec rm -r {} + && \
     rm -rf $DockerHOME/.cache/pip \
