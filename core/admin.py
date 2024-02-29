@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
 
-from translator.models import TranslatorEngine
+from django_text_translator.models import TranslatorEngine
 
 from .models import O_Feed, T_Feed
 from .tasks import update_original_feed, update_translated_feed

@@ -34,27 +34,17 @@ def log(request):
 
 if settings.DEMO:
     from django.contrib import admin
-
-
     class AccessUser:
         has_module_perms = has_perm = __getattr__ = lambda s, *a, **kw: True
 
-
     admin.site.has_permission = lambda r: setattr(r, 'user', AccessUser()) or True
 
-if settings.DEBUG:
-    urlpatterns = [
-    path("favicon.ico", favicon_view),
-    path("log/", log, name="log"),
-    path("rss/", include("core.urls")),
-    path("__debug__/", include("debug_toolbar.urls")),
-    path("",admin.site.urls),
-    
-]
-else:
-    urlpatterns = [
+urlpatterns = [
     path("favicon.ico", favicon_view),
     path("log/", log, name="log"),
     path("rss/", include("core.urls")),
     path("",admin.site.urls),
     ]
+
+if settings.DEBUG:
+    urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
