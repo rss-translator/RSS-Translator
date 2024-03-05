@@ -1,5 +1,5 @@
 django>=5.0.2
-django-text-translator>=2024.2.29.3
+django-text-translator>=2024.3.5
 opyml
 tiktoken
 feedparser
