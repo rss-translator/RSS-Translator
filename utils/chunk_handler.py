@@ -1,5 +1,7 @@
 import logging
-from itertools import groupby
+import re
+
+#from itertools import groupby
 import html2text
 import tiktoken
 
@@ -11,6 +13,8 @@ def content_split(content: str) -> dict:
     try:
         h = html2text.HTML2Text()
         h.mark_code = True
+        h.unicode_snob = True
+        h.body_width = 0
         content = h.handle(content)
         chunks = content.split('\n\n')
         tokens = []
@@ -49,15 +53,19 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
     grouped_chunks = []
     current_chunk = ''
     current_value = 0
-    try:
+     try:
         for chunk, value in zip(chunks, values):
             if value > max_size:
-                logging.warning(f'Chunk with {value} {group_by} is longer than {max_size} {group_by}.')
-                # split chunk into smaller chunks
-                for i in range(0, int(len(chunk)), int(max_size)):
-                    grouped_chunks.append(chunk[i:i + int(max_size) - 1] + '\n')
-            if current_value + 1 + value <= min_size:
-                current_chunk += "\n" + chunk
+                # Use regex to split the chunk at symbol boundaries
+                split_points = re.finditer(r'[\s\.,;!?]+', chunk)
+                last_split_end = 0
+                for match in split_points:
+                    if match.start() - last_split_end >= max_size:
+                        grouped_chunks.append(chunk[last_split_end:match.start()] + '\n')
+                        last_split_end = match.start()
+                # Append the remaining part of the chunk
+                if last_split_end < len(chunk):
+                    grouped_chunks.append(chunk[last_split_end:] + '\n')
             else:
                 grouped_chunks.append(current_chunk)
                 current_chunk = chunk
