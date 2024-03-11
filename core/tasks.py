@@ -273,6 +273,8 @@ def chunk_translate(original_content: str, target_language: str, engine: Transla
     total_characters = 0
     need_cache_objs: dict = {}
     for chunk in grouped_chunks:
+        if not chunk:
+            continue
         logging.info("Translate chunk: %s", chunk)
         cached = Translated_Content.is_translated(chunk, target_language)
         if not cached:
