@@ -21,7 +21,7 @@ def fetch_feed(url: str, etag: str = "") -> Dict:
     headers = {
         'If-None-Match': etag,
         #'If-Modified-Since': modified,
-        'User-Agent': ua.random
+        'User-Agent': ua.random.strip()
     }
 
     client = httpx.Client()
