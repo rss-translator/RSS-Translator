@@ -53,7 +53,7 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
     grouped_chunks = []
     current_chunk = ''
     current_value = 0
-     try:
+    try:
         for chunk, value in zip(chunks, values):
             if value > max_size:
                 # Use regex to split the chunk at symbol boundaries
