@@ -108,10 +108,10 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.link(href=link)
             fe.author({'name': author_name})
             fe.id(unique_id)
-            fe.content(content)
+            fe.content(content,type='html')
             fe.updated(updated)
             fe.pubDate(pubdate)
-            fe.summary(summary)
+            fe.summary(summary,type='html')
 
             # id, title, updated are required
             if not fe.updated():
