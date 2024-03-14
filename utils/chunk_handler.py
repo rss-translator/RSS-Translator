@@ -15,8 +15,9 @@ def content_split(content: str) -> dict:
         h.mark_code = True
         h.unicode_snob = True
         h.body_width = 0
-        h.images_as_html = True
-        content = h.handle(content)
+        h.bypass_tables = True
+        # h.images_as_html = True
+        content = h.handle(h.handle(content))  # 经测试，遇到解码后的html标签(&lt;p&gt;&lt), 需要转换2次
         chunks = content.split('\n\n')
         tokens = []
         characters = []
