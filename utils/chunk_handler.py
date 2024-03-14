@@ -15,6 +15,7 @@ def content_split(content: str) -> dict:
         h.mark_code = True
         h.unicode_snob = True
         h.body_width = 0
+        h.images_as_html = True
         content = h.handle(content)
         chunks = content.split('\n\n')
         tokens = []
