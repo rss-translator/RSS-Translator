@@ -296,4 +296,4 @@ def chunk_translate(original_content: str, target_language: str, engine: Transla
                 )
         else:
             translated_content.append(cached["text"])
-    return "".join(translated_content), total_tokens, total_characters, need_cache_objs
+    return "\n\n".join(translated_content), total_tokens, total_characters, need_cache_objs

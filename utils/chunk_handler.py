@@ -1,23 +1,17 @@
 import logging
 import re
 
-#from itertools import groupby
-import html2text
+from itertools import groupby
 import tiktoken
-
+import mistune
 
 def content_split(content: str) -> dict:
     """Split content into chunks, separated by two newlines."""
     # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
     encoding = tiktoken.get_encoding("cl100k_base")
     try:
-        h = html2text.HTML2Text()
-        h.mark_code = True
-        h.unicode_snob = True
-        h.body_width = 0
-        h.bypass_tables = True
-        # h.images_as_html = True
-        content = h.handle(h.handle(content))  # 经测试，遇到解码后的html标签(&lt;p&gt;&lt), 需要转换2次
+        markdown = mistune.create_markdown(escape=False)
+        content = markdown(content)
         chunks = content.split('\n\n')
         tokens = []
         characters = []
