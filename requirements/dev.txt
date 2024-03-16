@@ -12,7 +12,7 @@ django-debug-toolbar
 django-huey-monitor
 whitenoise
 uvicorn
-html2text
 fake-useragent
 cityhash
 mistune
+markdownify

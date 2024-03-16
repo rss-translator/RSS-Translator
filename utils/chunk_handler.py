@@ -1,24 +1,17 @@
 import logging
 import re
 
-#from itertools import groupby
-import html2text
+from itertools import groupby
 import tiktoken
-
+from markdownify import markdownify as md
 
 def content_split(content: str) -> dict:
     """Split content into chunks, separated by two newlines."""
     # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
     encoding = tiktoken.get_encoding("cl100k_base")
     try:
-        h = html2text.HTML2Text()
-        h.mark_code = True
-        h.unicode_snob = True
-        h.body_width = 0
-        h.bypass_tables = True
-        # h.images_as_html = True
-        content = h.handle(h.handle(content))  # 经测试，遇到解码后的html标签(&lt;p&gt;&lt), 需要转换2次
-        chunks = content.split('\n\n')
+        markdown = md(content)
+        chunks = markdown.split('\n\n')
         tokens = []
         characters = []
         for chunk in chunks:
@@ -59,7 +52,7 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
         for chunk, value in zip(chunks, values):
             if value > max_size:
                 # Use regex to split the chunk at symbol boundaries
-                split_points = re.finditer(r'[\s\.,;!?]+', chunk)
+                split_points = re.finditer(r'[\s.!?]+', chunk)
                 last_split_end = 0
                 for match in split_points:
                     if match.start() - last_split_end >= max_size:
