@@ -5,7 +5,12 @@ from django.core.management.base import BaseCommand
 from django.core.management import call_command
 
 class Command(BaseCommand):
-    help = "Please make sure you have installed the required packages for dev."
+    help = 'Initialize the server by running collectstatic, makemigrations, migrate, run_huey and create_default_superuser commands.'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.process = None
+
     def handle(self, *args, **options):
         # Set DEBUG environment variable to '1'
         os.environ['DEBUG'] = '1'
@@ -15,11 +20,18 @@ class Command(BaseCommand):
         call_command('makemigrations')
         call_command('migrate')
 
-        # Start run_huey in a separate process
-        subprocess.Popen([sys.executable, 'manage.py', 'run_huey'])
+        # Start run_huey in a separate process using the same Python interpreter
+        self.process = subprocess.Popen([sys.executable, 'manage.py', 'run_huey'])
 
         # Create default superuser
         call_command('create_default_superuser')
 
         # Run the server
-        call_command('runserver')
+        try:
+            call_command('runserver')
+        finally:
+            # Attempt to terminate the subprocess when the server is stopped
+            if self.process:
+                self.process.terminate()
+                self.process.wait()
+
