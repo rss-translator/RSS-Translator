@@ -5,7 +5,13 @@ from django.core.management.base import BaseCommand
 from django.core.management import call_command
 
 class Command(BaseCommand):
-    help = 'Initialize the server by running collectstatic, makemigrations, migrate, run_huey and create_default_superuser commands.'
+    '''
+    1. pip install -r requirements/dev
+    2. enable gevent compatible for your IDE
+        ex: PyCharm-> Preferences -> Build, Execution, Deployment -> Python Debugger -> check Gevent compatible
+    3. set the debug custom command to run_dev
+    '''
+    help = 'Initialize the server for DEV.'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
