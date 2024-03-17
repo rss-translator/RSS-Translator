@@ -8,10 +8,8 @@ httpx
 dateutils
 huey
 gevent
-django-debug-toolbar
-django-huey-monitor
-whitenoise
 uvicorn
+whitenoise
 fake-useragent
 cityhash
 mistune
