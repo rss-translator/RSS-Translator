@@ -17,6 +17,8 @@ from django_text_translator.models import TranslatorEngine, Translated_Content
 
 from utils.feed_action import fetch_feed, generate_atom_feed
 from utils import chunk_handler
+from bs4 import BeautifulSoup, Comment
+
 
 # from huey_monitor.models import TaskModel
 
@@ -226,10 +228,12 @@ def translate_feed(
                     # 任务去重
                     if cache_key not in unique_tasks:
                         unique_tasks.add(cache_key)
-                        translated_summary, tokens, characters, need_cache = chunk_translate(original_description,
+
+                        translated_summary, tokens, characters, need_cache = content_translate(original_description,
                                                                                              target_language, engine)
                         total_tokens += tokens
                         translated_characters += characters
+
                         need_cache_objs.update(need_cache)
                         entry["summary"] = "".join(translated_summary)
 
@@ -239,13 +243,13 @@ def translate_feed(
                     # 任务去重
                     if cache_key not in unique_tasks:
                         unique_tasks.add(cache_key)
-                        translated_content, tokens, characters, need_cache = chunk_translate(original_content,
+
+                        translated_content, tokens, characters, need_cache = content_translate(original_content,
                                                                                              target_language, engine)
                         total_tokens += tokens
                         translated_characters += characters
                         need_cache_objs.update(need_cache)
                         entry['content'][0].value = "".join(translated_content)
-
 
     except Exception as e:
         logging.error("translate_feed: %s", str(e))
@@ -261,6 +265,55 @@ def translate_feed(
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}
 
+def content_translate(original_content: str, target_language: str, engine: TranslatorEngine):
+    total_tokens = 0
+    total_characters = 0
+    need_cache_objs = {}
+    soup = BeautifulSoup(original_content, 'html.parser')
+
+    try:
+        # replace all <a> tags with their text
+        for a_tag in soup.find_all('a'):
+            if a_tag.text:
+                a_tag.replace_with(a_tag.text)
+        # delete all <!-- --> comments
+        comments = soup.find_all(string=lambda text: isinstance(text, Comment))
+        [comment.extract() for comment in comments]
+
+
+        for element in soup.find_all(string=True):
+            if not element.strip():
+                continue
+            #TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
+
+            text = str(element)
+            logging.info("Translate content: %s", text)
+            cached = Translated_Content.is_translated(text, target_language)
+
+            if not cached:
+                results = engine.translate(text, target_language=target_language)
+                total_tokens += results.get("tokens", 0)
+                total_characters += len(text)
+
+                if results["text"]:
+                    logging.info("Save to cache:%s", results["text"])
+                    hash64 = cityhash.CityHash64(f"{text}{target_language}")
+                    need_cache_objs[hash64] = Translated_Content(
+                        hash=hash64.to_bytes(8, byteorder='little'),
+                        original_content=text,
+                        translated_language=target_language,
+                        translated_content=results["text"],
+                        tokens=results.get("tokens", 0),
+                        characters=results.get("characters", 0),
+                    )
+
+                element.replace_with(results["text"])
+            else:
+                element.replace_with(cached["text"])
+    except Exception as e:
+        logging.error(f'content_translate: {str(e)}')
+
+    return str(soup), total_tokens, total_characters, need_cache_objs
 
 def chunk_translate(original_content: str, target_language: str, engine: TranslatorEngine):
     logging.info("Call chunk_translate: %s(%s items)", target_language, len(original_content))
