@@ -109,6 +109,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATA_FOLDER = BASE_DIR / "data"
+DATA_FOLDER.mkdir(exist_ok=True)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
