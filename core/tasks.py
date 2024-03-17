@@ -279,7 +279,9 @@ def content_translate(original_content: str, target_language: str, engine: Trans
         # delete all <!-- --> comments
         comments = soup.find_all(string=lambda text: isinstance(text, Comment))
         [comment.extract() for comment in comments]
-
+        # delete all code blocks
+        for code_tag in soup.find_all('code'):
+            code_tag.extract()
 
         for element in soup.find_all(string=True):
             if not element.strip():
