@@ -11,7 +11,7 @@ def content_split(content: str) -> dict:
     encoding = tiktoken.get_encoding("cl100k_base")
     try:
         markdown = md(content)
-        chunks = markdown.split('\n\n')
+        chunks = re.split('\n+', markdown)
         tokens = []
         characters = []
         for chunk in chunks:
