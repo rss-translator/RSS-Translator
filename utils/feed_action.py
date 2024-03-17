@@ -6,7 +6,6 @@ from time import mktime
 from typing import Dict
 
 import feedparser
-import mistune
 import httpx
 # from django.utils.feedgenerator import Atom1Feed
 from feedgen.feed import FeedGenerator
@@ -109,10 +108,10 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.link(href=link)
             fe.author({'name': author_name})
             fe.id(unique_id)
-            fe.content(mistune.html(content), type='html')
+            fe.content(content, type='html')
             fe.updated(updated)
             fe.pubDate(pubdate)
-            fe.summary(mistune.html(summary), type='html')
+            fe.summary(summary, type='html')
 
             # id, title, updated are required
             if not fe.updated():
