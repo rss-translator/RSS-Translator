@@ -10,7 +10,6 @@ huey
 gevent
 uvicorn
 whitenoise
-html2text
 fake-useragent
 cityhash
-mistune
+bs4
