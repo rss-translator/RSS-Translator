@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import logging
 import os
+import re
 from pathlib import Path
 from time import mktime
 
@@ -265,6 +266,27 @@ def translate_feed(
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}
 
+
+def should_skip(element):
+    # 去除两端的空白字符
+    element = element.strip()
+    if not element:
+        return True
+
+    # 使用正则表达式来检查元素是否为数字、URL、电子邮件或包含特定符号
+    skip_patterns = [
+        r'^\d+$',  # 数字
+        r'^http',  # URL
+        r'^[^@]+@[^@]+\.[^@]+$',  # 电子邮件
+        r'^\W+$'  # 非字母数字字符的字符串
+    ]
+
+    for pattern in skip_patterns:
+        if re.match(pattern, element):
+            return True
+
+    return False
+
 def content_translate(original_content: str, target_language: str, engine: TranslatorEngine):
     total_tokens = 0
     total_characters = 0
@@ -284,7 +306,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
             code_tag.extract()
 
         for element in soup.find_all(string=True):
-            if not element.strip():
+            if should_skip(element):
                 continue
             #TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
 
