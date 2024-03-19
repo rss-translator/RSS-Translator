@@ -48,6 +48,7 @@
 - Google Translate(Web)
 - Microsoft Translate API
 - Caiyun API
+- Moonshot AI
 
 陆续增加中
 

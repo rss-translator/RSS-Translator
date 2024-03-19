@@ -48,6 +48,7 @@ Currently supported translation engines:
 - Google Translate(Web)
 - Microsoft Translate API
 - Caiyun API
+- Moonshot AI
 
 We will add more translation engines soon.
 
