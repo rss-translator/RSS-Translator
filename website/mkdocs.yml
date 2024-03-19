@@ -20,7 +20,7 @@ theme:
     #- navigation.side.hide
     - navigation.side.indexes
     #- navigation.side.toc.hide
-    #- navigation.top.hide
+    - navigation.top.hide
     #- navigation.top.cursor_animation.hide
     #- navigation.top.search_button.hide
     - revision.date
@@ -30,7 +30,7 @@ theme:
   logo: assets/logo.ico
 
 markdown_extensions:
-  # Python Markdown  
+  # Python Markdown
   - attr_list
   - def_list
   - footnotes
@@ -45,7 +45,7 @@ markdown_extensions:
   - pymdownx.mark
   - pymdownx.tilde
   - pymdownx.snippets:
-      base_path: 
+      base_path:
         - docs
 
 plugins:
@@ -68,11 +68,19 @@ extra:
 
 # Page tree
 nav:
-  - Home: index.md
-  - Demo: https://demo.rsstranslator.com
+  - 主页: index.md
+  - 截图: screenshots.md
+  - Demo: demo.md
+  - 安装:
+      - 脚本自动安装: install/install-script.md
+      - 一键部署: install/one-click.md
+      - Docker安装: install/docker.md
+      - 手动安装: install/manual.md
+  - 使用说明: guide.md
+  - 常见问题: faq.md
+  - 开发进度: https://github.com/orgs/rss-translator/projects/2/views/1
   - Github: https://github.com/rss-translator/RSS-Translator
   - Telegram: https://t.me/rsstranslator
-  - Roadmap: https://github.com/orgs/rss-translator/projects/2/views/1
   - Releases: https://github.com/rss-translator/RSS-Translator/releases
 #  - Getting started: getting-started.md
 #  - Setup: setup.md
