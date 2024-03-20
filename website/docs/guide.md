@@ -10,7 +10,7 @@
 
 状态说明：
 
-<table> <tr> <td><img src="/assets/icon-loading.svg" width="20" height="20"></td> <td>正在处理中</td> </tr> <tr> <td><img src="https://github.com/rss-translator/RSS-Translator/assets/2398708/3e974467-948f-486a-9923-91978d47e7ea" width="20" height="20"></td> <td>处理完成/有效</td> </tr> <tr> <td><img src="https://github.com/rss-translator/RSS-Translator/assets/2398708/6a6a5fdc-ac8b-4e7a-b3ae-5093adcf9021" width="20" height="20"></td> <td>处理失败/无效</td> </tr> </table>
+<table> <tr> <td><img src="/assets/icon-loading.svg" width="20" height="20"></td> <td>正在处理中</td> </tr> <tr> <td><img src="/assets/icon-yes.svg" width="20" height="20"></td> <td>处理完成/有效</td> </tr> <tr> <td><img src="/assets/icon-no.svg" width="20" height="20"></td> <td>处理失败/无效</td> </tr> </table>
 
 目前状态不会自动更新，请刷新页面以获取最新状态
 

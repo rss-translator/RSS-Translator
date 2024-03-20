@@ -101,3 +101,11 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 **默认账户：admin 密码：rsstranslator**
 
 请登录后立即修改你的密码
+
+## 升级
+`sudo ./home/rsstranslator/deploy/install_update.sh`
+
+## 卸载
+`sudo ./home/rsstranslator/deploy/uninstall.sh`
+
+注意：该卸载脚本并不会删除/tmp目录下的数据备份文件，以防万一
