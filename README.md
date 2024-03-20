@@ -34,7 +34,7 @@
 陆续增加中
 
 ## 赞助
-非常感谢以下读者的支持。如有余力，请考虑成为[赞助者](https://afdian.net/a/versun)
+非常感谢以下读者的支持。
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg">
@@ -42,8 +42,9 @@
   </a>
 </p>
 
+如有余力，请考虑成为赞助者：[爱发电](https://afdian.net/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
 > 说明： 赞助头像每天早上和下午的5:30分刷新(UTC时区)。
-## 贡献
+## 开发贡献
 [请查看Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
 
 ## Star历史图
