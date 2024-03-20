@@ -2,7 +2,7 @@
 
 进入要存放数据的文件夹，如`/home/versun/rsstranslator/`
 
-下载[docker-compose.yml](deploy/docker-compose.yml)文件
+下载[docker-compose.yml](https://github.com/rss-translator/RSS-Translator/blob/main/deploy/docker-compose.yml)文件
 
 `wget "https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/deploy/docker-compose.yml"`
 
