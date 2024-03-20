@@ -34,7 +34,12 @@
 陆续增加中
 
 ## 赞助
-非常感谢以下读者的支持。
+
+感谢[JetBrains](https://www.jetbrains.com/)为本项目提供了[开源许可证](https://www.jetbrains.com/community/opensource/)。
+
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
+
+非常感谢以下用户的支持:
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg">

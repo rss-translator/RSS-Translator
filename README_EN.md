@@ -223,8 +223,19 @@ Status Note: \
 ! [no](https://github.com/rss-translator/RSS-Translator/assets/2398708/6a6a5fdc-ac8b-4e7a-b3ae-5093adcf9021): Processing failed \
 The current status will not be updated automatically, please refresh the page to get the latest status.
 ### Sponsorship
-Thank you for your sponsorship\
-[AFDIAN](https://afdian.net/a/versun)
+Thank you to JetBrains for providing the open source license for this project.
+
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
+
+Thank you for your sponsorship:
+<p align="center">
+  <a href="https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg">
+    <img src='https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg'/>
+  </a>
+</p>
+
+Please consider becoming a sponsor: [AFDIAN](https://afdian.net/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
+
 ### Contribution
 [Please check the Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
 
