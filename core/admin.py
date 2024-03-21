@@ -170,9 +170,14 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
         else:
             obj.name = "Empty" if not obj.name else obj.name
             obj.save()
+            
+    def translator(self, obj):
+        return obj.translator
+    translator.short_description = _('Translator')
 
     def translated_language(self, obj):
         return ", ".join(t_feed.language for t_feed in obj.t_feed_set.all())
+    translated_language.short_description = _('Translated Language')
 
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
@@ -207,6 +212,8 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
                 obj.feed_url
             )
         return ''
+    show_feed_url.short_description = _('Feed URL')
+
     def proxy_feed_url(self, obj):
         if obj.sid:
             return format_html(
@@ -241,6 +248,7 @@ class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
                obj.sid
             )
         return ''
+    feed_url.short_description = _('Translated Feed URL')
 
     def has_add_permission(self, request):
         return False

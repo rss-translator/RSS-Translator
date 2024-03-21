@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-21 02:05+0000\n"
+"POT-Creation-Date: 2024-03-21 03:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,15 +29,15 @@ msgstr "RSS翻译器"
 msgid "Dashboard"
 msgstr "仪表盘"
 
-#: core/admin.py:55
+#: core/admin.py:55 core/admin.py:251
 msgid "Translated Feed URL"
 msgstr "翻译源地址"
 
-#: core/admin.py:63 core/admin.py:180 core/admin.py:235
+#: core/admin.py:63 core/admin.py:185 core/admin.py:242
 msgid "Size(KB)"
 msgstr "文件大小(KB)"
 
-#: core/admin.py:81 core/admin.py:262
+#: core/admin.py:81 core/admin.py:270
 msgid "Status"
 msgstr "状态"
 
@@ -45,21 +45,27 @@ msgstr "状态"
 msgid "Select a valid translator"
 msgstr "选择一个有效的翻译器"
 
-#: core/admin.py:90
+#: core/admin.py:90 core/admin.py:176
 msgid "Translator"
 msgstr "翻译器"
 
-#: core/admin.py:196 core/models.py:21
+#: core/admin.py:180
+#, fuzzy
+#| msgid "Translated Feed"
+msgid "Translated Language"
+msgstr "翻译源"
+
+#: core/admin.py:201 core/models.py:21
 msgid "Valid"
 msgstr "验证"
+
+#: core/admin.py:215 core/models.py:15
+msgid "Feed URL"
+msgstr "源地址"
 
 #: core/models.py:14
 msgid "Name"
 msgstr "名称"
-
-#: core/models.py:15
-msgid "Feed URL"
-msgstr "源地址"
 
 #: core/models.py:16
 msgid "Last Updated(UTC)"
@@ -114,8 +120,7 @@ msgid ""
 "Example: if set to hacker_news, the subscription address will be "
 "http://127.0.0.1:8000/rss/hacker_news"
 msgstr ""
-"比如设置为'hacker_news',则订阅地址为'http://127.0.0.1:8000/rss/"
-"hacker_news'"
+"比如设置为'hacker_news',则订阅地址为'http://127.0.0.1:8000/rss/hacker_news'"
 
 #: core/models.py:45
 msgid "Language"
