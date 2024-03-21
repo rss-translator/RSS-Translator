@@ -8,7 +8,7 @@
 
 ---
 
-文档：[https://rsstranslator.com](https://rsstranslator.com)
+### 文档：[https://rsstranslator.com](https://rsstranslator.com)
 ## 功能：
 
 1. 可添加RSS源，可翻译标题和内容
