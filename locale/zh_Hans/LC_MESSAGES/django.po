@@ -50,10 +50,8 @@ msgid "Translator"
 msgstr "翻译器"
 
 #: core/admin.py:180
-#, fuzzy
-#| msgid "Translated Feed"
 msgid "Translated Language"
-msgstr "翻译源"
+msgstr "翻译语言"
 
 #: core/admin.py:201 core/models.py:21
 msgid "Valid"
