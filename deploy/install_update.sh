@@ -29,11 +29,11 @@ fi
 if command -v yum >/dev/null  2>&1; then
     # For systems with yum like CentOS, Fedora, or RHEL
     yum update -y
-    yum install python-virtualenv git zip -y
+    yum install python-virtualenv git zip gettext -y
 elif command -v apt-get >/dev/null  2>&1; then
     # For systems with apt like Debian or Ubuntu
     apt update && apt upgrade -y
-    apt install python3-venv git zip -y
+    apt install python3-venv git zip gettext -y
 else
     echo "Unsupported package manager. Only yum and apt are supported."
     exit  1
@@ -137,7 +137,7 @@ echo "----- Check default admin user"
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py create_default_superuser"
 
 echo "----- Compile locales"
-sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/django-admin compilemessages -v 0"
+sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py compilemessages -v 0"
 
 echo "----- Start rsstranslator.service"
 systemctl restart rsstranslator.service
