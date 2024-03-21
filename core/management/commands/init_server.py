@@ -10,3 +10,5 @@ class Command(BaseCommand):
         call_command('makemigrations')
         call_command('migrate')
         call_command('create_default_superuser')
+        call_command('compilemessages', verbosity=0)
+

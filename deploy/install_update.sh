@@ -136,6 +136,9 @@ sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/r
 echo "----- Check default admin user"
 sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/python /home/rsstranslator/manage.py create_default_superuser"
 
+echo "----- Compile locales"
+sudo -u rsstranslator /bin/bash -c "/home/rsstranslator/.venv/bin/django-admin compilemessages -v 0"
+
 echo "----- Start rsstranslator.service"
 systemctl restart rsstranslator.service
 
