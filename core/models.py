@@ -41,7 +41,7 @@ class O_Feed(models.Model):
 
 
 class T_Feed(models.Model):
-    sid = models.CharField(_("SID(Optional)"), max_length=255, unique=True, help_text=_("http://example.com/rss/[SID]"))  # sid for feed_url and file name
+    sid = models.CharField(_("URL Slug(Optional)"), max_length=255, unique=True, help_text=_("Example: if set to hacker_news, the subscription address will be http://127.0.0.1:8000/rss/hacker_news"))  # sid for feed_url and file name
     language = models.CharField(_("Language"), choices=settings.TRANSLATION_LANGUAGES, max_length=50)
     o_feed = models.ForeignKey(O_Feed, on_delete=models.CASCADE, verbose_name=_("Original Feed"))
     status = models.BooleanField(_("Translation Status"), null=True, editable=False,)
@@ -59,6 +59,7 @@ class T_Feed(models.Model):
 
     class Meta:
         verbose_name = _("Translated Feed")
+        verbose_name_plural = _("Translated Feeds")
         constraints = [
             models.UniqueConstraint(fields=['o_feed', 'language'], name='unique_o_feed_lang')
         ]

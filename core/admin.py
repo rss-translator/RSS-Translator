@@ -52,7 +52,7 @@ class T_FeedInline(admin.TabularInline):
             )
         return ''
 
-    feed_url.short_description = _('Feed URL')
+    feed_url.short_description = _('Translated Feed URL')
 
     class Media:
         js = ('js/admin/copytoclipboard.js',)
@@ -60,7 +60,7 @@ class T_FeedInline(admin.TabularInline):
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
 
-    size_in_kb.short_description = 'Size(KB)'
+    size_in_kb.short_description = _('Size(KB)')
 
     def obj_status(self, obj):
         if not obj.pk:
@@ -78,7 +78,7 @@ class T_FeedInline(admin.TabularInline):
                 "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
             )
 
-    obj_status.short_description = 'Status'
+    obj_status.short_description = _('Status')
     def get_formset(self, request, obj=None, **kwargs):
         # Store the request for use in feed_url
         self.request = request
@@ -87,7 +87,7 @@ class T_FeedInline(admin.TabularInline):
 
 class O_FeedForm(forms.ModelForm):
     # 自定义字段，使用ChoiceField生成下拉菜单
-    translator_engine = forms.ChoiceField(choices=(), required=False)
+    translator = forms.ChoiceField(choices=(), required=False, help_text=_("Select a valid translator"), label=_("Translator"))
 
     def __init__(self, *args, **kwargs):
         super(O_FeedForm, self).__init__(*args, **kwargs)
@@ -101,22 +101,24 @@ class O_FeedForm(forms.ModelForm):
             for model in translator_models
             for obj_id, obj_name in model.objects.filter(valid=True).values_list('id', 'name')
         ]
-        self.fields['translator_engine'].choices = translator_choices
+        self.fields['translator'].choices = translator_choices
 
         # 如果已经有关联的对象，设置默认值
         instance = getattr(self, 'instance', None)
         if instance and instance.pk and instance.content_type and instance.object_id:
-            self.fields['translator_engine'].initial = f"{instance.content_type.id}:{instance.object_id}"
+            self.fields['translator'].initial = f"{instance.content_type.id}:{instance.object_id}"
+        
+        #self.fields['translator'].short_description = _("Translator")
 
     class Meta:
         model = O_Feed
-        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator_engine', 'name']
+        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'name']
 
     # 重写save方法，以处理自定义字段的数据
     def save(self, commit=True):
         # 获取选择的translator，并设置content_type和translator_object_id
-        if self.cleaned_data['translator_engine']:
-            content_type_id, object_id = map(int, self.cleaned_data['translator_engine'].split(':'))
+        if self.cleaned_data['translator']:
+            content_type_id, object_id = map(int, self.cleaned_data['translator'].split(':'))
             self.instance.content_type_id = content_type_id
             self.instance.object_id = object_id
         else:
@@ -134,6 +136,7 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     search_fields = ["name", "feed_url"]
     list_filter = ["valid"]
     actions = ['o_feed_force_update', 'o_feed_export_as_opml']
+
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
@@ -174,7 +177,7 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
 
-    size_in_kb.short_description = 'Size(KB)'
+    size_in_kb.short_description = _('Size(KB)')
 
     def is_valid(self, obj):
         if obj.valid is None:
@@ -190,7 +193,8 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
                 "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
             )
 
-    is_valid.short_description = 'Valid'
+    is_valid.short_description = _('Valid')
+
     is_valid.admin_order_field = 'valid'
     size_in_kb.admin_order_field = 'size'
 
@@ -228,7 +232,7 @@ class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
 
-    size_in_kb.short_description = 'Size(KB)'
+    size_in_kb.short_description = _('Size(KB)')
 
     def feed_url(self, obj):
         if obj.sid:
@@ -255,7 +259,7 @@ class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
                 "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
             )
 
-    status_icon.short_description = 'Status'
+    status_icon.short_description = _('Status')
     status_icon.admin_order_field = 'status'
 
 if not settings.USER_MANAGEMENT:
