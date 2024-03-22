@@ -15,4 +15,3 @@ uvicorn
 fake-useragent
 cityhash
 bs4
-s
