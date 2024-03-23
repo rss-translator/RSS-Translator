@@ -4,7 +4,7 @@
 </div>
 <br/>
 
-| [English](README_EN.md) | [Demo](https://demo.rsstranslator.com) | [Telegram交流群](https://t.me/rsstranslator) | [开发进度](https://github.com/orgs/rss-translator/projects/2/views/1)
+| [English](README_EN.md) | [Demo](https://rsstranslator.com/demo/) | [Telegram交流群](https://t.me/rsstranslator) | [开发进度](https://github.com/orgs/rss-translator/projects/2/views/1)
 
 ---
 
