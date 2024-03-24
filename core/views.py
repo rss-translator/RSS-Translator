@@ -35,8 +35,9 @@ def rss(request, feed_sid):
 
     # Check if the file exists and if not, raise a 404 error
     if not os.path.exists(feed_file_path):
-        logging.error("Requested feed file not found: %s", feed_file_path)
-        raise Http404(f"The feed with ID {feed_sid} does not exist.")
+        logging.warning("Requested feed file not found: %s", feed_file_path)
+        #raise Http404(f"The feed with ID {feed_sid} does not exist.")
+        return HttpResponse("Please wait for the translation to complete or check if the original feeds has been verified")
 
     try:
         # Stream the file content
