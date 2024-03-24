@@ -34,3 +34,13 @@
 目前无法同时支持IPv4和IPv6；
 
 如需改为监听IPv6地址，仅需修改deploy/start.sh文件，将`0.0.0.0`改为`::`, 然后重启服务即可
+
+### 可以设置代理服务器吗
+RSS翻译器本身并不支持设置全局代理，但你可以添加下面2个环境变量来设置全局代理：
+```
+HTTP_PROXY=http://proxy.example.com:8080
+HTTPS_PROXY=http://proxy.example.com:8080
+```
+
+### 依旧无法解决？
+请 [提交Issue](https://github.com/rss-translator/RSS-Translator/issues) 或者在 [Telegram群组](https://t.me/rsstranslator) 中反馈
