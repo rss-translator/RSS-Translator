@@ -54,3 +54,32 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
         grouped_chunks = chunks
 
     return grouped_chunks
+
+def should_skip(element):
+    # 去除两端的空白字符
+    element = element.strip()
+    if not element:
+        return True
+
+    # 使用正则表达式来检查元素是否为数字、URL、电子邮件或包含特定符号
+    skip_patterns = [
+        r'^http',  # URL
+        r'^[^@]+@[^@]+\.[^@]+$',  # 电子邮件
+        r'^[\d\W]+$'  # 纯数字或者数字和符号的组合
+    ]
+
+    for pattern in skip_patterns:
+        if re.match(pattern, element):
+            return True
+
+    return False
+
+def set_translation_display(original:str, translation:str, translation_display:int, seprator:str = ' || ') -> str:
+    if translation_display == 0: #'Only Translation'
+        return translation
+    elif translation_display == 1: #'Translation || Original'
+        return f'{translation}{seprator}{original}'
+    elif translation_display == 2: #'Original || Translation'
+        return f'{original}{seprator}{translation}'
+    else:
+        return ''

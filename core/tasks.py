@@ -17,7 +17,7 @@ from .models import O_Feed, T_Feed
 from django_text_translator.models import TranslatorEngine, Translated_Content
 
 from utils.feed_action import fetch_feed, generate_atom_feed
-from utils import chunk_handler
+from utils import text_handler
 from bs4 import BeautifulSoup, Comment
 
 
@@ -122,9 +122,9 @@ def update_translated_feed(sid: str, force=False):
             return False
 
         translated_feed_file_path = f"{feed_dir_path}/{obj.sid}.xml"
-        if not os.path.exists(translated_feed_file_path):
-            with open(translated_feed_file_path, "w", encoding="utf-8") as f:
-                f.write("Translation in progress...")
+        # if not os.path.exists(translated_feed_file_path):
+        #     with open(translated_feed_file_path, "w", encoding="utf-8") as f:
+        #         f.write("Translation in progress...")
 
         original_feed = feedparser.parse(original_feed_file_path)
 
@@ -137,7 +137,8 @@ def update_translated_feed(sid: str, force=False):
                 engine=engine,
                 translate_title=obj.translate_title,
                 translate_content=obj.translate_content,
-                max_posts=obj.o_feed.max_posts
+                max_posts=obj.o_feed.max_posts,
+                translation_display=obj.o_feed.translation_display
             )
 
             if not results:
@@ -176,7 +177,8 @@ def translate_feed(
         translate_title: bool,
         translate_content: bool,
         engine: TranslatorEngine,
-        max_posts: int = 20) -> dict:
+        max_posts: int = 20,
+        translation_display: int=0) -> dict:
     logging.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
     translated_feed = feed
     total_tokens = 0
@@ -196,13 +198,12 @@ def translate_feed(
                 if cache_key not in unique_tasks:
                     unique_tasks.add(cache_key)
                     cached = Translated_Content.is_translated(title, target_language)  # check cache db
-
+                    translated_text = ''
                     if not cached:
                         results = engine.translate(title, target_language=target_language)
-                        translated_text = results["text"] if results["text"] else title
+                        translated_text = results.get("text", title)
                         total_tokens += results.get("tokens", 0)
                         translated_characters += len(title)
-                        entry["title"] = translated_text
 
                         if title and translated_text:
                             logging.info("Will cache:%s", translated_text)
@@ -217,7 +218,14 @@ def translate_feed(
                             )
                     else:
                         logging.info("Use db cache:%s", cached["text"])
-                        entry["title"] = cached["text"]
+                        translated_text = cached["text"]
+                    
+                    entry["title"] = text_handler.set_translation_display(
+                        original=title,
+                        translation=translated_text,
+                        translation_display=translation_display,
+                        seprator = ' || '
+                        )
 
             # Translate content
             if translate_content:
@@ -236,7 +244,13 @@ def translate_feed(
                         translated_characters += characters
 
                         need_cache_objs.update(need_cache)
-                        entry["summary"] = "".join(translated_summary)
+                        #entry["summary"] = "".join(translated_summary)
+                        entry["summary"] = text_handler.set_translation_display(
+                            original=original_description,
+                            translation=translated_summary,
+                            translation_display=translation_display,
+                            seprator = '\n<br />---------------<br />\n'
+                            )
 
                 if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
                     original_content = original_content[0].value
@@ -250,7 +264,13 @@ def translate_feed(
                         total_tokens += tokens
                         translated_characters += characters
                         need_cache_objs.update(need_cache)
-                        entry['content'][0].value = "".join(translated_content)
+                       # entry['content'][0].value = "".join(translated_content)
+                        entry['content'][0].value = text_handler.set_translation_display(
+                            original=original_content,
+                            translation=translated_content,
+                            translation_display=translation_display,
+                            seprator = '\n<br />---------------<br />\n'
+                            )
 
     except Exception as e:
         logging.error("translate_feed: %s", str(e))
@@ -265,26 +285,6 @@ def translate_feed(
             logging.error("Save cache: %s", str(e))
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}
-
-
-def should_skip(element):
-    # 去除两端的空白字符
-    element = element.strip()
-    if not element:
-        return True
-
-    # 使用正则表达式来检查元素是否为数字、URL、电子邮件或包含特定符号
-    skip_patterns = [
-        r'^http',  # URL
-        r'^[^@]+@[^@]+\.[^@]+$',  # 电子邮件
-        r'^[\d\W]+$'  # 纯数字或者数字和符号的组合
-    ]
-
-    for pattern in skip_patterns:
-        if re.match(pattern, element):
-            return True
-
-    return False
 
 def content_translate(original_content: str, target_language: str, engine: TranslatorEngine):
     total_tokens = 0
@@ -305,7 +305,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
             code_tag.extract()
 
         for element in soup.find_all(string=True):
-            if should_skip(element):
+            if text_handler.should_skip(element):
                 continue
             #TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
 
@@ -340,8 +340,8 @@ def content_translate(original_content: str, target_language: str, engine: Trans
 
 def chunk_translate(original_content: str, target_language: str, engine: TranslatorEngine):
     logging.info("Call chunk_translate: %s(%s items)", target_language, len(original_content))
-    split_chunks: dict = chunk_handler.content_split(original_content)
-    grouped_chunks: list = chunk_handler.group_chunks(split_chunks=split_chunks, min_size=engine.min_size(),
+    split_chunks: dict = text_handler.content_split(original_content)
+    grouped_chunks: list = text_handler.group_chunks(split_chunks=split_chunks, min_size=engine.min_size(),
                                                       max_size=engine.max_size(),
                                                       group_by="characters")
     translated_content = []
