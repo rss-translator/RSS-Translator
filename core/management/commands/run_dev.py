@@ -31,6 +31,8 @@ class Command(BaseCommand):
 
         # Create default superuser
         call_command('create_default_superuser')
+        # Compile messages
+        call_command('compilemessages', verbosity=0)
 
         # Run the server
         try:
