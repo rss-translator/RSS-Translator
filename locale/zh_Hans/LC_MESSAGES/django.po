@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-21 03:06+0000\n"
+"POT-Creation-Date: 2024-03-25 01:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,15 +29,15 @@ msgstr "RSS翻译器"
 msgid "Dashboard"
 msgstr "仪表盘"
 
-#: core/admin.py:55 core/admin.py:251
+#: core/admin.py:55 core/admin.py:252
 msgid "Translated Feed URL"
 msgstr "翻译源地址"
 
-#: core/admin.py:63 core/admin.py:185 core/admin.py:242
+#: core/admin.py:63 core/admin.py:186 core/admin.py:243
 msgid "Size(KB)"
 msgstr "文件大小(KB)"
 
-#: core/admin.py:81 core/admin.py:270
+#: core/admin.py:81 core/admin.py:271
 msgid "Status"
 msgstr "状态"
 
@@ -45,19 +45,19 @@ msgstr "状态"
 msgid "Select a valid translator"
 msgstr "选择一个有效的翻译器"
 
-#: core/admin.py:90 core/admin.py:176
+#: core/admin.py:90 core/admin.py:177
 msgid "Translator"
 msgstr "翻译器"
 
-#: core/admin.py:180
+#: core/admin.py:181
 msgid "Translated Language"
 msgstr "翻译语言"
 
-#: core/admin.py:201 core/models.py:21
+#: core/admin.py:202 core/models.py:27
 msgid "Valid"
 msgstr "验证"
 
-#: core/admin.py:215 core/models.py:15
+#: core/admin.py:216 core/models.py:15
 msgid "Feed URL"
 msgstr "源地址"
 
@@ -81,81 +81,97 @@ msgstr "最后获取(UTC)"
 msgid "Last time the feed was pulled"
 msgstr "最后获取原始源的时间"
 
-#: core/models.py:20 core/models.py:56
+#: core/models.py:19
+msgid "Only Translation"
+msgstr "仅译文"
+
+#: core/models.py:20
+msgid "Translation | Original"
+msgstr "译文 | 原文"
+
+#: core/models.py:21
+msgid "Original | Translation"
+msgstr "原文 | 译文"
+
+#: core/models.py:23
+msgid "Translation Display"
+msgstr "译文显示"
+
+#: core/models.py:26 core/models.py:65
 msgid "Size"
 msgstr "文件大小"
 
-#: core/models.py:22
+#: core/models.py:28
 msgid "Update Frequency"
 msgstr "更新频率(分钟)"
 
-#: core/models.py:22
+#: core/models.py:28
 msgid "Minutes"
 msgstr "分钟"
 
-#: core/models.py:23
+#: core/models.py:29
 msgid "Max Posts"
 msgstr "最大条目"
 
-#: core/models.py:23
+#: core/models.py:29
 msgid "Max number of posts to be translated"
 msgstr "要翻译的最大帖子数"
 
-#: core/models.py:33 core/models.py:46
+#: core/models.py:39 core/models.py:55
 msgid "Original Feed"
 msgstr "原始源"
 
-#: core/models.py:34
+#: core/models.py:40
 msgid "Original Feeds"
 msgstr "原始源"
 
-#: core/models.py:44
+#: core/models.py:53
 msgid "URL Slug(Optional)"
 msgstr "URL别名(可选)"
 
-#: core/models.py:44
+#: core/models.py:53
 msgid ""
 "Example: if set to hacker_news, the subscription address will be "
 "http://127.0.0.1:8000/rss/hacker_news"
 msgstr ""
 "比如设置为'hacker_news',则订阅地址为'http://127.0.0.1:8000/rss/hacker_news'"
 
-#: core/models.py:45
+#: core/models.py:54
 msgid "Language"
 msgstr "语言"
 
-#: core/models.py:47
+#: core/models.py:56
 msgid "Translation Status"
 msgstr "翻译状态"
 
-#: core/models.py:49
+#: core/models.py:58
 msgid "Translate Title"
 msgstr "翻译标题"
 
-#: core/models.py:50
+#: core/models.py:59
 msgid "Translate Content"
 msgstr "翻译内容"
 
-#: core/models.py:52
+#: core/models.py:61
 msgid "Tokens Cost"
 msgstr "花费Token数"
 
-#: core/models.py:53
+#: core/models.py:62
 msgid "Characters Cost"
 msgstr "花费字符数"
 
-#: core/models.py:55
+#: core/models.py:64
 msgid "Last Modified"
 msgstr "最后更新"
 
-#: core/models.py:55
+#: core/models.py:64
 msgid "Last time the feed was translated"
 msgstr "最后翻译的时间"
 
-#: core/models.py:61
+#: core/models.py:70
 msgid "Translated Feed"
 msgstr "翻译源"
 
-#: core/models.py:62
+#: core/models.py:71
 msgid "Translated Feeds"
 msgstr "翻译源"

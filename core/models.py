@@ -15,6 +15,12 @@ class O_Feed(models.Model):
     feed_url = models.URLField(_("Feed URL"), unique=True,)
     last_updated = models.DateTimeField(_("Last Updated(UTC)"), default=None, blank=True, null=True, editable=False, help_text=_("Last updated from the original feed"))
     last_pull = models.DateTimeField(_("Last Pull(UTC)"), default=None, blank=True, null=True, editable=False, help_text=_("Last time the feed was pulled"))
+    TRANSLATION_DISPLAY_CHOICES = [
+        (0, _("Only Translation")),
+        (1, _("Translation | Original")),
+        (2, _("Original | Translation")),
+    ]
+    translation_display = models.IntegerField(_("Translation Display"), default=0, choices=TRANSLATION_DISPLAY_CHOICES) # 0: Only Translation, 1: Translation || Original, 2: Original || Translation
 
     etag = models.CharField(max_length=255, default="", editable=False, )
     size = models.IntegerField(_("Size"), default=0, editable=False, )
@@ -39,6 +45,9 @@ class O_Feed(models.Model):
             self.sid = uuid.uuid5(uuid.NAMESPACE_URL, f"{self.feed_url}:{settings.SECRET_KEY}").hex
         super(O_Feed, self).save(*args, **kwargs)
 
+    def get_translation_display(self):
+        return dict(self.TRANSLATION_DISPLAY_CHOICES)[self.translation_display]
+    
 
 class T_Feed(models.Model):
     sid = models.CharField(_("URL Slug(Optional)"), max_length=255, unique=True, help_text=_("Example: if set to hacker_news, the subscription address will be http://127.0.0.1:8000/rss/hacker_news"))  # sid for feed_url and file name

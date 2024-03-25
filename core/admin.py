@@ -112,7 +112,7 @@ class O_FeedForm(forms.ModelForm):
 
     class Meta:
         model = O_Feed
-        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'name']
+        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'translation_display', 'name']
 
     # 重写save方法，以处理自定义字段的数据
     def save(self, commit=True):
@@ -155,10 +155,11 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     def save_model(self, request, obj, form, change):
         logging.info("Call O_Feed save_model: %s", obj)
         feed_url_changed = 'feed_url' in form.changed_data
-        feed_name_changed = 'name' in form.changed_data
+        #feed_name_changed = 'name' in form.changed_data
         frequency_changed = 'update_frequency' in form.changed_data
+        translation_display_changed = 'translation_display' in form.changed_data
         # translator_changed = 'content_type' in form.changed_data or 'object_id' in form.changed_data
-        if feed_url_changed:
+        if feed_url_changed or translation_display_changed:
             obj.valid = None
             obj.name = "Loading" if not obj.name else obj.name
             obj.save()
