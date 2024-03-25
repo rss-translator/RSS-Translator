@@ -30,12 +30,13 @@ The main reason for development was to solve personal needs. I followed many for
 
 ### Functions:
 
-1. Ability to add and translate the titles or content of RSS sources.
-2. Ability to subscribe to translated RSS or simply proxy the original RSS.
-3. Support for multiple translation engines, with each source being able to specify a translation engine.
-4. Control over the update frequency for each source and the ability to view translation status.
-5. Caching of all translation content to minimize translation costs.
-6. Ability to view the number of tokens/characters used by each source.
+1. Translate titles or content 
+2. Display bilingually
+3. Subscribe to translated RSS feeds or just proxy the original RSS feeds
+4. Add multiple translation engines, specifying one for each source
+5. Control the update frequency of translation sources and view translation status 
+6. Cache all translated content to minimize translation costs
+7. View the tokens/characters consumed by each source
 
 Currently supported translation engines:
 
