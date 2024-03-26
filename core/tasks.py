@@ -47,7 +47,7 @@ def schedule_update():
 def update_original_feed(sid: str):
     try:
         #obj = O_Feed.objects.get(sid=sid)
-        obj = O_Feed.objects.select_related('t_feed_set').get(sid=sid)
+        obj = O_Feed.objects.prefetch_related('t_feed_set').get(sid=sid)
     except O_Feed.DoesNotExist:
         return False
 
