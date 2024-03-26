@@ -43,10 +43,11 @@ def schedule_update():
     # TaskModel.objects.all().delete()
 
 
-@task(retries=3)
+@db_task(retries=3)
 def update_original_feed(sid: str):
     try:
-        obj = O_Feed.objects.get(sid=sid)
+        #obj = O_Feed.objects.get(sid=sid)
+        obj = O_Feed.objects.select_related('t_feed_set').get(sid=sid)
     except O_Feed.DoesNotExist:
         return False
 
@@ -60,15 +61,18 @@ def update_original_feed(sid: str):
     try:
         obj.valid = False
         fetch_feed_results = fetch_feed(url=obj.feed_url, etag=obj.etag)
+        error = fetch_feed_results['error'] 
+        update = fetch_feed_results.get("update")
+        xml = fetch_feed_results.get("xml")
+        feed = fetch_feed_results.get("feed")
 
-        if fetch_feed_results['error']:
-            raise Exception(f"Fetch Original Feed Failed: {fetch_feed_results['error']}")
-        elif not fetch_feed_results.get("update"):
+        if error:
+            raise Exception(f"Fetch Original Feed Failed: {error}")
+        elif not update:
             logging.info("Original Feed is up to date, Skip:%s",obj.feed_url)
         else:
             with open(original_feed_file_path, "w", encoding="utf-8") as f:
-                f.write(fetch_feed_results.get("xml"))
-            feed = fetch_feed_results.get("feed")
+                f.write(xml)
             if obj.name in ["Loading", "Empty", None]:
                 obj.name = feed.feed.get('title') or feed.feed.get('subtitle')
             obj.size = os.path.getsize(original_feed_file_path)
@@ -80,22 +84,24 @@ def update_original_feed(sid: str):
         obj.valid = True
         update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
     except Exception as e:
-        logging.error("task update_original_feed %s: %s", obj.feed_url, str(e))
+        logging.exception("task update_original_feed %s: %s", obj.feed_url, str(e))
     finally:
         obj.save()
 
     # Update T_Feeds
     t_feeds = obj.t_feed_set.all()
-    for t_feed in t_feeds:
-        t_feed.status = None
-        t_feed.save()
-        update_translated_feed.schedule(args=(t_feed.sid,), delay=1)
+    if t_feeds.exists():
+        for t_feed in t_feeds:
+            t_feed.status = None
+            t_feed.save()
+            update_translated_feed.schedule(args=(t_feed.sid,), delay=1)
 
 
-@task(retries=3)
+@db_task(retries=3)
 def update_translated_feed(sid: str, force=False):
     try:
-        obj = T_Feed.objects.get(sid=sid)
+        #obj = T_Feed.objects.get(sid=sid)
+        obj = T_Feed.objects.select_related('o_feed').get(sid=sid)
     except T_Feed.DoesNotExist:
         logging.error(f"T_Feed Not Found: {sid}")
         return False
@@ -118,7 +124,7 @@ def update_translated_feed(sid: str, force=False):
 
         original_feed_file_path = f"{feed_dir_path}/{obj.o_feed.sid}.xml"
         if not os.path.exists(original_feed_file_path):
-            update_original_feed(obj.o_feed.sid)
+            update_original_feed.call_local(obj.o_feed.sid)
             return False
 
         translated_feed_file_path = f"{feed_dir_path}/{obj.sid}.xml"
