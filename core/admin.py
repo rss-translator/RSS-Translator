@@ -163,7 +163,7 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
             obj.valid = None
             obj.name = "Loading" if not obj.name else obj.name
             obj.save()
-            update_original_feed(obj.sid)  # 会执行一次save() # 不放在model的save里是为了排除translator的更新，省流量
+            update_original_feed.schedule(args=(obj.sid,), delay=1) # 会执行一次save() # 不放在model的save里是为了排除translator的更新，省流量
         elif frequency_changed:
             obj.save()
             self.revoke_tasks_by_arg(obj.sid)
