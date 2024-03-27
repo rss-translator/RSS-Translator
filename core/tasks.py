@@ -299,18 +299,15 @@ def content_translate(original_content: str, target_language: str, engine: Trans
     soup = BeautifulSoup(original_content, 'html.parser')
 
     try:
-        # replace all <a> tags with their text
-        for a_tag in soup.find_all('a'):
-            if a_tag.text:
-                a_tag.replace_with(a_tag.text)
+        # replace tags with their text
+        for tag in soup.find_all(['a', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'ins', 'mark', 'sub', 'sup']):
+            if tag.text:
+                tag.replace_with(tag.text)
         # delete all <!-- --> comments
         comments = soup.find_all(string=lambda text: isinstance(text, Comment))
         [comment.extract() for comment in comments]
-        # delete all code blocks
-        for code_tag in soup.find_all('code'):
-            code_tag.extract()
 
-        for element in soup.find_all(string=True):
+        for element in soup.get_text():
             if text_handler.should_skip(element):
                 continue
             #TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
