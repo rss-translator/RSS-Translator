@@ -333,9 +333,9 @@ def content_translate(original_content: str, target_language: str, engine: Trans
                         characters=results.get("characters", 0),
                     )
 
-                element.replace_with(results["text"])
+                element.string.replace_with(results["text"])
             else:
-                element.replace_with(cached["text"])
+                element.string.replace_with(cached["text"])
     except Exception as e:
         logging.error(f'content_translate: {str(e)}')
 
