@@ -56,11 +56,12 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
     return grouped_chunks
 
 def should_skip(element):
-    if element.find_parent('code'):
+    if element.name == 'code':
         return True
     # 去除两端的空白字符
-    element = element.strip()
-    if not element:
+    text = element.get_text()
+    text = text.strip()
+    if not text:
         return True
 
     # 使用正则表达式来检查元素是否为数字、URL、电子邮件或包含特定符号
@@ -68,11 +69,10 @@ def should_skip(element):
         r'^http',  # URL
         r'^[^@]+@[^@]+\.[^@]+$',  # 电子邮件
         r'^[\d\W]+$'  # 纯数字或者数字和符号的组合
-        r'<code>.*</code>'  # <code>标签的内容
     ]
 
     for pattern in skip_patterns:
-        if re.match(pattern, element):
+        if re.match(pattern, text):
             return True
 
     return False

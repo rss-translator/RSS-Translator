@@ -307,12 +307,12 @@ def content_translate(original_content: str, target_language: str, engine: Trans
         comments = soup.find_all(string=lambda text: isinstance(text, Comment))
         [comment.extract() for comment in comments]
 
-        for element in soup.get_text():
+        for element in soup:
             if text_handler.should_skip(element):
                 continue
             #TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
 
-            text = str(element)
+            text = element.get_text()
             logging.info("Translate content: %s", text)
             cached = Translated_Content.is_translated(text, target_language)
 
