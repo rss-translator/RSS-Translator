@@ -1,6 +1,6 @@
 import logging
 import re
-
+from bs4 import Comment
 import tiktoken
 
 def content_split(content: str) -> dict:
@@ -56,11 +56,11 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
     return grouped_chunks
 
 def should_skip(element):
-    if element.name == 'code':
+    # if element is a comment or a script or a style element, skip it
+    if isinstance(element, Comment) or element.name in ['code', 'script', 'style', 'head', 'title', 'meta', '[document]']:
         return True
-    # 去除两端的空白字符
-    text = element.get_text()
-    text = text.strip()
+
+    text = element.get_text(strip=True)
     if not text:
         return True
 

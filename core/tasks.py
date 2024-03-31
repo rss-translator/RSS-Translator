@@ -299,20 +299,12 @@ def content_translate(original_content: str, target_language: str, engine: Trans
     soup = BeautifulSoup(original_content, 'html.parser')
 
     try:
-        # replace tags with their text
-        for tag in soup.find_all(['a', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'ins', 'mark', 'sub', 'sup']):
-            if tag.text:
-                tag.replace_with(tag.text)
-        # delete all <!-- --> comments
-        comments = soup.find_all(string=lambda text: isinstance(text, Comment))
-        [comment.extract() for comment in comments]
-
-        for element in soup:
+        for element in soup.find_all(string=True):
             if text_handler.should_skip(element):
                 continue
             #TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
-
             text = element.get_text()
+
             logging.info("Translate content: %s", text)
             cached = Translated_Content.is_translated(text, target_language)
 
@@ -333,9 +325,9 @@ def content_translate(original_content: str, target_language: str, engine: Trans
                         characters=results.get("characters", 0),
                     )
 
-                element.string.replace_with(results["text"])
+                element.string.replace_with(results.get("text", text))
             else:
-                element.string.replace_with(cached["text"])
+                element.string.replace_with(cached.get("text"))
     except Exception as e:
         logging.error(f'content_translate: {str(e)}')
 
