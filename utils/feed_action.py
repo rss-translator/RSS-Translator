@@ -1,12 +1,15 @@
 import logging
-import xml.dom.minidom
+import os
+#import xml.dom.minidom
 from datetime import datetime, timezone
 from time import mktime
+from django.conf import settings
 
 from typing import Dict
 
 import feedparser
 import httpx
+from lxml import etree
 # from django.utils.feedgenerator import Atom1Feed
 from feedgen.feed import FeedGenerator
 from fake_useragent import UserAgent
@@ -128,12 +131,52 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         logging.error("generate_atom_feed error %s: %s", feed_url, str(e))
         return None
 
-    dom = xml.dom.minidom.parseString(atom_string)
-    pi = dom.createProcessingInstruction("xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"')
-    dom.insertBefore(pi, dom.firstChild)
-    atom_string_with_pi = dom.toprettyxml()
+    # dom = xml.dom.minidom.parseString(atom_string)
+    # pi = dom.createProcessingInstruction("xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"')
+    # dom.insertBefore(pi, dom.firstChild)
+    # atom_string_with_pi = dom.toprettyxml()
+
+    root = etree.fromstring(atom_string)
+    tree = etree.ElementTree(root)
+    pi = etree.ProcessingInstruction("xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"')
+    root.addprevious(pi)
+    atom_string_with_pi = etree.tostring(tree, pretty_print=True, xml_declaration=True, encoding='utf-8').decode()
 
     return atom_string_with_pi
+
+
+def merge_all_atom(input_files):
+    merged_root = etree.Element('feed', nsmap={None: 'http://www.w3.org/2005/Atom'})
+
+    # 添加feed的基本信息
+    title = etree.SubElement(merged_root, 'title')
+    title.text = "All Translated Feeds"
+
+    link = etree.SubElement(merged_root, 'link', href='https://rsstranslator.com')
+
+    # 添加feed的更新时间
+    updated = etree.SubElement(merged_root, 'updated')
+    updated.text = datetime.now(timezone.utc).isoformat()
+
+    for input_file in input_files:
+        # 解析输入的XML文件
+        tree = etree.parse(input_file)
+        root = tree.getroot()
+
+        for entry in root.findall("{http://www.w3.org/2005/Atom}entry"):
+            merged_root.append(entry)
+
+    # 创建ElementTree对象并写入输出文件
+    merged_tree = etree.ElementTree(merged_root)
+    xml_stylesheet = etree.ProcessingInstruction(
+        "xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"'
+    )
+    merged_tree.getroot().addprevious(xml_stylesheet)
+
+    output_dir = os.path.join(settings.DATA_FOLDER, 'feeds')
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, 'all_t.xml')
+    merged_tree.write(output_file, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
 
 def get_first_non_none(feed, *keys):
