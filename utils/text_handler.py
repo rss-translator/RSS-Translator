@@ -57,7 +57,7 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
 
 def should_skip(element):
     # if element is a comment or a script or a style element, skip it
-    if isinstance(element, Comment) or element.name in ['code', 'script', 'style', 'head', 'title', 'meta', '[document]']:
+    if isinstance(element, Comment) or element.name in ['pre', 'code', 'script', 'style', 'head', 'title', 'meta', '[document]']:
         return True
 
     text = element.get_text(strip=True)
