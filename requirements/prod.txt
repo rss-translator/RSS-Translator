@@ -13,3 +13,4 @@ whitenoise
 fake-useragent
 cityhash
 bs4
+lxml
