@@ -106,7 +106,7 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             content = entry.get('content')[0].value if entry.get('content') else None
             summary = entry.get('summary')
 
-            fe = fg.add_entry()
+            fe = fg.add_entry(order='append')
             fe.title(title)
             fe.link(href=link)
             fe.author({'name': author_name})
