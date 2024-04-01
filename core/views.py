@@ -30,9 +30,7 @@ def get_etag(request, feed_sid):
 
 
 # @cache_page(60 * 15)  # Cache this view for 15 minutes
-condition(etag_func=get_etag, last_modified_func=get_modified)
-
-
+@condition(etag_func=get_etag, last_modified_func=get_modified)
 def rss(request, feed_sid):
     # Sanitize the feed_sid to prevent path traversal attacks
     feed_sid = smart_str(feed_sid)
