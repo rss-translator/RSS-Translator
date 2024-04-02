@@ -239,7 +239,8 @@ def translate_feed(
                 original_content = entry.get('content', None)
 
                 if original_description:
-                    cache_key = f"content_{original_description}_{target_language}"
+                    cache_key = cityhash.CityHash64(f"description_{original_description}_{target_language}")
+                    
                     # 任务去重
                     if cache_key not in unique_tasks:
                         unique_tasks.add(cache_key)
@@ -260,7 +261,7 @@ def translate_feed(
 
                 if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
                     original_content = original_content[0].value
-                    cache_key = f"content_{original_content}_{target_language}"
+                    cache_key = cityhash.CityHash64(f"content_{original_content}_{target_language}")
                     # 任务去重
                     if cache_key not in unique_tasks:
                         unique_tasks.add(cache_key)
