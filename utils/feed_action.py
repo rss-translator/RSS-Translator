@@ -1,8 +1,9 @@
 import logging
 import os
 #import xml.dom.minidom
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date, timedelta
 from time import mktime
+from dateutil import parser
 from django.conf import settings
 
 from typing import Dict
@@ -158,13 +159,25 @@ def merge_all_atom(input_files):
     updated = etree.SubElement(merged_root, 'updated')
     updated.text = datetime.now(timezone.utc).isoformat()
 
+    today = date.today() 
+    thirty_days_ago = today - timedelta(days=30)
     for input_file in input_files:
-        # 解析输入的XML文件
         tree = etree.parse(input_file)
         root = tree.getroot()
-
         for entry in root.findall("{http://www.w3.org/2005/Atom}entry"):
-            merged_root.append(entry)
+            # 获取发布日期
+            published_elem = entry.find("{http://www.w3.org/2005/Atom}published")
+            if published_elem is None:
+                # 如果没有<published>元素,尝试<updated>元素
+                published_elem = entry.find("{http://www.w3.org/2005/Atom}updated")
+            
+            if published_elem is not None:
+                # 解析日期字符串
+                published_date = parser.parse(published_elem.text).date()
+                
+                # 检查是否在30天内
+                if published_date >= thirty_days_ago:
+                    merged_root.append(entry)
 
     # 创建ElementTree对象并写入输出文件
     merged_tree = etree.ElementTree(merged_root)
