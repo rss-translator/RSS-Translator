@@ -1,5 +1,6 @@
 import logging
 import os
+import gc
 #import xml.dom.minidom
 from datetime import datetime, timezone, date, timedelta
 from time import mktime
@@ -145,52 +146,39 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 
     return atom_string_with_pi
 
-
 def merge_all_atom(input_files):
-    merged_root = etree.Element('feed', nsmap={None: 'http://www.w3.org/2005/Atom'})
-
-    # 添加feed的基本信息
-    title = etree.SubElement(merged_root, 'title')
-    title.text = "All Translated Feeds"
-
-    link = etree.SubElement(merged_root, 'link', href='https://rsstranslator.com')
-
-    # 添加feed的更新时间
-    updated = etree.SubElement(merged_root, 'updated')
-    updated.text = datetime.now(timezone.utc).isoformat()
-
-    today = date.today() 
-    thirty_days_ago = today - timedelta(days=30)
-    for input_file in input_files:
-        tree = etree.parse(input_file)
-        root = tree.getroot()
-        for entry in root.findall("{http://www.w3.org/2005/Atom}entry"):
-            # 获取发布日期
-            published_elem = entry.find("{http://www.w3.org/2005/Atom}published")
-            if published_elem is None:
-                # 如果没有<published>元素,尝试<updated>元素
-                published_elem = entry.find("{http://www.w3.org/2005/Atom}updated")
-            
-            if published_elem is not None:
-                # 解析日期字符串
-                published_date = parser.parse(published_elem.text).date()
-                
-                # 检查是否在30天内
-                if published_date >= thirty_days_ago:
-                    merged_root.append(entry)
-
-    # 创建ElementTree对象并写入输出文件
-    merged_tree = etree.ElementTree(merged_root)
-    xml_stylesheet = etree.ProcessingInstruction(
-        "xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"'
-    )
-    merged_tree.getroot().addprevious(xml_stylesheet)
+    ATOM_NS = "http://www.w3.org/2005/Atom"
 
     output_dir = os.path.join(settings.DATA_FOLDER, 'feeds')
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, 'all_t.xml')
-    merged_tree.write(output_file, pretty_print=True, xml_declaration=True, encoding='utf-8')
+    with open(output_file, 'wb') as f:
+        f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
+        f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
+        f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode('utf-8'))
+        f.write(b'<title>All Translated Feeds | RSS Translator</title>\n')   
+        f.write(b'<link href="https://rsstranslator.com"/>\n')
+        f.write(f'<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n'.encode('utf-8'))
 
+        today = date.today()
+        thirty_days_ago = today - timedelta(days=30)
+        processed_entries = set()
+
+        for input_file in input_files:
+            for _, entry in etree.iterparse(input_file, events=('end',), tag=f"{{{ATOM_NS}}}entry"):
+                id_elem = entry.find(f"{{{ATOM_NS}}}id")
+                if id_elem is not None and id_elem.text not in processed_entries:
+                    published_elem = entry.find(f"{{{ATOM_NS}}}published") or entry.find(f"{{{ATOM_NS}}}updated")
+                    if published_elem is not None:
+                        published_date = parser.parse(published_elem.text).date()
+                        if published_date >= thirty_days_ago:
+                            f.write(etree.tostring(entry, pretty_print=True))
+                            processed_entries.add(id_elem.text)
+                entry.clear()
+                while entry.getprevious() is not None:
+                    del entry.getparent()[0]
+            gc.collect()
+        f.write(b'</feed>')
 
 def get_first_non_none(feed, *keys):
     return next((feed.get(key) for key in keys if feed.get(key) is not None), None)
