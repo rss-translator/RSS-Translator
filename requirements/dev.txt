@@ -16,3 +16,4 @@ fake-useragent
 cityhash
 bs4
 lxml
+python-dateutil
