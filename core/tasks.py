@@ -43,7 +43,7 @@ def schedule_update():
     # TaskModel.objects.all().delete()
 
 
-@db_task(retries=3)
+@task(retries=3)
 def update_original_feed(sid: str):
     try:
         #obj = O_Feed.objects.get(sid=sid)
@@ -97,7 +97,7 @@ def update_original_feed(sid: str):
             update_translated_feed.schedule(args=(t_feed.sid,), delay=1)
 
 
-@db_task(retries=3)
+@task(retries=3)
 def update_translated_feed(sid: str, force=False):
     try:
         #obj = T_Feed.objects.get(sid=sid)
@@ -176,7 +176,7 @@ def update_translated_feed(sid: str, force=False):
         obj.save()
 
 
-@db_task()
+@task()
 def translate_feed(
         feed: feedparser.FeedParserDict,
         target_language: str,
