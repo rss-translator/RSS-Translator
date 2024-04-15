@@ -78,7 +78,7 @@ def update_original_feed(sid: str):
             obj.size = os.path.getsize(original_feed_file_path)
             update_time = feed.feed.get("updated_parsed")
             obj.last_updated = datetime.fromtimestamp(mktime(update_time), tz=timezone.utc) if update_time else None
-            obj.last_pull = datetime.now(timezone.utc)
+            #obj.last_pull = datetime.now(timezone.utc)
             obj.etag = feed.get("etag", '')
 
         obj.valid = True
@@ -86,6 +86,7 @@ def update_original_feed(sid: str):
     except Exception as e:
         logging.exception("task update_original_feed %s: %s", obj.feed_url, str(e))
     finally:
+        obj.last_pull = datetime.now(timezone.utc)
         update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
         obj.save()
 
