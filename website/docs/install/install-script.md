@@ -2,7 +2,7 @@
 
 系统: Ubuntu 22.04 LTS(推荐) / Debian 12 / Fedora 37
 
-内存: 建议512M以上
+内存: 建议512M以上(主程序100M，任务系统10M/worker)
 
 Python: >= 3.10
 
