@@ -82,10 +82,11 @@ def update_original_feed(sid: str):
             obj.etag = feed.get("etag", '')
 
         obj.valid = True
-        update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
+        #update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
     except Exception as e:
         logging.exception("task update_original_feed %s: %s", obj.feed_url, str(e))
     finally:
+        update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
         obj.save()
 
     # Update T_Feeds
