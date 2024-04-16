@@ -32,7 +32,7 @@
 - Moonshot AI
 
 陆续增加中   
-具体信息请查看[<翻译服务>](/translator.md)
+具体信息请查看[<翻译服务>](/translator)
 
 ## 赞助
 
