@@ -3,6 +3,7 @@
 </div>
 
 # RSS翻译器
+[中文](/) | [English](/en)
 
 开源、简洁、可自部署
 
@@ -32,7 +33,7 @@
 - Moonshot AI
 
 陆续增加中   
-具体信息请查看[<翻译服务>](/translator)
+具体信息请查看[<翻译服务>](translator.md)
 
 ## 赞助
 
