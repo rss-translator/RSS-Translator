@@ -10,36 +10,36 @@ If content translation is ticked, it will take longer in order to keep the forma
 
 Status Description:
 
-<table> <tr> <td><img src="/assets/icon-loading.svg" width="20" height="20"></td> <td>Processing</td> </tr> <tr> <td><img src="/assets/icon-yes.svg" width="20" height="20"></td> <td>Processing Complete/Valid</td> </tr> <tr> <td><img src="/assets/icon-no.svg" width="20" height="20"></td> <td>Processing Failed/Invalid</td><td> </tr> </table>
+<table> <tr> <td><img src="/assets/icon-loading.svg" width="20" height="20"></td> <td>Processing</td> </tr> <tr> <td><img src="/assets/icon-yes.svg" width="20" height="20"></td> <td>Processing Complete/Valid</td> </tr> <tr> <td><img src="/assets/icon-no.svg" width="20" height="20"></td> <td>Processing Failed/Invalid</td></tr> </table>
 
 The current status is not updated automatically, please refresh the page to get the latest status.
 
 ## Add Translation Engine
 Select the translation engine provider you want to add on the left and click the +Add button.
-! [add_translator_1] (/assets/add_translator_1.png )
+![add_translator_1](/assets/add_translator_1.png)
 Then enter the relevant information and save
 
 Check that it is valid, if it is not, you need to check the information you have entered and re-save to validate it.
-! [translator_list] (/assets/translator_list.png )
+![translator_list](/assets/translator_list.png)
 
 ## Add Feeds
 Click the +Add button in Original Feeds on the left.
-! [core_feeds] (/assets/core_feeds.png )
+![core_feeds](/assets/core_feeds.png)
 Enter the relevant information
-! [add_feed] (/assets/add_feed.png )
+![add_feed](/assets/add_feed.png)
 Save and jump to the list of feeds
-! [feed_list] (/assets/feeds_list_2.png )
+![feed_list](/assets/feeds_list_2.png)
 You need to make sure that the added feed is valid, then click on the name to go to the detail page
-! [feed_detail] (/assets/feed_detail.png )
+![feed_detail](/assets/feed_detail.png)
 Wait for the status of the translated feed to complete, then copy the FEED URL next to it and subscribe to it using your favourite reader!
-! [translated_feed_status] (/assets/translated_feed_status.png )
+![translated_feed_status](/assets/translated_feed_status.png)
 If you just translate the title and use the paid translation engine, it will take about 1 minute to translate.
 
 If translated content is ticked, it will take longer in order to maintain the translated format.
 
 ## Force update/delete/export sources
 Tick the source you want to operate, click Action, select the corresponding option, and click Go.
-! [action] (/assets/action.png )
+![action](/assets/action.png)
 
 ## Unified Subscription Link
 Use the following link to merge all translation sources into one source:
