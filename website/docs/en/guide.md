@@ -10,7 +10,7 @@ If content translation is ticked, it will take longer in order to keep the forma
 
 Status Description:
 
-<table> <tr> <td><img src="/assets/icon-loading.svg" width="20" height="20"></td> <td>Processing</td> </tr> <tr> <td><img src="/assets/icon-yes. svg" width="20" height="20"></td> <td>Processing Complete/Valid</td> </tr> <tr> <td><img src="/assets/icon-no.svg" width="20" height="20"></td> <td>Processing Failed/Invalid</td>. td> </tr> </table
+<table> <tr> <td><img src="/assets/icon-loading.svg" width="20" height="20"></td> <td>Processing</td> </tr> <tr> <td><img src="/assets/icon-yes.svg" width="20" height="20"></td> <td>Processing Complete/Valid</td> </tr> <tr> <td><img src="/assets/icon-no.svg" width="20" height="20"></td> <td>Processing Failed/Invalid</td><td> </tr> </table>
 
 The current status is not updated automatically, please refresh the page to get the latest status.
 

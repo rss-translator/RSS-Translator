@@ -11,6 +11,7 @@ May refer to [/home/rsstranslator/deploy/Caddyfile](https://github.com/rss-trans
 
 `sudo nano /home/rsstranslator/deploy/Caddyfile`
 
+File Content:
 ```
 example.com {
         encode zstd gzip
