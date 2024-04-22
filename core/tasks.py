@@ -270,19 +270,19 @@ def translate_feed(
                                                                                 engine=summary_engine)
                             total_tokens += tokens
                             need_cache_objs.update(need_cache)
-                            html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />---------------<br />\n"
+                            html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />----------------------<br />\n"
                             entry["summary"] = html_summary
                             bulk_save_cache(need_cache_objs)
                             need_cache_objs = {}
                         else:
                             entry["summary"] = ''
                         
-                        entry["summary"].join(text_handler.set_translation_display(
+                        entry["summary"] += text_handler.set_translation_display(
                             original=original_description,
                             translation=translated_summary,
                             translation_display=translation_display,
                             seprator = '\n<br />---------------<br />\n'
-                            ))
+                            )
 
 
                 if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
@@ -313,13 +313,13 @@ def translate_feed(
                         else:
                             entry['content'][0].value = ''
 
-                        entry['content'][0].value.join(text_handler.set_translation_display(
+                        entry['content'][0].value += text_handler.set_translation_display(
                             original=original_content,
                             translation=translated_content,
                             translation_display=translation_display,
                             seprator = '\n<br />---------------<br />\n'
-                            ))
-                        
+                            )
+
                 bulk_save_cache(need_cache_objs)
                 need_cache_objs = {}
     except Exception as e:
@@ -394,7 +394,6 @@ def content_summarize(original_content: str,
     
     total_tokens = 0
     need_cache_objs = {}
-    need_cache_objs = {}
     final_summary = ''
     try:
         text = text_handler.clean_content(original_content)
@@ -427,7 +426,7 @@ def content_summarize(original_content: str,
             total_tokens += response.get('tokens', 0)
 
         # Compile final summary from partial summaries
-        final_summary = '\n\n'.join(accumulated_summaries)
+        final_summary = '<br/><br/>'.join(accumulated_summaries)
 
         hash64 = cityhash.CityHash64(f"Summary_{original_content}{target_language}")
         need_cache_objs[hash64] = Translated_Content(
