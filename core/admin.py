@@ -122,6 +122,8 @@ class O_FeedForm(forms.ModelForm):
         instance = getattr(self, 'instance', None)
         if instance and instance.pk and instance.content_type and instance.object_id:
             self.fields['translator'].initial = f"{instance.content_type.id}:{instance.object_id}"
+        if instance and instance.pk and instance.content_type and instance.object_id:
+            self.fields['summary_engine'].initial = f"{instance.content_type_summary.id}:{instance.object_id_summary}"
         
         #self.fields['translator'].short_description = _("Translator")
 
@@ -141,9 +143,12 @@ class O_FeedForm(forms.ModelForm):
             self.instance.object_id = None
 
         if self.cleaned_data['summary_engine']:
-            content_type_id, object_id = map(int, self.cleaned_data['summary_engine'].split(':'))
-            self.instance.content_type_summary_id = content_type_id
-            self.instance.object_id_summary = object_id
+            content_type_summary_id, object_id_summary = map(int, self.cleaned_data['summary_engine'].split(':'))
+            self.instance.content_type_summary_id = content_type_summary_id
+            self.instance.object_id_summary = object_id_summary
+        else:
+            self.instance.content_type_summary_id = None
+            self.instance.object_id_summary = None
 
         return super(O_FeedForm, self).save(commit=commit)
 
