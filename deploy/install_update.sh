@@ -32,7 +32,7 @@ if command -v yum >/dev/null  2>&1; then
     yum install python-virtualenv git zip gettext -y
 elif command -v apt-get >/dev/null  2>&1; then
     # For systems with apt like Debian or Ubuntu
-    apt update && apt upgrade -y
+    apt update #&& apt upgrade -y
     apt install python3-venv git zip gettext -y
 else
     echo "Unsupported package manager. Only yum and apt are supported."
