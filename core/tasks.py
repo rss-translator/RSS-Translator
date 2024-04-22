@@ -19,6 +19,7 @@ from django_text_translator.models import TranslatorEngine, Translated_Content
 from utils.feed_action import fetch_feed, generate_atom_feed
 from utils import text_handler
 from bs4 import BeautifulSoup, Comment
+from typing import List, Tuple, Optional
 
 
 # from huey_monitor.models import TaskModel
@@ -135,16 +136,19 @@ def update_translated_feed(sid: str, force=False):
         original_feed = feedparser.parse(original_feed_file_path)
 
         if original_feed.entries:
-            engine = obj.o_feed.translator
-            logging.info("Start translate feed: [%s]%s" , obj.language, obj.o_feed.feed_url)
+            o_feed = obj.o_feed
+            logging.info("Start translate feed: [%s]%s" , obj.language, o_feed.feed_url)
             results = translate_feed.call_local(
                 feed=original_feed,
                 target_language=obj.language,
-                engine=engine,
+                translate_engine=o_feed.translator,
                 translate_title=obj.translate_title,
                 translate_content=obj.translate_content,
-                max_posts=obj.o_feed.max_posts,
-                translation_display=obj.o_feed.translation_display
+                summary=obj.summary,
+                summary_engine=o_feed.summary_engine,
+                summary_detail=o_feed.summary_detail,
+                max_posts=o_feed.max_posts,
+                translation_display=o_feed.translation_display
             )
 
             if not results:
@@ -153,7 +157,7 @@ def update_translated_feed(sid: str, force=False):
                 feed = results.get("feed")
                 total_tokens = results.get("tokens")
                 translated_characters = results.get("characters")
-            xml_str = generate_atom_feed(obj.o_feed.feed_url, feed)  # feed is a feedparser object
+            xml_str = generate_atom_feed(o_feed.feed_url, feed)  # feed is a feedparser object
 
             if xml_str is None:
                 raise Exception("generate_atom_feed returned None")
@@ -182,7 +186,10 @@ def translate_feed(
         target_language: str,
         translate_title: bool,
         translate_content: bool,
-        engine: TranslatorEngine,
+        translate_engine: TranslatorEngine,
+        summary: bool,
+        summary_detail: float,
+        summary_engine: TranslatorEngine,
         max_posts: int = 20,
         translation_display: int=0) -> dict:
     logging.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
@@ -206,7 +213,7 @@ def translate_feed(
                     cached = Translated_Content.is_translated(title, target_language)  # check cache db
                     translated_text = ''
                     if not cached:
-                        results = engine.translate(title, target_language=target_language)
+                        results = translate_engine.translate(title, target_language=target_language)
                         translated_text = results.get("text", title)
                         total_tokens += results.get("tokens", 0)
                         translated_characters += len(title)
@@ -232,6 +239,8 @@ def translate_feed(
                         translation_display=translation_display,
                         seprator = ' || '
                         )
+            bulk_save_cache(need_cache_objs)
+            need_cache_objs = {}
 
             # Translate content
             if translate_content:
@@ -246,18 +255,35 @@ def translate_feed(
                         unique_tasks.add(cache_key)
 
                         translated_summary, tokens, characters, need_cache = content_translate(original_description,
-                                                                                             target_language, engine)
+                                                                                             target_language, translate_engine)
                         total_tokens += tokens
                         translated_characters += characters
 
                         need_cache_objs.update(need_cache)
-                        #entry["summary"] = "".join(translated_summary)
-                        entry["summary"] = text_handler.set_translation_display(
+                        bulk_save_cache(need_cache_objs)
+                        need_cache_objs = {}
+
+                        if summary:
+                            summary_text, tokens, need_cache = content_summarize(original_description, 
+                                                                                target_language=target_language, 
+                                                                                detail=summary_detail, 
+                                                                                engine=summary_engine)
+                            total_tokens += tokens
+                            need_cache_objs.update(need_cache)
+                            html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />---------------<br />\n"
+                            entry["summary"] = html_summary
+                            bulk_save_cache(need_cache_objs)
+                            need_cache_objs = {}
+                        else:
+                            entry["summary"] = ''
+                        
+                        entry["summary"].join(text_handler.set_translation_display(
                             original=original_description,
                             translation=translated_summary,
                             translation_display=translation_display,
                             seprator = '\n<br />---------------<br />\n'
-                            )
+                            ))
+
 
                 if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
                     original_content = original_content[0].value
@@ -267,31 +293,53 @@ def translate_feed(
                         unique_tasks.add(cache_key)
 
                         translated_content, tokens, characters, need_cache = content_translate(original_content,
-                                                                                             target_language, engine)
+                                                                                             target_language, 
+                                                                                             translate_engine)
                         total_tokens += tokens
                         translated_characters += characters
                         need_cache_objs.update(need_cache)
-                       # entry['content'][0].value = "".join(translated_content)
-                        entry['content'][0].value = text_handler.set_translation_display(
+                        bulk_save_cache(need_cache_objs)
+                        need_cache_objs = {}
+                        
+                        if summary:
+                            summary_text, tokens, need_cache = content_summarize(original_content, 
+                                                                                target_language=target_language, 
+                                                                                detail=summary_detail, 
+                                                                                engine=summary_engine)
+                            total_tokens += tokens
+                            need_cache_objs.update(need_cache)
+                            html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />---------------<br />\n"
+                            entry['content'][0].value = html_summary
+                        else:
+                            entry['content'][0].value = ''
+
+                        entry['content'][0].value.join(text_handler.set_translation_display(
                             original=original_content,
                             translation=translated_content,
                             translation_display=translation_display,
                             seprator = '\n<br />---------------<br />\n'
-                            )
-
+                            ))
+                        
+                bulk_save_cache(need_cache_objs)
+                need_cache_objs = {}
     except Exception as e:
         logging.error("translate_feed: %s", str(e))
     finally:
-        try:
-            logging.info("Save caches to db")
-            if need_cache_objs:
-                Translated_Content.objects.bulk_create(need_cache_objs.values())
-        except IntegrityError:
-            logging.warning("Save cache: A record with this hash value already exists.")
-        except Exception as e:
-            logging.error("Save cache: %s", str(e))
+        bulk_save_cache(need_cache_objs)
+        need_cache_objs = {}
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}
+
+def bulk_save_cache(need_cache_objs):
+    try:
+        if need_cache_objs:
+            logging.info("Save caches to db")
+            Translated_Content.objects.bulk_create(need_cache_objs.values())
+    except IntegrityError:
+        logging.warning("Save cache: A record with this hash value already exists.")
+    except Exception as e:
+        logging.error("Save cache: %s", str(e))
+    return True
 
 def content_translate(original_content: str, target_language: str, engine: TranslatorEngine):
     total_tokens = 0
@@ -334,6 +382,68 @@ def content_translate(original_content: str, target_language: str, engine: Trans
 
     return str(soup), total_tokens, total_characters, need_cache_objs
 
+def content_summarize(original_content: str, 
+                      target_language: str, 
+                      engine: TranslatorEngine,
+                      detail: float = 0.0,
+                      minimum_chunk_size: Optional[int] = 500,
+                      chunk_delimiter: str = ".",
+                      summarize_recursively=True):
+    # check detail is set correctly
+    assert 0 <= detail <= 1
+    
+    total_tokens = 0
+    need_cache_objs = {}
+    need_cache_objs = {}
+    final_summary = ''
+    try:
+        text = text_handler.clean_content(original_content)
+        # interpolate the number of chunks based to get specified level of detail
+        max_chunks = len(text_handler.chunk_on_delimiter(text, minimum_chunk_size, chunk_delimiter))
+        min_chunks = 1
+        num_chunks = int(min_chunks + detail * (max_chunks - min_chunks))
+
+        # adjust chunk_size based on interpolated number of chunks
+        document_length = len(text_handler.tokenize(text))
+        chunk_size = max(minimum_chunk_size, document_length // num_chunks)
+        text_chunks = text_handler.chunk_on_delimiter(text, chunk_size, chunk_delimiter)
+
+        logging.info("Splitting the text into %d chunks to be summarized.", len(text_chunks))
+        #logging.info(f"Chunk lengths are {[len(text_handler.tokenize(x)) for x in text_chunks]}")
+
+        accumulated_summaries = []
+        for chunk in text_chunks:
+            if summarize_recursively and accumulated_summaries:
+                # Creating a structured prompt for recursive summarization
+                accumulated_summaries_string = '\n\n'.join(accumulated_summaries)
+                user_message_content = f"Previous summaries:\n\n{accumulated_summaries_string}\n\nText to summarize next:\n\n{chunk}"
+            else:
+                # Directly passing the chunk for summarization without recursive context
+                user_message_content = chunk
+
+            # Assuming this function gets the completion and works as expected
+            response = engine.summarize(user_message_content, target_language)
+            accumulated_summaries.append(response.get('text'))
+            total_tokens += response.get('tokens', 0)
+
+        # Compile final summary from partial summaries
+        final_summary = '\n\n'.join(accumulated_summaries)
+
+        hash64 = cityhash.CityHash64(f"Summary_{original_content}{target_language}")
+        need_cache_objs[hash64] = Translated_Content(
+            hash=hash64.to_bytes(8, byteorder='little'),
+            original_content=f"Summary_{original_content}",
+            translated_language=target_language,
+            translated_content=final_summary,
+            tokens=total_tokens,
+            characters=0,
+        )
+    except Exception as e:
+        logging.error(f'content_summarize: {str(e)}')
+
+    return final_summary, total_tokens, need_cache_objs
+
+'''
 def chunk_translate(original_content: str, target_language: str, engine: TranslatorEngine):
     logging.info("Call chunk_translate: %s(%s items)", target_language, len(original_content))
     split_chunks: dict = text_handler.content_split(original_content)
@@ -369,3 +479,4 @@ def chunk_translate(original_content: str, target_language: str, engine: Transla
         else:
             translated_content.append(cached["text"])
     return "".join(translated_content), total_tokens, total_characters, need_cache_objs
+'''
