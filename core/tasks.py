@@ -204,142 +204,110 @@ def translate_feed(
 
     try:
         for entry in translated_feed.entries[:max_posts]:
+            title = entry["title"]
+            cache_key = f"title_{title}_{target_language}"
+            unique_tasks.add(cache_key)
             # Translate title
             if translate_title:
-                title = entry["title"]
-                cache_key = f"title_{title}_{target_language}"
+                logging.info("Start Translate Title")
+                # title = entry["title"]
+                # cache_key = f"title_{title}_{target_language}"
 
                 # 任务去重
-                if cache_key not in unique_tasks:
-                    unique_tasks.add(cache_key)
-                    cached = Translated_Content.is_translated(title, target_language)  # check cache db
-                    translated_text = ''
-                    if not cached:
-                        results = translate_engine.translate(title, target_language=target_language)
-                        translated_text = results.get("text", title)
-                        total_tokens += results.get("tokens", 0)
-                        translated_characters += len(title)
+                # if cache_key not in unique_tasks:
+                #     unique_tasks.add(cache_key)
+                cached = Translated_Content.is_translated(title, target_language)  # check cache db
+                translated_text = ''
+                if not cached:
+                    results = translate_engine.translate(title, target_language=target_language)
+                    translated_text = results.get("text", title)
+                    total_tokens += results.get("tokens", 0)
+                    translated_characters += len(title)
 
-                        if title and translated_text:
-                            logging.info("Will cache:%s", translated_text)
-                            hash64 = cityhash.CityHash64(f"{title}{target_language}")
-                            need_cache_objs[hash64] = Translated_Content(
-                                hash=hash64.to_bytes(8, byteorder='little'),
-                                original_content=title,
-                                translated_language=target_language,
-                                translated_content=translated_text,
-                                tokens=results.get("tokens", 0),
-                                characters=results.get("characters", 0),
-                            )
-                    else:
-                        logging.info("Use db cache:%s", cached["text"])
-                        translated_text = cached["text"]
-                    
-                    entry["title"] = text_handler.set_translation_display(
-                        original=title,
-                        translation=translated_text,
-                        translation_display=translation_display,
-                        seprator = ' || '
+                    if title and translated_text:
+                        logging.info("Will cache:%s", translated_text)
+                        hash64 = cityhash.CityHash64(f"{title}{target_language}")
+                        need_cache_objs[hash64] = Translated_Content(
+                            hash=hash64.to_bytes(8, byteorder='little'),
+                            original_content=title,
+                            translated_language=target_language,
+                            translated_content=translated_text,
+                            tokens=results.get("tokens", 0),
+                            characters=results.get("characters", 0),
                         )
-            bulk_save_cache(need_cache_objs)
-            need_cache_objs = {}
+                else:
+                    logging.info("Use db cache:%s", cached["text"])
+                    translated_text = cached["text"]
+                
+                entry["title"] = text_handler.set_translation_display(
+                    original=title,
+                    translation=translated_text,
+                    translation_display=translation_display,
+                    seprator = ' || '
+                    )
+                bulk_save_cache(need_cache_objs)
+                need_cache_objs = {}
 
             # Translate content
             if translate_content:
-                original_description = entry.get('summary', None)  # summary, description
-                original_content = entry.get('content', None)
+                logging.info("Start Translate Content")
+                # original_description = entry.get('summary', None)  # summary, description
+                # original_content = entry.get('content', None)
+                content = original_content[0].value if original_content[0] else entry.get('summary')
 
-                if original_description:
-                    cache_key = cityhash.CityHash64(f"description_{original_description}_{target_language}")
+                if content:
+                    #cache_key = cityhash.CityHash64(f"description_{original_description}_{target_language}")
                     
                     # 任务去重
-                    if cache_key not in unique_tasks:
-                        unique_tasks.add(cache_key)
+                    # if cache_key not in unique_tasks:
+                    #     unique_tasks.add(cache_key)
 
-                        translated_summary, tokens, characters, need_cache = content_translate(original_description,
+                        translated_summary, tokens, characters, need_cache = content_translate(content,
                                                                                              target_language, translate_engine)
                         total_tokens += tokens
                         translated_characters += characters
 
                         need_cache_objs.update(need_cache)
                         
-                        entry["summary"] = text_handler.set_translation_display(
-                            original=original_description,
+                        text = text_handler.set_translation_display(
+                            original=content,
                             translation=translated_summary,
                             translation_display=translation_display,
                             seprator = '\n<br />---------------<br />\n'
                             )
-                    bulk_save_cache(need_cache_objs)
-                    need_cache_objs = {}
+                        entry['summary'] = text
+                        entry['content'][0].value = text
 
-
-                if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
-                    original_content = original_content[0].value
-                    cache_key = cityhash.CityHash64(f"content_{original_content}_{target_language}")
-                    # 任务去重
-                    if cache_key not in unique_tasks:
-                        unique_tasks.add(cache_key)
-
-                        translated_content, tokens, characters, need_cache = content_translate(original_content,
-                                                                                             target_language, 
-                                                                                             translate_engine)
-                        total_tokens += tokens
-                        translated_characters += characters
-                        need_cache_objs.update(need_cache)
                         bulk_save_cache(need_cache_objs)
                         need_cache_objs = {}
-                        
-                        entry['content'][0].value = text_handler.set_translation_display(
-                            original=original_content,
-                            translation=translated_content,
-                            translation_display=translation_display,
-                            seprator = '\n<br />---------------<br />\n'
-                            )
 
-                    bulk_save_cache(need_cache_objs)
-                    need_cache_objs = {}
-    
+
             if summary:
-                original_description = entry.get('summary', None)  # summary, description
-                original_content = entry.get('content', None)
+                logging.info("Start Summarize")
+                #original_description = entry.get('summary')  # summary, description
+                original_content = entry.get('content')
+                content = original_content[0].value if original_content[0] else entry.get('summary')
 
-                if original_description:
-                    cache_key = cityhash.CityHash64(f"summary_{original_description}_{target_language}")
-                    
+                if content: 
+                    #cache_key = cityhash.CityHash64(f"summary_{content}_{target_language}")
                     # 任务去重
-                    if cache_key not in unique_tasks:
-                        unique_tasks.add(cache_key)
-
-                        summary_text, tokens, need_cache = content_summarize(original_description, 
+                    # if cache_key not in unique_tasks:
+                    #     unique_tasks.add(cache_key)
+                        summary_text, tokens, need_cache = content_summarize(content, 
                                                                             target_language=target_language, 
                                                                             detail=summary_detail, 
-                                                                            engine=summary_engine)
+                                                                            engine=summary_engine,
+                                                                            minimum_chunk_size=summary_engine.max_size())
                         total_tokens += tokens
                         need_cache_objs.update(need_cache)
-                        html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />----------------------<br />\n"
-                        entry["summary"] = html_summary + entry["summary"]
-                    
-                    bulk_save_cache(need_cache_objs)
-                    need_cache_objs = {}
+                        html_summary = f"\n<br />AI Summary:<br />\n{summary_text}\n<br />---------------<br />\n"
 
+                        entry['summary'] = summary_text
+                        entry['content'][0].value = html_summary + content
 
-                if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
-                    original_content = original_content[0].value
-                    cache_key = cityhash.CityHash64(f"summary_{original_content}_{target_language}")
-                    # 任务去重
-                    if cache_key not in unique_tasks:
-                        unique_tasks.add(cache_key)
-                        summary_text, tokens, need_cache = content_summarize(original_content, 
-                                                                            target_language=target_language, 
-                                                                            detail=summary_detail, 
-                                                                            engine=summary_engine)
-                        total_tokens += tokens
-                        need_cache_objs.update(need_cache)
-                        html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />---------------<br />\n"
-                        entry['content'][0].value = html_summary + entry['content'][0].value
-
-                    bulk_save_cache(need_cache_objs)
-                    need_cache_objs = {}
+                        bulk_save_cache(need_cache_objs)
+                        need_cache_objs = {}
+    
     except Exception as e:
         logging.error("translate_feed: %s", str(e))
     finally:
@@ -381,7 +349,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
                 total_characters += len(text)
 
                 if results["text"]:
-                    logging.info("Save to cache:%s", results["text"])
+                    logging.info("Will cache:%s", results["text"])
                     hash64 = cityhash.CityHash64(f"{text}{target_language}")
                     need_cache_objs[hash64] = Translated_Content(
                         hash=hash64.to_bytes(8, byteorder='little'),
@@ -394,6 +362,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
 
                 element.string.replace_with(results.get("text", text))
             else:
+                logging.info("Use db cache:%s", text)
                 element.string.replace_with(cached.get("text"))
     except Exception as e:
         logging.error(f'content_translate: {str(e)}')
@@ -415,7 +384,8 @@ def content_summarize(original_content: str,
     final_summary = ''
     try:
         text = text_handler.clean_content(original_content)
-        cached = Translated_Content.is_translated(f"Summary_{original_content}{target_language}", target_language)
+        logging.info("Summarize content: %s...", text)
+        cached = Translated_Content.is_translated(f"Summary_{original_content}", target_language)
 
         if not cached:
             # interpolate the number of chunks based to get specified level of detail
@@ -449,7 +419,8 @@ def content_summarize(original_content: str,
             # Compile final summary from partial summaries
             final_summary = '<br/><br/>'.join(accumulated_summaries)
 
-            hash64 = cityhash.CityHash64(f"Summary_{original_content}{target_language}")
+            hash64 = cityhash.CityHash64(f"Summary_{original_content}")
+            logging.info("Will cache:%s", final_summary)
             need_cache_objs[hash64] = Translated_Content(
                 hash=hash64.to_bytes(8, byteorder='little'),
                 original_content=f"Summary_{original_content}",
@@ -460,6 +431,7 @@ def content_summarize(original_content: str,
             )
         else:
             final_summary = cached.get("text")
+            logging.info("Use db cache:%s", final_summary)
     except Exception as e:
         logging.error(f'content_summarize: {str(e)}')
 
