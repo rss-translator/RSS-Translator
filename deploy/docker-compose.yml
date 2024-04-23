@@ -18,4 +18,4 @@ services:
     ports:
       - 8000:8000
     restart: always
-    command: bash -c "python manage.py init_server && python manage.py run_huey & uvicorn config.asgi:application --host 0.0.0.0"
+    #command: bash -c "python manage.py init_server && python manage.py run_huey & uvicorn config.asgi:application --host 0.0.0.0"

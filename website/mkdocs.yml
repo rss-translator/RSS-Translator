@@ -53,6 +53,33 @@ plugins:
   - git-revision-date
   - macros
   - search
+  - i18n:
+        docs_structure: folder
+        languages:
+          - locale: zh
+            default: true
+            name: 中文
+            build: true
+          - locale: en
+            name: English
+            build: true
+            nav_translations:
+              主页: Home
+              截图: Screenshots
+              安装: Install
+              脚本自动安装: Installation Script
+              一键部署: One Click
+              Docker安装: Docker
+              手动安装: Manual
+              升级: Upgrade
+              开启SSL: Enable SSL
+              使用说明: Guide
+              翻译服务: Translate Services
+              常见问题: FAQ
+              开发进度: Roadmap
+              赞助: Sponsorship
+
+
 
 # Additional configuration
 extra:
@@ -79,6 +106,7 @@ nav:
   - 升级: upgrade.md
   - 开启SSL: ssl.md
   - 使用说明: guide.md
+  - 翻译服务: translator.md
   - 常见问题: faq.md
   - 开发进度: https://github.com/orgs/rss-translator/projects/2/views/1
   - 赞助: https://rsstranslator.com/#_2

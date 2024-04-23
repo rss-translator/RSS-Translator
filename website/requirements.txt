@@ -9,3 +9,4 @@ pymdown-extensions>=9.9
 mkdocs-git-revision-date-plugin
 mkdocs-exclude-search
 mkdocs-macros-plugin>0.5.10
+mkdocs-static-i18n
