@@ -1,5 +1,5 @@
 django>=5.0.2
-django-text-translator>=2024.4.22
+django-text-translator>=2024.4.23
 opyml
 tiktoken
 feedparser
@@ -15,3 +15,4 @@ cityhash
 bs4
 lxml
 python-dateutil
+html2text

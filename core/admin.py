@@ -36,7 +36,7 @@ class T_FeedForm(forms.ModelForm):
 class T_FeedInline(admin.TabularInline):
     model = T_Feed
     form = T_FeedForm
-    fields = ["language", "obj_status", "feed_url", "translate_title", "translate_content", "total_tokens",
+    fields = ["language", "obj_status", "feed_url", "translate_title", "translate_content", "summary", "total_tokens",
               "total_characters", "size_in_kb",'sid']
     readonly_fields = ("feed_url", "obj_status", "size_in_kb", "total_tokens", "total_characters")
     extra = 1
@@ -84,14 +84,22 @@ class T_FeedInline(admin.TabularInline):
         self.request = request
         return super(T_FeedInline, self).get_formset(request, obj, **kwargs)
 
+def get_all_subclasses(cls):
+    subclasses = set()
+    for subclass in cls.__subclasses__():
+        if not subclass.__subclasses__():
+            subclasses.add(subclass)
+        subclasses.update(get_all_subclasses(subclass))
+    return subclasses
 
 class O_FeedForm(forms.ModelForm):
     # 自定义字段，使用ChoiceField生成下拉菜单
     translator = forms.ChoiceField(choices=(), required=False, help_text=_("Select a valid translator"), label=_("Translator"))
-
+    summary_engine = forms.ChoiceField(choices=(), required=False, help_text=_("Select a valid AI engine"), label=_("Summary Engine"))
     def __init__(self, *args, **kwargs):
         super(O_FeedForm, self).__init__(*args, **kwargs)
-        translator_models = TranslatorEngine.__subclasses__()
+        translator_models = get_all_subclasses(TranslatorEngine)
+        #translator_models = TranslatorEngine.__subclasses__()
         # Cache ContentTypes to avoid repetitive database calls
         content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
 
@@ -103,16 +111,25 @@ class O_FeedForm(forms.ModelForm):
         ]
         self.fields['translator'].choices = translator_choices
 
+        summary_engine_choices = [
+            (f"{content_types[model].id}:{obj_id}", obj_name)
+            for model in translator_models
+            for obj_id, obj_name in model.objects.filter(valid=True, is_ai=True).values_list('id', 'name')
+        ]
+        self.fields['summary_engine'].choices = summary_engine_choices
+
         # 如果已经有关联的对象，设置默认值
         instance = getattr(self, 'instance', None)
         if instance and instance.pk and instance.content_type and instance.object_id:
             self.fields['translator'].initial = f"{instance.content_type.id}:{instance.object_id}"
+        if instance and instance.pk and instance.content_type and instance.object_id:
+            self.fields['summary_engine'].initial = f"{instance.content_type_summary.id}:{instance.object_id_summary}"
         
         #self.fields['translator'].short_description = _("Translator")
 
     class Meta:
         model = O_Feed
-        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'translation_display', 'name']
+        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'translation_display', 'summary_engine', 'summary_detail', 'additional_prompt', 'name']
 
     # 重写save方法，以处理自定义字段的数据
     def save(self, commit=True):
@@ -124,6 +141,15 @@ class O_FeedForm(forms.ModelForm):
         else:
             self.instance.content_type = None
             self.instance.object_id = None
+
+        if self.cleaned_data['summary_engine']:
+            content_type_summary_id, object_id_summary = map(int, self.cleaned_data['summary_engine'].split(':'))
+            self.instance.content_type_summary_id = content_type_summary_id
+            self.instance.object_id_summary = object_id_summary
+        else:
+            self.instance.content_type_summary_id = None
+            self.instance.object_id_summary = None
+
         return super(O_FeedForm, self).save(commit=commit)
 
 
@@ -225,7 +251,7 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
 
 @admin.register(T_Feed)
 class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
-    list_display = ["id", "feed_url", "o_feed", "status_icon", "language", "translate_title", "translate_content", "total_tokens", "total_characters", "size_in_kb", "modified"]
+    list_display = ["id", "feed_url", "o_feed", "status_icon", "language", "translate_title", "translate_content", "summary", "total_tokens", "total_characters", "size_in_kb", "modified"]
     list_filter = ["status", "translate_title", "translate_content"]
     search_fields = ["sid"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]

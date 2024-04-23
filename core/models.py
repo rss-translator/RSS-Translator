@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class O_Feed(models.Model):
@@ -28,9 +29,23 @@ class O_Feed(models.Model):
     update_frequency = models.IntegerField(_("Update Frequency"), default=os.getenv("default_update_frequency", 30), help_text=_("Minutes"))
     max_posts = models.IntegerField(_("Max Posts"), default=os.getenv("default_max_posts", 20), help_text=_("Max number of posts to be translated"))
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, related_name='translator')
     object_id = models.PositiveIntegerField(null=True)
     translator = GenericForeignKey( 'content_type', 'object_id')
+
+    content_type_summary = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, related_name='summary_engine')
+    object_id_summary = models.PositiveIntegerField(null=True)
+    summary_engine = GenericForeignKey( 'content_type_summary', 'object_id_summary')
+    
+    summary_detail = models.FloatField(_("Summary Detail"), 
+                                       validators=[
+                                            MinValueValidator(0.0),
+                                            MaxValueValidator(1.0)
+                                        ],
+                                       default=0.0, blank=True, null=True,
+                                       help_text=_("Level of detail of summaries of longer articles. 0: Normal, 1: Most detailed (cost more tokens)"))
+
+    additional_prompt = models.TextField(_("Addtional Prompt"), default=None, blank=True, null=True, help_text=_("Addtional Prompt for translation and summary"))
 
     def __str__(self):
         return self.feed_url
@@ -57,6 +72,7 @@ class T_Feed(models.Model):
 
     translate_title = models.BooleanField(_("Translate Title"), default=True)
     translate_content = models.BooleanField(_("Translate Content"), default=False)
+    summary = models.BooleanField(_("Summary"), default=False)
 
     total_tokens = models.IntegerField(_("Tokens Cost"), default=0)
     total_characters = models.IntegerField(_("Characters Cost"), default=0)
