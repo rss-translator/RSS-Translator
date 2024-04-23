@@ -279,7 +279,7 @@ def translate_feed(
                             seprator = '\n<br />---------------<br />\n'
                             )
                         entry['summary'] = text
-                        entry['content'][0].value = text
+                        entry['content'] = [{'value': text}]
 
                         bulk_save_cache(need_cache_objs)
                         need_cache_objs = {}
@@ -309,7 +309,7 @@ def translate_feed(
                         html_summary = f"\n<br />AI Summary:<br />\n{summary_text}\n<br />---------------<br />\n"
 
                         entry['summary'] = summary_text
-                        entry['content'][0].value = html_summary + content
+                        entry['content'] = [{'value': html_summary + content}]
 
                         bulk_save_cache(need_cache_objs)
                         need_cache_objs = {}

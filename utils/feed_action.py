@@ -105,7 +105,7 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             unique_id = entry.get('id', link)
 
             author_name = get_first_non_none(entry, 'author', 'publisher')
-            content = entry.get('content')[0].value if entry.get('content') else None
+            content = entry.get('content')[0].get('value') if entry.get('content') else None
             summary = entry.get('summary')
 
             fe = fg.add_entry(order='append')
