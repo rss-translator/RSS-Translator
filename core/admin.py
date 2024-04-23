@@ -122,7 +122,8 @@ class O_FeedForm(forms.ModelForm):
         instance = getattr(self, 'instance', None)
         if instance and instance.pk and instance.content_type and instance.object_id:
             self.fields['translator'].initial = f"{instance.content_type.id}:{instance.object_id}"
-        if instance and instance.pk and instance.content_type and instance.object_id:
+            
+        if instance and instance.pk and instance.content_type_summary and instance.object_id_summary:
             self.fields['summary_engine'].initial = f"{instance.content_type_summary.id}:{instance.object_id_summary}"
         
         #self.fields['translator'].short_description = _("Translator")
