@@ -255,7 +255,7 @@ def translate_feed(
                     continue
                 logging.info("Start Translate Content")
                 # original_description = entry.get('summary', None)  # summary, description
-                # original_content = entry.get('content', None)
+                original_content = entry.get('content')
                 content = original_content[0].value if original_content[0] else entry.get('summary')
 
                 if content:
