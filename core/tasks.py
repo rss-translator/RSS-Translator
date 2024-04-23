@@ -262,29 +262,15 @@ def translate_feed(
                         translated_characters += characters
 
                         need_cache_objs.update(need_cache)
-                        bulk_save_cache(need_cache_objs)
-                        need_cache_objs = {}
-
-                        if summary:
-                            summary_text, tokens, need_cache = content_summarize(original_description, 
-                                                                                target_language=target_language, 
-                                                                                detail=summary_detail, 
-                                                                                engine=summary_engine)
-                            total_tokens += tokens
-                            need_cache_objs.update(need_cache)
-                            html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />----------------------<br />\n"
-                            entry["summary"] = html_summary
-                            bulk_save_cache(need_cache_objs)
-                            need_cache_objs = {}
-                        else:
-                            entry["summary"] = ''
                         
-                        entry["summary"] += text_handler.set_translation_display(
+                        entry["summary"] = text_handler.set_translation_display(
                             original=original_description,
                             translation=translated_summary,
                             translation_display=translation_display,
                             seprator = '\n<br />---------------<br />\n'
                             )
+                    bulk_save_cache(need_cache_objs)
+                    need_cache_objs = {}
 
 
                 if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
@@ -303,27 +289,57 @@ def translate_feed(
                         bulk_save_cache(need_cache_objs)
                         need_cache_objs = {}
                         
-                        if summary:
-                            summary_text, tokens, need_cache = content_summarize(original_content, 
-                                                                                target_language=target_language, 
-                                                                                detail=summary_detail, 
-                                                                                engine=summary_engine)
-                            total_tokens += tokens
-                            need_cache_objs.update(need_cache)
-                            html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />---------------<br />\n"
-                            entry['content'][0].value = html_summary
-                        else:
-                            entry['content'][0].value = ''
-
-                        entry['content'][0].value += text_handler.set_translation_display(
+                        entry['content'][0].value = text_handler.set_translation_display(
                             original=original_content,
                             translation=translated_content,
                             translation_display=translation_display,
                             seprator = '\n<br />---------------<br />\n'
                             )
 
-                bulk_save_cache(need_cache_objs)
-                need_cache_objs = {}
+                    bulk_save_cache(need_cache_objs)
+                    need_cache_objs = {}
+    
+            if summary:
+                original_description = entry.get('summary', None)  # summary, description
+                original_content = entry.get('content', None)
+
+                if original_description:
+                    cache_key = cityhash.CityHash64(f"summary_{original_description}_{target_language}")
+                    
+                    # 任务去重
+                    if cache_key not in unique_tasks:
+                        unique_tasks.add(cache_key)
+
+                        summary_text, tokens, need_cache = content_summarize(original_description, 
+                                                                            target_language=target_language, 
+                                                                            detail=summary_detail, 
+                                                                            engine=summary_engine)
+                        total_tokens += tokens
+                        need_cache_objs.update(need_cache)
+                        html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />----------------------<br />\n"
+                        entry["summary"] = html_summary + entry["summary"]
+                    
+                    bulk_save_cache(need_cache_objs)
+                    need_cache_objs = {}
+
+
+                if original_content and original_content[0]: # if isinstance(original_content, (list, str, tuple)) and original_content:
+                    original_content = original_content[0].value
+                    cache_key = cityhash.CityHash64(f"summary_{original_content}_{target_language}")
+                    # 任务去重
+                    if cache_key not in unique_tasks:
+                        unique_tasks.add(cache_key)
+                        summary_text, tokens, need_cache = content_summarize(original_content, 
+                                                                            target_language=target_language, 
+                                                                            detail=summary_detail, 
+                                                                            engine=summary_engine)
+                        total_tokens += tokens
+                        need_cache_objs.update(need_cache)
+                        html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />---------------<br />\n"
+                        entry['content'][0].value = html_summary + entry['content'][0].value
+                        
+                    bulk_save_cache(need_cache_objs)
+                    need_cache_objs = {}
     except Exception as e:
         logging.error("translate_feed: %s", str(e))
     finally:
@@ -398,47 +414,52 @@ def content_summarize(original_content: str,
     need_cache_objs = {}
     final_summary = ''
     try:
-        text = text_handler.clean_content(original_content)
-        # interpolate the number of chunks based to get specified level of detail
-        max_chunks = len(text_handler.chunk_on_delimiter(text, minimum_chunk_size, chunk_delimiter))
-        min_chunks = 1
-        num_chunks = int(min_chunks + detail * (max_chunks - min_chunks))
+        cached = Translated_Content.is_translated(f"Summary_{text}", target_language)
 
-        # adjust chunk_size based on interpolated number of chunks
-        document_length = len(text_handler.tokenize(text))
-        chunk_size = max(minimum_chunk_size, document_length // num_chunks)
-        text_chunks = text_handler.chunk_on_delimiter(text, chunk_size, chunk_delimiter)
+        if not cached:
+            text = text_handler.clean_content(original_content)
+            # interpolate the number of chunks based to get specified level of detail
+            max_chunks = len(text_handler.chunk_on_delimiter(text, minimum_chunk_size, chunk_delimiter))
+            min_chunks = 1
+            num_chunks = int(min_chunks + detail * (max_chunks - min_chunks))
 
-        logging.info("Splitting the text into %d chunks to be summarized.", len(text_chunks))
-        #logging.info(f"Chunk lengths are {[len(text_handler.tokenize(x)) for x in text_chunks]}")
+            # adjust chunk_size based on interpolated number of chunks
+            document_length = len(text_handler.tokenize(text))
+            chunk_size = max(minimum_chunk_size, document_length // num_chunks)
+            text_chunks = text_handler.chunk_on_delimiter(text, chunk_size, chunk_delimiter)
 
-        accumulated_summaries = []
-        for chunk in text_chunks:
-            if summarize_recursively and accumulated_summaries:
-                # Creating a structured prompt for recursive summarization
-                accumulated_summaries_string = '\n\n'.join(accumulated_summaries)
-                user_message_content = f"Previous summaries:\n\n{accumulated_summaries_string}\n\nText to summarize next:\n\n{chunk}"
-            else:
-                # Directly passing the chunk for summarization without recursive context
-                user_message_content = chunk
+            logging.info("Splitting the text into %d chunks to be summarized.", len(text_chunks))
+            #logging.info(f"Chunk lengths are {[len(text_handler.tokenize(x)) for x in text_chunks]}")
 
-            # Assuming this function gets the completion and works as expected
-            response = engine.summarize(user_message_content, target_language)
-            accumulated_summaries.append(response.get('text'))
-            total_tokens += response.get('tokens', 0)
+            accumulated_summaries = []
+            for chunk in text_chunks:
+                if summarize_recursively and accumulated_summaries:
+                    # Creating a structured prompt for recursive summarization
+                    accumulated_summaries_string = '\n\n'.join(accumulated_summaries)
+                    user_message_content = f"Previous summaries:\n\n{accumulated_summaries_string}\n\nText to summarize next:\n\n{chunk}"
+                else:
+                    # Directly passing the chunk for summarization without recursive context
+                    user_message_content = chunk
 
-        # Compile final summary from partial summaries
-        final_summary = '<br/><br/>'.join(accumulated_summaries)
+                # Assuming this function gets the completion and works as expected
+                response = engine.summarize(user_message_content, target_language)
+                accumulated_summaries.append(response.get('text'))
+                total_tokens += response.get('tokens', 0)
 
-        hash64 = cityhash.CityHash64(f"Summary_{original_content}{target_language}")
-        need_cache_objs[hash64] = Translated_Content(
-            hash=hash64.to_bytes(8, byteorder='little'),
-            original_content=f"Summary_{original_content}",
-            translated_language=target_language,
-            translated_content=final_summary,
-            tokens=total_tokens,
-            characters=0,
-        )
+            # Compile final summary from partial summaries
+            final_summary = '<br/><br/>'.join(accumulated_summaries)
+
+            hash64 = cityhash.CityHash64(f"Summary_{original_content}{target_language}")
+            need_cache_objs[hash64] = Translated_Content(
+                hash=hash64.to_bytes(8, byteorder='little'),
+                original_content=f"Summary_{original_content}",
+                translated_language=target_language,
+                translated_content=final_summary,
+                tokens=total_tokens,
+                characters=0,
+            )
+        else:
+            final_summary = cached.get("text")
     except Exception as e:
         logging.error(f'content_summarize: {str(e)}')
 
