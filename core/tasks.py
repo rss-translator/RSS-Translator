@@ -292,7 +292,7 @@ def translate_feed(
                 logging.info("Start Summarize")
                 #original_description = entry.get('summary')  # summary, description
                 original_content = entry.get('content')
-                content = original_content[0].value if original_content else entry.get('summary')
+                content = original_content[0].get('value') if original_content else entry.get('summary')
 
                 if content: 
                     #cache_key = cityhash.CityHash64(f"summary_{content}_{target_language}")
