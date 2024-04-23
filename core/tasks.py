@@ -415,7 +415,7 @@ def content_summarize(original_content: str,
     final_summary = ''
     try:
         text = text_handler.clean_content(original_content)
-        cached = Translated_Content.is_translated(f"Summary_{text}", target_language)
+        cached = Translated_Content.is_translated(f"Summary_{original_content}", target_language)
 
         if not cached:
             # interpolate the number of chunks based to get specified level of detail
