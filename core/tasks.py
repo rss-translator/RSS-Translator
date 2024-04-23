@@ -337,7 +337,7 @@ def translate_feed(
                         need_cache_objs.update(need_cache)
                         html_summary = f"\n<br />-----AI Summary-----<br />\n{summary_text}\n<br />---------------<br />\n"
                         entry['content'][0].value = html_summary + entry['content'][0].value
-                        
+
                     bulk_save_cache(need_cache_objs)
                     need_cache_objs = {}
     except Exception as e:
@@ -414,10 +414,10 @@ def content_summarize(original_content: str,
     need_cache_objs = {}
     final_summary = ''
     try:
+        text = text_handler.clean_content(original_content)
         cached = Translated_Content.is_translated(f"Summary_{text}", target_language)
 
         if not cached:
-            text = text_handler.clean_content(original_content)
             # interpolate the number of chunks based to get specified level of detail
             max_chunks = len(text_handler.chunk_on_delimiter(text, minimum_chunk_size, chunk_delimiter))
             min_chunks = 1
