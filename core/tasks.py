@@ -250,6 +250,9 @@ def translate_feed(
 
             # Translate content
             if translate_content:
+                if translate_engine == None:
+                    logging.warning("No translate engine")
+                    continue
                 logging.info("Start Translate Content")
                 # original_description = entry.get('summary', None)  # summary, description
                 # original_content = entry.get('content', None)
@@ -283,6 +286,9 @@ def translate_feed(
 
 
             if summary:
+                if summary_engine == None:
+                    logging.warning("No Summarize engine")
+                    continue
                 logging.info("Start Summarize")
                 #original_description = entry.get('summary')  # summary, description
                 original_content = entry.get('content')
