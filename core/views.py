@@ -1,8 +1,9 @@
 import logging
 import os
+import json
 
 from django.conf import settings
-from django.http import HttpResponse, Http404, StreamingHttpResponse
+from django.http import HttpResponse, Http404, StreamingHttpResponse, JsonResponse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import condition
@@ -60,6 +61,33 @@ def rss(request, feed_sid):
         logging.info("Feed file served: %s", feed_file_path)
         return response
     except IOError as e:
+        # Log the exception and return an appropriate error response
+        logging.exception("Failed to read the feed file: %s / %s", feed_file_path, str(e))
+        return HttpResponse(status=500)
+
+@condition(etag_func=get_etag, last_modified_func=get_modified)
+def rss_json(request, feed_sid):
+    # Sanitize the feed_sid to prevent path traversal attacks
+    feed_sid = smart_str(feed_sid)
+
+    feed_file_path = os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed_sid}.json')
+    content_type = 'application/json; charset=utf-8'
+
+    # Check if the file exists and if not, raise a 404 error
+    if not os.path.exists(feed_file_path):
+        logging.warning("Requested feed file not found: %s", feed_file_path)
+        # raise Http404(f"The feed with ID {feed_sid} does not exist.")
+        return HttpResponse(
+            "Please wait for the translation to complete or check if the original feeds has been verified")
+
+    try:
+        with open(feed_file_path, 'rb') as f:
+            feed_data = json.load(f)
+        response = JsonResponse(feed_data)
+
+        logging.info("Feed file served: %s", feed_file_path)
+        return response
+    except Exception as e:
         # Log the exception and return an appropriate error response
         logging.exception("Failed to read the feed file: %s / %s", feed_file_path, str(e))
         return HttpResponse(status=500)

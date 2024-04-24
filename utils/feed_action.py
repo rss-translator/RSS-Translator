@@ -1,6 +1,7 @@
 import logging
 import os
 import gc
+import json
 #import xml.dom.minidom
 from datetime import datetime, timezone, date, timedelta
 from time import mktime
@@ -119,11 +120,11 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.summary(summary, type='html')
 
             for enclosure in entry.get('enclosures', []):
-                fe.enclosure(url=enclosure.get('href'), 
-                            type=enclosure.get('type'),
-                            length=enclosure.get('length'),
+                fe.enclosure(url=enclosure.get('href'),
+                             type=enclosure.get('type'),
+                             length=enclosure.get('length'),
                              )
-            
+
             # id, title, updated are required
             if not fe.updated():
                 fe.updated(pubdate if pubdate else datetime.now(timezone.utc))
@@ -152,6 +153,53 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 
     return atom_string_with_pi
 
+
+def atom2jsonfeed(atom_file_path: str) -> dict:
+    feed = feedparser.parse(atom_file_path)
+
+    json_feed = {
+        "version": "https://jsonfeed.org/version/1.1",
+        "title": feed.feed.title,
+        "feed_url": feed.feed.id,
+        "home_page_url": feed.feed.get("link", None)
+    }
+
+    if hasattr(feed.feed, "subtitle"):
+        json_feed["description"] = feed.feed.subtitle
+    if hasattr(feed.feed, "updated"):
+        json_feed["updated"] = feed.feed.updated
+
+    json_feed["items"] = []
+    for entry in feed.entries:
+        item = {
+            "id": entry.id,
+            "url": entry.link,
+            "title": entry.title,
+        }
+        if hasattr(entry, "summary"):
+            item["content_html"] = entry.summary
+        if hasattr(entry, "published"):
+            item["date_published"] = entry.published
+        if hasattr(entry, "updated"):
+            item["date_modified"] = entry.updated
+        if hasattr(entry, "author"):
+            authors = entry.author
+            if not isinstance(authors, list):
+                authors = [authors]
+            item["authors"] = [{"name": author} for author in authors]
+        if hasattr(entry, "content"):
+            item["content_html"] = ""
+            for content in entry.content:
+                if content["type"] == "text/html":
+                    item["content_html"] += content["value"]
+                elif content["type"] == "text/plain":
+                    item["content_text"] = content["value"]
+
+        json_feed["items"].append(item)
+
+    return json_feed
+
+
 def merge_all_atom(input_files):
     ATOM_NS = "http://www.w3.org/2005/Atom"
 
@@ -162,7 +210,7 @@ def merge_all_atom(input_files):
         f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
         f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
         f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode('utf-8'))
-        f.write(b'<title>All Translated Feeds | RSS Translator</title>\n')   
+        f.write(b'<title>All Translated Feeds | RSS Translator</title>\n')
         f.write(b'<link href="https://rsstranslator.com"/>\n')
         f.write(f'<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n'.encode('utf-8'))
 
@@ -185,6 +233,7 @@ def merge_all_atom(input_files):
                     del entry.getparent()[0]
             gc.collect()
         f.write(b'</feed>')
+
 
 def get_first_non_none(feed, *keys):
     return next((feed.get(key) for key in keys if feed.get(key) is not None), None)

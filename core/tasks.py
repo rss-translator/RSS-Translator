@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 import logging
 import os
@@ -16,7 +17,7 @@ from huey.contrib.djhuey import on_startup, on_shutdown, task, db_task
 from .models import O_Feed, T_Feed
 from django_text_translator.models import TranslatorEngine, Translated_Content
 
-from utils.feed_action import fetch_feed, generate_atom_feed
+from utils.feed_action import fetch_feed, generate_atom_feed, atom2jsonfeed
 from utils import text_handler
 from bs4 import BeautifulSoup, Comment
 from typing import List, Tuple, Optional
@@ -130,7 +131,7 @@ def update_translated_feed(sid: str, force=False):
             update_original_feed.call_local(obj.o_feed.sid)
             return False
 
-        translated_feed_file_path = f"{feed_dir_path}/{obj.sid}.xml"
+        translated_feed_file_path = f"{feed_dir_path}/{obj.sid}"
         # if not os.path.exists(translated_feed_file_path):
         #     with open(translated_feed_file_path, "w", encoding="utf-8") as f:
         #         f.write("Translation in progress...")
@@ -163,8 +164,16 @@ def update_translated_feed(sid: str, force=False):
 
             if xml_str is None:
                 raise Exception("generate_atom_feed returned None")
-            with open(translated_feed_file_path, "w", encoding="utf-8") as f:
+            with open(f"{translated_feed_file_path}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
+
+            json_dict = atom2jsonfeed(f"{translated_feed_file_path}.xml")
+            json_str = json.dumps(json_dict, indent=4, ensure_ascii=False)
+            if json_str is None:
+                raise Exception("atom2json returned None")
+            with open(f"{translated_feed_file_path}.json", "w", encoding="utf-8") as f:
+                f.write(json_str)
+
 
             # There can only be one billing method at a time, either token or character count.
             if total_tokens > 0:
@@ -173,7 +182,7 @@ def update_translated_feed(sid: str, force=False):
                 obj.total_characters += translated_characters
 
             obj.modified = obj.o_feed.last_pull
-            obj.size = os.path.getsize(translated_feed_file_path)
+            obj.size = os.path.getsize(f"{translated_feed_file_path}.xml")
             obj.status = True
     except Exception as e:
         logging.error("task update_translated_feed (%s)%s: %s", obj.language, obj.o_feed.feed_url, str(e))
