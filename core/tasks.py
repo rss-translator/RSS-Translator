@@ -209,7 +209,7 @@ def translate_feed(
             unique_tasks.add(cache_key)
             # Translate title
             if translate_title:
-                logging.info("Start Translate Title")
+                #logging.info("Start Translate Title")
                 # title = entry["title"]
                 # cache_key = f"title_{title}_{target_language}"
 
@@ -225,7 +225,7 @@ def translate_feed(
                     translated_characters += len(title)
 
                     if title and translated_text:
-                        logging.info("Will cache:%s", translated_text)
+                        logging.info("[Title] Will cache:%s", translated_text)
                         hash64 = cityhash.CityHash64(f"{title}{target_language}")
                         need_cache_objs[hash64] = Translated_Content(
                             hash=hash64.to_bytes(8, byteorder='little'),
@@ -236,7 +236,7 @@ def translate_feed(
                             characters=results.get("characters", 0),
                         )
                 else:
-                    logging.info("Use db cache:%s", cached["text"])
+                    logging.info("[Title] Use db cache:%s", cached["text"])
                     translated_text = cached["text"]
                 
                 entry["title"] = text_handler.set_translation_display(
@@ -253,7 +253,7 @@ def translate_feed(
                 if translate_engine == None:
                     logging.warning("No translate engine")
                     continue
-                logging.info("Start Translate Content")
+                #logging.info("Start Translate Content")
                 # original_description = entry.get('summary', None)  # summary, description
                 original_content = entry.get('content')
                 content = original_content[0].value if original_content else entry.get('summary')
@@ -289,7 +289,7 @@ def translate_feed(
                 if summary_engine == None:
                     logging.warning("No Summarize engine")
                     continue
-                logging.info("Start Summarize")
+                #logging.info("Start Summarize")
                 #original_description = entry.get('summary')  # summary, description
                 original_content = entry.get('content')
                 content = original_content[0].get('value') if original_content else entry.get('summary')
@@ -346,7 +346,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
             #TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
             text = element.get_text()
 
-            logging.info("Translate content: %s", text)
+            logging.info("[Content] Translate: %s...", text)
             cached = Translated_Content.is_translated(text, target_language)
 
             if not cached:
@@ -355,7 +355,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
                 total_characters += len(text)
 
                 if results["text"]:
-                    logging.info("Will cache:%s", results["text"])
+                    logging.info("[Content] Will cache:%s", results["text"])
                     hash64 = cityhash.CityHash64(f"{text}{target_language}")
                     need_cache_objs[hash64] = Translated_Content(
                         hash=hash64.to_bytes(8, byteorder='little'),
@@ -368,7 +368,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
 
                 element.string.replace_with(results.get("text", text))
             else:
-                logging.info("Use db cache:%s", text)
+                logging.info("[Content] Use db cache:%s", text)
                 element.string.replace_with(cached.get("text"))
     except Exception as e:
         logging.error(f'content_translate: {str(e)}')
@@ -390,7 +390,7 @@ def content_summarize(original_content: str,
     final_summary = ''
     try:
         text = text_handler.clean_content(original_content)
-        logging.info("Summarize content: %s...", text)
+        logging.info("[Summarize]: %s...", text)
         cached = Translated_Content.is_translated(f"Summary_{original_content}", target_language)
 
         if not cached:
@@ -426,7 +426,7 @@ def content_summarize(original_content: str,
             final_summary = '<br/><br/>'.join(accumulated_summaries)
 
             hash64 = cityhash.CityHash64(f"Summary_{original_content}")
-            logging.info("Will cache:%s", final_summary)
+            logging.info("[Summary] Will cache:%s", final_summary)
             need_cache_objs[hash64] = Translated_Content(
                 hash=hash64.to_bytes(8, byteorder='little'),
                 original_content=f"Summary_{original_content}",
@@ -437,7 +437,7 @@ def content_summarize(original_content: str,
             )
         else:
             final_summary = cached.get("text")
-            logging.info("Use db cache:%s", final_summary)
+            logging.info("[Summary] Use db cache:%s", final_summary)
     except Exception as e:
         logging.error(f'content_summarize: {str(e)}')
 
