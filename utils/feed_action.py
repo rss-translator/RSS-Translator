@@ -118,12 +118,12 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
             fe.pubDate(pubdate)
             fe.summary(summary, type='html')
 
-            if entry.get('enclosures'):
-                enclosure = entry.get('enclosures')[0]
+            for enclosure in entry.get('enclosures', []):
                 fe.enclosure(url=enclosure.get('href'), 
                             type=enclosure.get('type'),
                             length=enclosure.get('length'),
                              )
+            
             # id, title, updated are required
             if not fe.updated():
                 fe.updated(pubdate if pubdate else datetime.now(timezone.utc))
