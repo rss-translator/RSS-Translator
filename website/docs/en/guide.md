@@ -51,6 +51,12 @@ The merge is done in real time when you visit this URL, it is relatively resourc
 ## Viewing the service log
 After logging in, just visit the log in the address bar: http://127.0.0.1:8000/log
 
+## Use json feed
+add the /json path after /rss:
+
+`http://127.0.0.1:8000/rss/json/<sid>`
+
+
 ## Field Descriptions
 | Field Names | Fields | Description |
 | ------ | ---- | ---- |

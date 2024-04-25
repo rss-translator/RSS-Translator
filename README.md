@@ -32,6 +32,9 @@
 - Microsoft Translate API
 - Caiyun API
 - Moonshot AI
+- Together AI
+- OpenRouter AI
+- Groq
 
 陆续增加中
 

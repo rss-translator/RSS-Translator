@@ -24,14 +24,17 @@
 
 - DeepL
 - DeepLX
+- Google Translate(Web)
+- Microsoft Translate API
+- Caiyun API
 - OpenAI
 - ClaudeAI
 - Azure OpenAI
 - Google Gemini
-- Google Translate(Web)
-- Microsoft Translate API
-- Caiyun API
 - Moonshot AI
+- Together AI
+- OpenRouter AI
+- Groq
 
 陆续增加中   
 具体信息请查看[<翻译服务>](translator.md)
