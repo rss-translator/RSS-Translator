@@ -19,7 +19,8 @@ from django_text_translator.models import TranslatorEngine, Translated_Content
 
 from utils.feed_action import fetch_feed, generate_atom_feed, atom2jsonfeed
 from utils import text_handler
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup
+import mistune
 from typing import List, Tuple, Optional
 
 
@@ -316,7 +317,7 @@ def translate_feed(
                                                                             minimum_chunk_size=summary_engine.max_size())
                         total_tokens += tokens
                         need_cache_objs.update(need_cache)
-                        html_summary = f"\n<br />AI Summary:<br />\n{summary_text}\n<br />---------------<br />\n"
+                        html_summary = f"\n<br />AI Summary:<br />\n{mistune.html(summary_text)}\n<br />---------------<br />\n"
 
                         entry['summary'] = summary_text
                         entry['content'] = [{'value': html_summary + content}]
@@ -433,7 +434,7 @@ def content_summarize(original_content: str,
                 total_tokens += response.get('tokens', 0)
 
             # Compile final summary from partial summaries
-            final_summary = '<br/><br/>'.join(accumulated_summaries)
+            final_summary = '/n/n'.join(accumulated_summaries)
 
             hash64 = cityhash.CityHash64(f"Summary_{original_content}")
             logging.info("[Summary] Will cache:%s", final_summary)
