@@ -37,13 +37,14 @@ def schedule_update():
         if feed.sid not in task_feeds:
             update_original_feed.schedule(args=(feed.sid,), delay=feed.update_frequency * 60)
 
+
 #@on_shutdown()
 # def flush_all():
 #     huey.storage.flush_queue()
 #     huey.storage.flush_schedule()
 #     huey.storage.flush_results()
-    # clean TaskModel all data
-    # TaskModel.objects.all().delete()
+# clean TaskModel all data
+# TaskModel.objects.all().delete()
 
 
 @db_task(retries=3)
@@ -64,7 +65,7 @@ def update_original_feed(sid: str):
     try:
         obj.valid = False
         fetch_feed_results = fetch_feed(url=obj.feed_url, etag=obj.etag)
-        error = fetch_feed_results['error'] 
+        error = fetch_feed_results['error']
         update = fetch_feed_results.get("update")
         xml = fetch_feed_results.get("xml")
         feed = fetch_feed_results.get("feed")
@@ -72,7 +73,7 @@ def update_original_feed(sid: str):
         if error:
             raise Exception(f"Fetch Original Feed Failed: {error}")
         elif not update:
-            logging.info("Original Feed is up to date, Skip:%s",obj.feed_url)
+            logging.info("Original Feed is up to date, Skip:%s", obj.feed_url)
         else:
             with open(original_feed_file_path, "w", encoding="utf-8") as f:
                 f.write(xml)
@@ -118,7 +119,7 @@ def update_translated_feed(sid: str, force=False):
             raise Exception("Unable translate feed, because Original Feed is None")
 
         if not force and obj.modified == obj.o_feed.last_pull:
-            logging.info("Translated Feed is up to date, Skip translation: %s",obj.o_feed.feed_url)
+            logging.info("Translated Feed is up to date, Skip translation: %s", obj.o_feed.feed_url)
             obj.status = True
             obj.save()
             return True
@@ -141,7 +142,7 @@ def update_translated_feed(sid: str, force=False):
 
         if original_feed.entries:
             o_feed = obj.o_feed
-            logging.info("Start translate feed: [%s]%s" , obj.language, o_feed.feed_url)
+            logging.info("Start translate feed: [%s]%s", obj.language, o_feed.feed_url)
             results = translate_feed.call_local(
                 feed=original_feed,
                 target_language=obj.language,
@@ -176,7 +177,6 @@ def update_translated_feed(sid: str, force=False):
                 with open(f"{translated_feed_file_path}.json", "w", encoding="utf-8") as f:
                     f.write(json_str)
 
-
             # There can only be one billing method at a time, either token or character count.
             if total_tokens > 0:
                 obj.total_tokens += total_tokens
@@ -204,7 +204,7 @@ def translate_feed(
         summary_detail: float,
         summary_engine: TranslatorEngine,
         max_posts: int = 20,
-        translation_display: int=0) -> dict:
+        translation_display: int = 0) -> dict:
     logging.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
     translated_feed = feed
     total_tokens = 0
@@ -249,13 +249,13 @@ def translate_feed(
                 else:
                     logging.info("[Title] Use db cache:%s", cached["text"])
                     translated_text = cached["text"]
-                
+
                 entry["title"] = text_handler.set_translation_display(
                     original=title,
                     translation=translated_text,
                     translation_display=translation_display,
-                    seprator = ' || '
-                    )
+                    seprator=' || '
+                )
                 bulk_save_cache(need_cache_objs)
                 need_cache_objs = {}
 
@@ -271,30 +271,30 @@ def translate_feed(
 
                 if content:
                     #cache_key = cityhash.CityHash64(f"description_{original_description}_{target_language}")
-                    
+
                     # 任务去重
                     # if cache_key not in unique_tasks:
                     #     unique_tasks.add(cache_key)
 
-                        translated_summary, tokens, characters, need_cache = content_translate(content,
-                                                                                             target_language, translate_engine)
-                        total_tokens += tokens
-                        translated_characters += characters
+                    translated_summary, tokens, characters, need_cache = content_translate(content,
+                                                                                           target_language,
+                                                                                           translate_engine)
+                    total_tokens += tokens
+                    translated_characters += characters
 
-                        need_cache_objs.update(need_cache)
-                        
-                        text = text_handler.set_translation_display(
-                            original=content,
-                            translation=translated_summary,
-                            translation_display=translation_display,
-                            seprator = '\n<br />---------------<br />\n'
-                            )
-                        entry['summary'] = text
-                        entry['content'] = [{'value': text}]
+                    need_cache_objs.update(need_cache)
 
-                        bulk_save_cache(need_cache_objs)
-                        need_cache_objs = {}
+                    text = text_handler.set_translation_display(
+                        original=content,
+                        translation=translated_summary,
+                        translation_display=translation_display,
+                        seprator='<br />---------------<br />'
+                    )
+                    entry['summary'] = text
+                    entry['content'] = [{'value': text}]
 
+                    bulk_save_cache(need_cache_objs)
+                    need_cache_objs = {}
 
             if summary:
                 if summary_engine == None:
@@ -305,26 +305,26 @@ def translate_feed(
                 original_content = entry.get('content')
                 content = original_content[0].get('value') if original_content else entry.get('summary')
 
-                if content: 
+                if content:
                     #cache_key = cityhash.CityHash64(f"summary_{content}_{target_language}")
                     # 任务去重
                     # if cache_key not in unique_tasks:
                     #     unique_tasks.add(cache_key)
-                        summary_text, tokens, need_cache = content_summarize(content, 
-                                                                            target_language=target_language, 
-                                                                            detail=summary_detail, 
-                                                                            engine=summary_engine,
-                                                                            minimum_chunk_size=summary_engine.max_size())
-                        total_tokens += tokens
-                        need_cache_objs.update(need_cache)
-                        html_summary = f"\n<br />AI Summary:<br />\n{mistune.html(summary_text)}\n<br />---------------<br />\n"
+                    summary_text, tokens, need_cache = content_summarize(content,
+                                                                         target_language=target_language,
+                                                                         detail=summary_detail,
+                                                                         engine=summary_engine,
+                                                                         minimum_chunk_size=summary_engine.max_size())
+                    total_tokens += tokens
+                    need_cache_objs.update(need_cache)
+                    html_summary = f"<br />AI Summary:<br />{mistune.html(summary_text)}<br />---------------<br />"
 
-                        entry['summary'] = summary_text
-                        entry['content'] = [{'value': html_summary + content}]
+                    entry['summary'] = summary_text
+                    entry['content'] = [{'value': html_summary + content}]
 
-                        bulk_save_cache(need_cache_objs)
-                        need_cache_objs = {}
-    
+                    bulk_save_cache(need_cache_objs)
+                    need_cache_objs = {}
+
     except Exception as e:
         logging.error("translate_feed: %s", str(e))
     finally:
@@ -332,6 +332,7 @@ def translate_feed(
         need_cache_objs = {}
 
     return {"feed": translated_feed, "tokens": total_tokens, "characters": translated_characters}
+
 
 def bulk_save_cache(need_cache_objs):
     try:
@@ -343,6 +344,7 @@ def bulk_save_cache(need_cache_objs):
     except Exception as e:
         logging.error("Save cache: %s", str(e))
     return True
+
 
 def content_translate(original_content: str, target_language: str, engine: TranslatorEngine):
     total_tokens = 0
@@ -386,8 +388,9 @@ def content_translate(original_content: str, target_language: str, engine: Trans
 
     return str(soup), total_tokens, total_characters, need_cache_objs
 
-def content_summarize(original_content: str, 
-                      target_language: str, 
+
+def content_summarize(original_content: str,
+                      target_language: str,
                       engine: TranslatorEngine,
                       detail: float = 0.0,
                       minimum_chunk_size: Optional[int] = 500,
@@ -395,7 +398,7 @@ def content_summarize(original_content: str,
                       summarize_recursively=True):
     # check detail is set correctly
     assert 0 <= detail <= 1
-    
+
     total_tokens = 0
     need_cache_objs = {}
     final_summary = ''
@@ -453,6 +456,7 @@ def content_summarize(original_content: str,
         logging.error(f'content_summarize: {str(e)}')
 
     return final_summary, total_tokens, need_cache_objs
+
 
 '''
 def chunk_translate(original_content: str, target_language: str, engine: TranslatorEngine):
