@@ -24,14 +24,17 @@ Currently supported translation services:
 
 - DeepL
 - DeepLX
-- OpenAI
-- ClaudeAI
-- Azure OpenAI
-- Google Gemini
 - Google Translate(Web)
 - Microsoft Translate API
 - Caiyun API
+- OpenAI
+- Claude AI
+- Azure OpenAI
+- Google Gemini
 - Moonshot AI
+- Together AI
+- OpenRouter AI
+- Groq
 
 Continuously adding   
 For more information, please check [translation service](translator.md).
