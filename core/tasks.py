@@ -437,7 +437,7 @@ def content_summarize(original_content: str,
                 total_tokens += response.get('tokens', 0)
 
             # Compile final summary from partial summaries
-            final_summary = '/n/n'.join(accumulated_summaries)
+            final_summary = '<br/>'.join(accumulated_summaries)
 
             hash64 = cityhash.CityHash64(f"Summary_{original_content}")
             logging.info("[Summary] Will cache:%s", final_summary)
