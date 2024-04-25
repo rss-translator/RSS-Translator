@@ -63,7 +63,7 @@ INSTALLED_APPS = [
 DEBUG_PLUGINS = [
     "debug_toolbar",
     'bx_django_utils',  # https://github.com/boxine/bx_django_utils
-    'huey_monitor',
+    #'huey_monitor',
 ]
 
 MIDDLEWARE = [

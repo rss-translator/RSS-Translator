@@ -8,8 +8,8 @@ from django.db import transaction
 
 from core.tasks import update_original_feed, update_translated_feed
 
-if settings.DEBUG:
-    from huey_monitor.models import TaskModel
+#if settings.DEBUG:
+#    from huey_monitor.models import TaskModel
 
 class ExportMixin:
     def o_feed_export_as_opml(self, request, queryset):
@@ -69,5 +69,5 @@ class ForceUpdateMixin:
                 logging.info("Revoke task: %s", task)
                 huey.revoke_by_id(task)
                 # delete TaskModel data
-                if settings.DEBUG:
-                    TaskModel.objects.filter(task_id=task.id).delete()
+                # if settings.DEBUG:
+                #     TaskModel.objects.filter(task_id=task.id).delete()
