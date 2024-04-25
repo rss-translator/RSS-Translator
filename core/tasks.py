@@ -94,7 +94,7 @@ def update_original_feed(sid: str):
 
     # Update T_Feeds
     t_feeds = obj.t_feed_set.all()
-    if t_feeds.exists():
+    if obj.valid and t_feeds.exists():
         for t_feed in t_feeds:
             t_feed.status = None
             t_feed.save()
@@ -111,7 +111,7 @@ def update_translated_feed(sid: str, force=False):
         return False
 
     try:
-        logging.info("Call task update_translated_feed")
+        logging.info("Call task update_translated_feed: %s", obj.o_feed.feed_url)
 
         if obj.o_feed.pk is None:
             raise Exception("Unable translate feed, because Original Feed is None")
@@ -170,9 +170,10 @@ def update_translated_feed(sid: str, force=False):
             json_dict = atom2jsonfeed(f"{translated_feed_file_path}.xml")
             json_str = json.dumps(json_dict, indent=4, ensure_ascii=False)
             if json_str is None:
-                raise Exception("atom2json returned None")
-            with open(f"{translated_feed_file_path}.json", "w", encoding="utf-8") as f:
-                f.write(json_str)
+                logging.error("atom2json returned None")
+            else:
+                with open(f"{translated_feed_file_path}.json", "w", encoding="utf-8") as f:
+                    f.write(json_str)
 
 
             # There can only be one billing method at a time, either token or character count.
