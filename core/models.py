@@ -28,6 +28,7 @@ class O_Feed(models.Model):
     valid = models.BooleanField(_("Valid"), null=True,editable=False, )
     update_frequency = models.IntegerField(_("Update Frequency"), default=os.getenv("default_update_frequency", 30), help_text=_("Minutes"))
     max_posts = models.IntegerField(_("Max Posts"), default=os.getenv("default_max_posts", 20), help_text=_("Max number of posts to be translated"))
+    quality = models.BooleanField(_("Best Quality"), default=False, help_text=_("Formatting such as hyperlinks, bold, italics, etc. will be lost for optimal translation quality."))
 
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, related_name='translator')
     object_id = models.PositiveIntegerField(null=True)

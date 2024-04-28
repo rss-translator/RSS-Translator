@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-23 06:43+0000\n"
+"POT-Creation-Date: 2024-04-28 07:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,7 +105,7 @@ msgstr "原文 | 译文"
 msgid "Translation Display"
 msgstr "译文显示"
 
-#: core/models.py:27 core/models.py:81
+#: core/models.py:27 core/models.py:82
 msgid "Size"
 msgstr "文件大小"
 
@@ -125,84 +125,93 @@ msgstr "最大条目"
 msgid "Max number of posts to be translated"
 msgstr "要翻译的最大帖子数"
 
-#: core/models.py:40
+#: core/models.py:31
+msgid "Best Quality"
+msgstr "最佳质量"
+
+#: core/models.py:31
+msgid ""
+"Formatting such as hyperlinks, bold, italics, etc. will be lost for optimal "
+"translation quality."
+msgstr "获取最佳翻译质量，将会丢失超链接、加粗、斜体等格式"
+
+#: core/models.py:41
 msgid "Summary Detail"
 msgstr "摘要细粒度"
 
-#: core/models.py:46
+#: core/models.py:47
 msgid ""
 "Level of detail of summaries of longer articles. 0: Normal, 1: Most detailed "
 "(cost more tokens)"
-msgstr ""
-"较长文章摘要的详细程度。0：正常，1：最详细(花费更多token)" 
+msgstr "较长文章摘要的详细程度。0：正常，1：最详细(花费更多token)"
 
-#: core/models.py:48
+#: core/models.py:49
 msgid "Addtional Prompt"
 msgstr "额外的提示词"
 
-#: core/models.py:48
+#: core/models.py:49
 msgid "Addtional Prompt for translation and summary"
 msgstr "用于AI翻译和摘要(可选)"
 
-#: core/models.py:54 core/models.py:70
+#: core/models.py:55 core/models.py:71
 msgid "Original Feed"
 msgstr "原始源"
 
-#: core/models.py:55
+#: core/models.py:56
 msgid "Original Feeds"
 msgstr "原始源"
 
-#: core/models.py:68
+#: core/models.py:69
 msgid "URL Slug(Optional)"
 msgstr "URL别名(可选)"
 
-#: core/models.py:68
+#: core/models.py:69
 msgid ""
 "Example: if set to hacker_news, the subscription address will be "
 "http://127.0.0.1:8000/rss/hacker_news"
 msgstr ""
 "比如设置为'hacker_news',则订阅地址为'http://127.0.0.1:8000/rss/hacker_news'"
 
-#: core/models.py:69
+#: core/models.py:70
 msgid "Language"
 msgstr "语言"
 
-#: core/models.py:71
+#: core/models.py:72
 msgid "Translation Status"
 msgstr "翻译状态"
 
-#: core/models.py:73
+#: core/models.py:74
 msgid "Translate Title"
 msgstr "翻译标题"
 
-#: core/models.py:74
+#: core/models.py:75
 msgid "Translate Content"
 msgstr "翻译内容"
 
-#: core/models.py:75
+#: core/models.py:76
 msgid "Summary"
 msgstr "摘要"
 
-#: core/models.py:77
+#: core/models.py:78
 msgid "Tokens Cost"
 msgstr "花费Token数"
 
-#: core/models.py:78
+#: core/models.py:79
 msgid "Characters Cost"
 msgstr "花费字符数"
 
-#: core/models.py:80
+#: core/models.py:81
 msgid "Last Modified"
 msgstr "最后更新"
 
-#: core/models.py:80
+#: core/models.py:81
 msgid "Last time the feed was translated"
 msgstr "最后翻译的时间"
 
-#: core/models.py:86
+#: core/models.py:87
 msgid "Translated Feed"
 msgstr "翻译源"
 
-#: core/models.py:87
+#: core/models.py:88
 msgid "Translated Feeds"
 msgstr "翻译源"

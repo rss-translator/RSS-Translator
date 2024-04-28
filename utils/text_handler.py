@@ -148,7 +148,7 @@ def group_chunks(split_chunks: dict, min_size: int, max_size: int,
 '''
 
 def should_skip(element):
-    skip_tags = ['pre', 'code', 'script', 'style', 'head', 'title', 'meta']
+    skip_tags = ['pre', 'code', 'script', 'style', 'head', 'title', 'meta', 'abbr', 'address', 'samp', 'kbd', 'bdo', 'cite', 'dfn']
     if isinstance(element, Comment):
         return True
     if element.find_parents(skip_tags):
@@ -170,6 +170,13 @@ def should_skip(element):
             return True
 
     return False
+
+def unwrap_tags(soup)->str:
+    tags_to_unwrap = ['i', 'a', 'strong', 'b', 'em', 'span', 'sup', 'sub', 'mark', 'del', 'ins', 'u', 's', 'small']
+    for tag_name in tags_to_unwrap:
+        for tag in soup.find_all(tag_name):
+            tag.unwrap()
+    return str(soup)
 
 def set_translation_display(original:str, translation:str, translation_display:int, seprator:str = ' || ') -> str:
     if translation_display == 0: #'Only Translation'

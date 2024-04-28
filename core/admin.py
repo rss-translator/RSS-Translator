@@ -130,7 +130,7 @@ class O_FeedForm(forms.ModelForm):
 
     class Meta:
         model = O_Feed
-        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'translation_display', 'summary_engine', 'summary_detail', 'additional_prompt', 'name']
+        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'translation_display', 'summary_engine', 'summary_detail', 'additional_prompt', 'name', 'quality']
 
     # 重写save方法，以处理自定义字段的数据
     def save(self, commit=True):

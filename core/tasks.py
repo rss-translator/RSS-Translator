@@ -143,7 +143,7 @@ def update_translated_feed(sid: str, force=False):
         if original_feed.entries:
             o_feed = obj.o_feed
             logging.info("Start translate feed: [%s]%s", obj.language, o_feed.feed_url)
-            results = translate_feed.call_local(
+            results = translate_feed(
                 feed=original_feed,
                 target_language=obj.language,
                 translate_engine=o_feed.translator,
@@ -153,7 +153,8 @@ def update_translated_feed(sid: str, force=False):
                 summary_engine=o_feed.summary_engine,
                 summary_detail=o_feed.summary_detail,
                 max_posts=o_feed.max_posts,
-                translation_display=o_feed.translation_display
+                translation_display=o_feed.translation_display,
+                quality=o_feed.quality
             )
 
             if not results:
@@ -193,7 +194,6 @@ def update_translated_feed(sid: str, force=False):
         obj.save()
 
 
-@db_task()
 def translate_feed(
         feed: feedparser.FeedParserDict,
         target_language: str,
@@ -204,7 +204,8 @@ def translate_feed(
         summary_detail: float,
         summary_engine: TranslatorEngine,
         max_posts: int = 20,
-        translation_display: int = 0) -> dict:
+        translation_display: int = 0,
+        quality: bool = False) -> dict:
     logging.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
     translated_feed = feed
     total_tokens = 0
@@ -278,7 +279,8 @@ def translate_feed(
 
                     translated_summary, tokens, characters, need_cache = content_translate(content,
                                                                                            target_language,
-                                                                                           translate_engine)
+                                                                                           translate_engine,
+                                                                                           quality)
                     total_tokens += tokens
                     translated_characters += characters
 
@@ -346,13 +348,16 @@ def bulk_save_cache(need_cache_objs):
     return True
 
 
-def content_translate(original_content: str, target_language: str, engine: TranslatorEngine):
+def content_translate(original_content: str, target_language: str, engine: TranslatorEngine, quality: bool = False):
     total_tokens = 0
     total_characters = 0
     need_cache_objs = {}
-    soup = BeautifulSoup(original_content, 'html.parser')
+    soup = BeautifulSoup(original_content, 'lxml')
 
     try:
+        if quality:
+            soup = BeautifulSoup(text_handler.unwrap_tags(soup), 'lxml')
+            
         for element in soup.find_all(string=True):
             if text_handler.should_skip(element):
                 continue
