@@ -263,6 +263,13 @@ def translate_feed(
                 bulk_save_cache(need_cache_objs)
                 need_cache_objs = {}
 
+            if fetch_article:
+                    try:
+                        article = newspaper.article(entry.get('link')) #勿使用build，因为不支持跳转
+                        entry['content'] = mistune.html(article.text)
+                    except Exception as e:
+                        logging.warning("Fetch original article error:%s", e)
+
             # Translate content
             if translate_content:
                 if translate_engine == None:
@@ -270,17 +277,8 @@ def translate_feed(
                     continue
                 #logging.info("Start Translate Content")
                 # original_description = entry.get('summary', None)  # summary, description
-                content = None
-                if fetch_article:
-                    try:
-                        article = newspaper.article(entry.get('link')) #勿使用build，因为不支持跳转
-                        content = mistune.html(article.text)
-                    except Exception as e:
-                        logging.warning("Fetch original article error:%s", e)
-
-                if not content:
-                    original_content = entry.get('content')
-                    content = original_content[0].value if original_content else entry.get('summary')
+                original_content = entry.get('content')
+                content = original_content[0].value if original_content else entry.get('summary')
 
                 if content:
                     #cache_key = cityhash.CityHash64(f"description_{original_description}_{target_language}")
