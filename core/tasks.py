@@ -156,7 +156,7 @@ def update_translated_feed(sid: str, force=False):
                 max_posts=o_feed.max_posts,
                 translation_display=o_feed.translation_display,
                 quality=o_feed.quality,
-                fetch_article=obj.fetch_article
+                fetch_article=o_feed.fetch_article
             )
 
             if not results:
