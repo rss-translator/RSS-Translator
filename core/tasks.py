@@ -266,7 +266,7 @@ def translate_feed(
             if fetch_article:
                     try:
                         article = newspaper.article(entry.get('link')) #勿使用build，因为不支持跳转
-                        entry['content'] = mistune.html(article.text)
+                        entry['content'] = [{'value': mistune.html(article.text)}]
                     except Exception as e:
                         logging.warning("Fetch original article error:%s", e)
 
