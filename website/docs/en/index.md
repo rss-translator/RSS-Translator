@@ -13,12 +13,13 @@ Official website: [rsstranslator.com](https://rsstranslator.com)
 
 1. Translation of title or content
 2. Bilingual display
-3. subscribe to the translated RSS
-4. add multiple translation engines, each source can specify a translation engine
-5. control the update frequency of the translation source and check the status of the translation
-6. cache all translated content to minimise translation costs
+3. Subscribe to the translated RSS
+4. Support multiple translation engines, each source can specify a translation engine
+5. Control the update frequency of the translation source and check the status of the translation
+6. Cache all translated content to minimise translation costs
 7. View the number of tokens/characters spent on each source.
 8. AI summary content
+9. Fetch Original Article 
    
 Currently supported translation services:
 
