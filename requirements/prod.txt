@@ -14,6 +14,8 @@ fake-useragent
 cityhash
 bs4
 lxml
+lxml_html_clean
 python-dateutil
 html2text
 mistune
+newspaper4k

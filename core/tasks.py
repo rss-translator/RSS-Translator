@@ -21,6 +21,7 @@ from utils.feed_action import fetch_feed, generate_atom_feed, atom2jsonfeed
 from utils import text_handler
 from bs4 import BeautifulSoup
 import mistune
+import newspaper
 from typing import List, Tuple, Optional
 
 
@@ -154,7 +155,8 @@ def update_translated_feed(sid: str, force=False):
                 summary_detail=o_feed.summary_detail,
                 max_posts=o_feed.max_posts,
                 translation_display=o_feed.translation_display,
-                quality=o_feed.quality
+                quality=o_feed.quality,
+                fetch_article=obj.fetch_article
             )
 
             if not results:
@@ -205,7 +207,8 @@ def translate_feed(
         summary_engine: TranslatorEngine,
         max_posts: int = 20,
         translation_display: int = 0,
-        quality: bool = False) -> dict:
+        quality: bool = False,
+        fetch_article: bool = False) -> dict:
     logging.info("Call task translate_feed: %s(%s items)", target_language, len(feed.entries))
     translated_feed = feed
     total_tokens = 0
@@ -267,8 +270,17 @@ def translate_feed(
                     continue
                 #logging.info("Start Translate Content")
                 # original_description = entry.get('summary', None)  # summary, description
-                original_content = entry.get('content')
-                content = original_content[0].value if original_content else entry.get('summary')
+                content = None
+                if fetch_article:
+                    try:
+                        article = newspaper.article(entry.get('link')) #勿使用build，因为不支持跳转
+                        content = mistune.html(article.text)
+                    except Exception as e:
+                        logging.warning("Fetch original article error:%s", e)
+
+                if not content:
+                    original_content = entry.get('content')
+                    content = original_content[0].value if original_content else entry.get('summary')
 
                 if content:
                     #cache_key = cityhash.CityHash64(f"description_{original_description}_{target_language}")
