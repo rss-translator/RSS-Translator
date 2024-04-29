@@ -19,3 +19,4 @@ python-dateutil
 html2text
 mistune
 newspaper4k
+feed2json

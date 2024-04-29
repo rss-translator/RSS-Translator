@@ -43,12 +43,16 @@ class T_FeedInline(admin.TabularInline):
 
     def feed_url(self, obj):
         if obj.sid:
-            url = reverse('core:rss', kwargs={'feed_sid': obj.sid})
-            full_url = self.request.build_absolute_uri(url)
+            rss = reverse('core:rss', kwargs={'feed_sid': obj.sid})
+            rss_url = self.request.build_absolute_uri(rss)
+            json = reverse('core:json', kwargs={'feed_sid': obj.sid})
+            json_url = self.request.build_absolute_uri(json)
             return format_html(
-                "<a href='{0}' target='_blank'>{0}  </a>"
-                "<button type='button' class='btn' data-url='{0}' onclick='copyToClipboard(this)'>Copy</button>",
-                full_url
+                "<a href='{0}' target='_blank'>RSS </a>"
+                "<button type='button' class='btn' data-url='{0}' onclick='copyToClipboard(this)'>Copy</button> | "
+                "<a href='{1}' target='_blank'>JSON </a>"
+                "<button type='button' class='btn' data-url='{1}' onclick='copyToClipboard(this)'>Copy</button>",
+                rss_url,json_url
             )
         return ''
 

@@ -154,50 +154,50 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
     return atom_string_with_pi
 
 
-def atom2jsonfeed(atom_file_path: str) -> dict:
-    feed = feedparser.parse(atom_file_path)
+# def atom2jsonfeed(atom_file_path: str) -> dict:
+#     feed = feedparser.parse(atom_file_path)
 
-    json_feed = {
-        "version": "https://jsonfeed.org/version/1.1",
-        "title": feed.feed.title,
-        "feed_url": feed.feed.id,
-        "home_page_url": feed.feed.get("link", None)
-    }
+#     json_feed = {
+#         "version": "https://jsonfeed.org/version/1.1",
+#         "title": feed.feed.title,
+#         "feed_url": feed.feed.id,
+#         "home_page_url": feed.feed.get("link", None)
+#     }
 
-    if hasattr(feed.feed, "subtitle"):
-        json_feed["description"] = feed.feed.subtitle
-    if hasattr(feed.feed, "updated"):
-        json_feed["updated"] = feed.feed.updated
+#     if hasattr(feed.feed, "subtitle"):
+#         json_feed["description"] = feed.feed.subtitle
+#     if hasattr(feed.feed, "updated"):
+#         json_feed["updated"] = feed.feed.updated
 
-    json_feed["items"] = []
-    for entry in feed.entries:
-        item = {
-            "id": entry.id,
-            "url": entry.link,
-            "title": entry.title,
-        }
-        if hasattr(entry, "summary"):
-            item["content_html"] = entry.summary
-        if hasattr(entry, "published"):
-            item["date_published"] = entry.published
-        if hasattr(entry, "updated"):
-            item["date_modified"] = entry.updated
-        if hasattr(entry, "author"):
-            authors = entry.author
-            if not isinstance(authors, list):
-                authors = [authors]
-            item["authors"] = [{"name": author} for author in authors]
-        if hasattr(entry, "content"):
-            item["content_html"] = ""
-            for content in entry.content:
-                if content["type"] == "text/html":
-                    item["content_html"] += content["value"]
-                elif content["type"] == "text/plain":
-                    item["content_text"] = content["value"]
+#     json_feed["items"] = []
+#     for entry in feed.entries:
+#         item = {
+#             "id": entry.id,
+#             "url": entry.link,
+#             "title": entry.title,
+#         }
+#         if hasattr(entry, "summary"):
+#             item["content_html"] = entry.summary
+#         if hasattr(entry, "published"):
+#             item["date_published"] = entry.published
+#         if hasattr(entry, "updated"):
+#             item["date_modified"] = entry.updated
+#         if hasattr(entry, "author"):
+#             authors = entry.author
+#             if not isinstance(authors, list):
+#                 authors = [authors]
+#             item["authors"] = [{"name": author} for author in authors]
+#         if hasattr(entry, "content"):
+#             item["content_html"] = ""
+#             for content in entry.content:
+#                 if content["type"] == "text/html":
+#                     item["content_html"] += content["value"]
+#                 elif content["type"] == "text/plain":
+#                     item["content_text"] = content["value"]
 
-        json_feed["items"].append(item)
+#         json_feed["items"].append(item)
 
-    return json_feed
+#     return json_feed
 
 
 def merge_all_atom(input_files):

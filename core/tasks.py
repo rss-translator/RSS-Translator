@@ -17,8 +17,9 @@ from huey.contrib.djhuey import on_startup, on_shutdown, task, db_task
 from .models import O_Feed, T_Feed
 from django_text_translator.models import TranslatorEngine, Translated_Content
 
-from utils.feed_action import fetch_feed, generate_atom_feed, atom2jsonfeed
+from utils.feed_action import fetch_feed, generate_atom_feed
 from utils import text_handler
+from feed2json import feed2json
 from bs4 import BeautifulSoup
 import mistune
 import newspaper
@@ -172,7 +173,7 @@ def update_translated_feed(sid: str, force=False):
             with open(f"{translated_feed_file_path}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
 
-            json_dict = atom2jsonfeed(f"{translated_feed_file_path}.xml")
+            json_dict = feed2json(f"{translated_feed_file_path}.xml")
             json_str = json.dumps(json_dict, indent=4, ensure_ascii=False)
             if json_str is None:
                 logging.error("atom2json returned None")
