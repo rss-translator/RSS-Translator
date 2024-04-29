@@ -13,7 +13,7 @@ Official website: [rsstranslator.com](https://rsstranslator.com)
 
 1. Translation of title or content
 2. Bilingual display
-3. Subscribe to the translated RSS
+3. Subscribe to the translated RSS/JSON
 4. Support multiple translation engines, each source can specify a translation engine
 5. Control the update frequency of the translation source and check the status of the translation
 6. Cache all translated content to minimise translation costs
