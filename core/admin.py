@@ -242,7 +242,7 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
             return format_html(
                 "<a href='{0}' target='_blank'>{1}...</a>",
                 # "<button type='button' class='btn' data-url='{0}' onclick=''>Update</button>",
-                url, url[:50]
+                url, url[:30]
             )
         return ''
     show_feed_url.short_description = _('Feed URL')
