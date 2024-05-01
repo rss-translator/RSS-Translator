@@ -238,10 +238,11 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     @admin.display(description="feed_url")
     def show_feed_url(self, obj):
         if obj.feed_url:
+            url = obj.feed_url
             return format_html(
-                "<a href='{0}' target='_blank'>{0}  </a>",
+                "<a href='{0}' target='_blank'>{1}...</a>",
                 # "<button type='button' class='btn' data-url='{0}' onclick=''>Update</button>",
-                obj.feed_url
+                url, url[:50]
             )
         return ''
     show_feed_url.short_description = _('Feed URL')
