@@ -20,6 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Set DEBUG environment variable to '1'
         os.environ['DEBUG'] = '1'
+        os.environ['LOG_LEVEL'] = 'INFO'
         os.environ['CSRF_TRUSTED_ORIGINS'] = 'http://localhost,http://localhost:8000,http://127.0.0.1,http://127.0.0.1:8000,https://localhost,https://localhost:8000,https://127.0.0.1,https://127.0.0.1:8000'
         # Run collectstatic, makemigrations, and migrate
         call_command('collectstatic', '--no-input')
@@ -27,7 +28,7 @@ class Command(BaseCommand):
         call_command('migrate')
 
         # Start run_huey in a separate process using the same Python interpreter
-        self.process = subprocess.Popen([sys.executable, 'manage.py', 'run_huey'])
+        self.process = subprocess.Popen([sys.executable, 'manage.py', 'run_huey', '-f'])
 
         # Create default superuser
         call_command('create_default_superuser')

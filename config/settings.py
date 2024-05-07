@@ -119,12 +119,15 @@ DATABASES = {
 
 HUEY = {
     'huey_class': 'huey.SqliteHuey',
-    'filename': DATA_FOLDER / "huey.sqlite3",
+    'filename': DATA_FOLDER / "tasks.sqlite3",
     'consumer': {
         'workers': int(os.environ.get('HUEY_WORKERS', 10)),
         'worker_type': 'greenlet',
     },
     "immediate": False,
+    "results": False,
+    "store_none": False,
+    "utc": True,
 }
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
