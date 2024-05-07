@@ -31,7 +31,7 @@ DEBUG = os.environ.get('DEBUG') == '1'
 
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://*').split(',')
-# CSRF_TRUSTED_ORIGINS = list(os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://*'))
+CSRF_COOKIE_DOMAIN = CSRF_TRUSTED_ORIGINS
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
