@@ -15,7 +15,7 @@ from huey.contrib.djhuey import HUEY as huey
 from huey.contrib.djhuey import on_startup, on_shutdown, task, db_task
 
 from .models import O_Feed, T_Feed
-from django_text_translator.models import TranslatorEngine, Translated_Content
+from translator.models import TranslatorEngine, Translated_Content
 
 from utils.feed_action import fetch_feed, generate_atom_feed
 from utils import text_handler

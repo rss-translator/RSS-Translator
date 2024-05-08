@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-28 08:41+0000\n"
+"POT-Creation-Date: 2024-05-06 08:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,43 +29,43 @@ msgstr "RSS翻译器"
 msgid "Dashboard"
 msgstr "仪表盘"
 
-#: core/admin.py:55 core/admin.py:279
+#: core/admin.py:59 core/admin.py:282
 msgid "Translated Feed URL"
 msgstr "翻译源地址"
 
-#: core/admin.py:63 core/admin.py:213 core/admin.py:270
+#: core/admin.py:67 core/admin.py:217 core/admin.py:273
 msgid "Size(KB)"
 msgstr "文件大小(KB)"
 
-#: core/admin.py:81 core/admin.py:298
+#: core/admin.py:85 core/admin.py:301
 msgid "Status"
 msgstr "状态"
 
-#: core/admin.py:97
+#: core/admin.py:101
 msgid "Select a valid translator"
 msgstr "选择一个有效的翻译器"
 
-#: core/admin.py:97 core/admin.py:204
+#: core/admin.py:101 core/admin.py:208
 msgid "Translator"
 msgstr "翻译器"
 
-#: core/admin.py:98
+#: core/admin.py:102
 msgid "Select a valid AI engine"
 msgstr "选择一个有效的AI引擎"
 
-#: core/admin.py:98
+#: core/admin.py:102
 msgid "Summary Engine"
 msgstr "摘要器"
 
-#: core/admin.py:208
+#: core/admin.py:212
 msgid "Translated Language"
 msgstr "翻译语言"
 
-#: core/admin.py:229 core/models.py:28
+#: core/admin.py:233 core/models.py:28
 msgid "Valid"
 msgstr "验证"
 
-#: core/admin.py:243 core/models.py:16
+#: core/admin.py:247 core/models.py:16
 msgid "Feed URL"
 msgstr "源地址"
 
@@ -105,7 +105,7 @@ msgstr "原文 | 译文"
 msgid "Translation Display"
 msgstr "译文显示"
 
-#: core/models.py:27 core/models.py:84
+#: core/models.py:27 core/models.py:83
 msgid "Size"
 msgstr "文件大小"
 
@@ -135,91 +135,117 @@ msgid ""
 "translation quality."
 msgstr "获取最佳翻译质量，将会丢失超链接、加粗、斜体等格式"
 
-#: core/models.py:33
+#: core/models.py:32
 msgid "Fetch Original Article"
 msgstr "获取全文"
 
-#: core/models.py:33
+#: core/models.py:32
 msgid "Fetch original article from the website."
 msgstr "从原网站获取全文"
 
-#: core/models.py:43
+#: core/models.py:42
 msgid "Summary Detail"
 msgstr "摘要细粒度"
 
-#: core/models.py:49
+#: core/models.py:48
 msgid ""
 "Level of detail of summaries of longer articles. 0: Normal, 1: Most detailed "
 "(cost more tokens)"
 msgstr "较长文章摘要的详细程度。0：正常，1：最详细(花费更多token)"
 
-#: core/models.py:51
+#: core/models.py:50
 msgid "Addtional Prompt"
 msgstr "额外的提示词"
 
-#: core/models.py:51
+#: core/models.py:50
 msgid "Addtional Prompt for translation and summary"
 msgstr "用于AI翻译和摘要(可选)"
 
-#: core/models.py:57 core/models.py:73
+#: core/models.py:56 core/models.py:72
 msgid "Original Feed"
 msgstr "原始源"
 
-#: core/models.py:58
+#: core/models.py:57
 msgid "Original Feeds"
 msgstr "原始源"
 
-#: core/models.py:71
+#: core/models.py:70
 msgid "URL Slug(Optional)"
 msgstr "URL别名(可选)"
 
-#: core/models.py:71
+#: core/models.py:70
 msgid ""
 "Example: if set to hacker_news, the subscription address will be "
 "http://127.0.0.1:8000/rss/hacker_news"
 msgstr ""
 "比如设置为'hacker_news',则订阅地址为'http://127.0.0.1:8000/rss/hacker_news'"
 
-#: core/models.py:72
+#: core/models.py:71
 msgid "Language"
 msgstr "语言"
 
-#: core/models.py:74
+#: core/models.py:73
 msgid "Translation Status"
 msgstr "翻译状态"
 
-#: core/models.py:76
+#: core/models.py:75 templates/admin/t_feed_banch_update.html:13
 msgid "Translate Title"
 msgstr "翻译标题"
 
-#: core/models.py:77
+#: core/models.py:76 templates/admin/t_feed_banch_update.html:18
 msgid "Translate Content"
 msgstr "翻译内容"
 
-#: core/models.py:78
+#: core/models.py:77 templates/admin/t_feed_banch_update.html:23
 msgid "Summary"
 msgstr "摘要"
 
-#: core/models.py:80
+#: core/models.py:79
 msgid "Tokens Cost"
 msgstr "花费Token数"
 
-#: core/models.py:81
+#: core/models.py:80
 msgid "Characters Cost"
 msgstr "花费字符数"
 
-#: core/models.py:83
+#: core/models.py:82
 msgid "Last Modified"
 msgstr "最后更新"
 
-#: core/models.py:83
+#: core/models.py:82
 msgid "Last time the feed was translated"
 msgstr "最后翻译的时间"
 
-#: core/models.py:89
+#: core/models.py:88
 msgid "Translated Feed"
 msgstr "翻译源"
 
-#: core/models.py:90
+#: core/models.py:89
 msgid "Translated Feeds"
 msgstr "翻译源"
+
+#: templates/admin/t_feed_banch_update.html:14
+#: templates/admin/t_feed_banch_update.html:19
+#: templates/admin/t_feed_banch_update.html:24
+msgid " Keep Original"
+msgstr " 保持原设置"
+
+#: templates/admin/t_feed_banch_update.html:15
+#: templates/admin/t_feed_banch_update.html:20
+#: templates/admin/t_feed_banch_update.html:25
+msgid " Enable"
+msgstr " 启用"
+
+#: templates/admin/t_feed_banch_update.html:16
+#: templates/admin/t_feed_banch_update.html:21
+#: templates/admin/t_feed_banch_update.html:26
+msgid " Disable"
+msgstr " 禁用"
+
+#: utils/modelAdmin_actions.py:56 utils/modelAdmin_actions.py:67
+msgid "Force update"
+msgstr "强制更新"
+
+#: utils/modelAdmin_actions.py:114
+msgid "Batch modification"
+msgstr "批量修改"
