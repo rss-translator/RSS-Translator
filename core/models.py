@@ -11,7 +11,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class O_Feed(models.Model):
-    sid = models.CharField(max_length=255, unique=True, editable=False,)
+    sid = models.SlugField(max_length=255, unique=True, editable=False,)
     name = models.CharField(_("Name"), max_length=255, blank=True, null=True)
     feed_url = models.URLField(_("Feed URL"), unique=True,)
     last_updated = models.DateTimeField(_("Last Updated(UTC)"), default=None, blank=True, null=True, editable=False, help_text=_("Last updated from the original feed"))
@@ -67,7 +67,7 @@ class O_Feed(models.Model):
     
 
 class T_Feed(models.Model):
-    sid = models.CharField(_("URL Slug(Optional)"), max_length=255, unique=True, help_text=_("Example: if set to hacker_news, the subscription address will be http://127.0.0.1:8000/rss/hacker_news"))  # sid for feed_url and file name
+    sid = models.SlugField(_("URL Slug(Optional)"), max_length=255, unique=True, help_text=_("Example: if set to hacker_news, the subscription address will be http://127.0.0.1:8000/rss/hacker_news"))  # sid for feed_url and file name
     language = models.CharField(_("Language"), choices=settings.TRANSLATION_LANGUAGES, max_length=50)
     o_feed = models.ForeignKey(O_Feed, on_delete=models.CASCADE, verbose_name=_("Original Feed"))
     status = models.BooleanField(_("Translation Status"), null=True, editable=False,)
@@ -97,6 +97,6 @@ class T_Feed(models.Model):
     def save(self, *args, **kwargs):
         if not self.sid:
             self.sid = f"{self.o_feed.sid}_{re.sub('[^a-z]', '_', self.language.lower())}"
-        else:
-            self.sid = f"{re.sub('[^a-zA-Z0-9]', '_', self.sid)}"
+        # else:
+        #     self.sid = self.sid
         super(T_Feed, self).save(*args, **kwargs)
