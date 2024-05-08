@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'huey.contrib.djhuey',
-    'django_text_translator',
+    'translator.apps.TranslatorConfig',
     'core.apps.CoreConfig',
     'encrypted_model_fields', # must set FIELD_ENCRYPTION_KEY value
 ]
