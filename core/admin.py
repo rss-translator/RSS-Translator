@@ -1,13 +1,11 @@
 import logging
 from ast import literal_eval
-
 from django import forms
 from django.contrib import admin
 from django.conf import settings
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
 from django.urls import path
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.core.paginator import Paginator
 
 from django.contrib.auth.models import User, Group
@@ -15,9 +13,8 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
 from .models import O_Feed, T_Feed
-from translator.models import TranslatorEngine
 from .tasks import update_original_feed, update_translated_feed
-from utils.modelAdmin_utils import CustomModelActions, get_translator_and_summary_choices, get_all_subclasses, valid_icon
+from utils.modelAdmin_utils import CustomModelActions, get_translator_and_summary_choices, get_all_app_models, valid_icon
 
 class CoreAdminSite(admin.AdminSite):
     site_header = _('RSS Translator Admin')
@@ -27,27 +24,28 @@ class CoreAdminSite(admin.AdminSite):
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path("translator/", translator_view, name="translator"),
+            path("translator/add", translator_add_view, name="translator_add"),
+            path("translator/list", translator_list_view, name="translator_list"),
         ]
         return custom_urls + urls
     
     def get_app_list(self, request, app_label=None):
         app_list = super().get_app_list(request, app_label)
-        app_list += [
-            {
-                "name": _("Translator"),
-                "app_label": "translator",
+        app_list += [{
+                "name": _("Engine"),
+                "app_label": "engine",
                 "models": [
                     {
-                        "name": "Translator",
+                        "name": _("Translator"),
                         "object_name": "Translator",
-                        "admin_url": "/translator/",
-                        "add_url": "/translator/add/",
+                        "admin_url": "/translator/list",
+                        "add_url": "/translator/add",
                         #"view_only": False,
                     }
                 ],
             }
         ]
+        
         return app_list
     
 core_admin_site = CoreAdminSite()
@@ -56,7 +54,7 @@ class TranslatorPaginator(Paginator):
     def __init__(self):
         super().__init__(self, 100)
 
-        self.translator_count = len(get_all_subclasses(TranslatorEngine))
+        self.translator_count = len(get_all_app_models('translator'))
 
     @property
     def count(self):
@@ -73,17 +71,17 @@ class TranslatorPaginator(Paginator):
 
     # Copied from Huey's SqliteStorage with some modifications to allow pagination
     def enqueued_items(self, limit, offset):
-        translators = get_all_subclasses(TranslatorEngine)
+        translators = get_all_app_models('translator')
         translator_list = []
         for model in translators:
             objects = model.objects.all().order_by('name').values_list('id', 'name', 'valid')[offset:offset+limit]
             for obj_id, obj_name, obj_valid in objects:
-                translator_list.append({'id':obj_id, 'table_name': model._meta.db_table.split('_')[1], 'name':obj_name,'valid': valid_icon(obj_valid), 'type': model._meta.verbose_name})
+                translator_list.append({'id':obj_id, 'table_name': model._meta.db_table.split('_')[1], 'name':obj_name,'valid': valid_icon(obj_valid), 'provider': model._meta.verbose_name})
 
         return translator_list
  
 
-def translator_view(request):
+def translator_list_view(request):
     page_number = int(request.GET.get("p", 1))
     paginator = TranslatorPaginator()
     page = paginator.get_page(page_number)
@@ -97,7 +95,22 @@ def translator_view(request):
         "translators": page.object_list,
     }
     return render(request, 'admin/translator.html', context)
-   
+
+def translator_add_view(request):
+    if request.method == 'POST':
+        translator_name = request.POST.get('translator_name','/')
+        # redirect to example.com/translator/translator_name/add
+        return redirect(f"/translator/{translator_name}/add")
+    else:
+        models = get_all_app_models('translator')
+        translator_list = []
+        for model in models:
+            translator_list.append({'table_name': model._meta.db_table.split('_')[1], 'provider': model._meta.verbose_name})
+        context = {
+            **core_admin_site.each_context(request),
+            "translator_choices": translator_list,
+        }
+        return render(request, 'admin/translator_add.html', context)
 
 class T_FeedForm(forms.ModelForm):
     class Meta:
@@ -327,11 +340,12 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
                 queryset.update(**update_fields)
 
             #self.message_user(request, f"Successfully modified {queryset.count()} items.")
-            return HttpResponseRedirect(request.get_full_path())
+            #return HttpResponseRedirect(request.get_full_path())
+            return redirect(request.get_full_path())
         
         translator_choices, summary_engine_choices = get_translator_and_summary_choices() 
         logging.info("translator_choices: %s, summary_engine_choices: %s", translator_choices, summary_engine_choices)
-        return render(request, 'admin/o_feed_banch_modify.html', context={**admin.site.each_context(request), 'items': queryset,'translator_choices': translator_choices, 'summary_engine_choices': summary_engine_choices})
+        return render(request, 'admin/o_feed_batch_modify.html', context={**core_admin_site.each_context(request), 'items': queryset,'translator_choices': translator_choices, 'summary_engine_choices': summary_engine_choices})
     o_feed_batch_modify.short_description = _("Batch modification")
 
 
@@ -401,8 +415,9 @@ class T_FeedAdmin(admin.ModelAdmin, CustomModelActions):
                     queryset.update(summary=False)
 
             #self.message_user(request, f"Successfully modified {queryset.count()} items.")
-            return HttpResponseRedirect(request.get_full_path())
-        return render(request, 'admin/t_feed_batch_modify.html', context={**admin.site.each_context(request), 'items': queryset})
+            #return HttpResponseRedirect(request.get_full_path())
+            return redirect(request.get_full_path())
+        return render(request, 'admin/t_feed_batch_modify.html', context={**core_admin_site.each_context(request), 'items': queryset})
     
     t_feed_batch_modify.short_description = _("Batch modification")
    
@@ -413,9 +428,3 @@ core_admin_site.register(T_Feed, T_FeedAdmin)
 if settings.USER_MANAGEMENT:
     core_admin_site.register(User)
     core_admin_site.register(Group)
-
-if settings.DEBUG:
-    from translator.models import Translated_Content, TestTranslator
-    from translator.admin import Translated_ContentAdmin, TestTranslatorAdmin
-    core_admin_site.register(Translated_Content, Translated_ContentAdmin)
-    core_admin_site.register(TestTranslator, TestTranslatorAdmin)
