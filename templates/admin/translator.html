@@ -6,7 +6,7 @@
     <tr>
       <th>Name</th>
       <th>Valid</th>
-      <th>Type</th>
+      <th>Provider</th>
     </tr>
     </thead>
     <tbody>
@@ -14,7 +14,7 @@
       <tr>
         <td><a href="/translator/{{ translator.table_name }}/{{ translator.id }}/change/">{{ translator.name }}</a></td>
         <td>{{ translator.valid }}</td>
-        <td>{{ translator.type }}</td>
+        <td>{{ translator.provider }}</td>
       </tr>
     {% endfor %}
     </tbody>
