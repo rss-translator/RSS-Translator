@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional
 from bs4 import Comment
 import tiktoken
 import html2text
-from django_text_translator.models import TranslatorEngine
+from translator.models import TranslatorEngine
 
 def clean_content(content: str) -> str:
     """convert html to markdown without useless tags"""

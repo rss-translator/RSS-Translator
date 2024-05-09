@@ -15,7 +15,7 @@ from huey.contrib.djhuey import HUEY as huey
 from huey.contrib.djhuey import on_startup, on_shutdown, task, db_task
 
 from .models import O_Feed, T_Feed
-from django_text_translator.models import TranslatorEngine, Translated_Content
+from translator.models import TranslatorEngine, Translated_Content
 
 from utils.feed_action import fetch_feed, generate_atom_feed
 from utils import text_handler
@@ -27,7 +27,7 @@ from typing import List, Tuple, Optional
 
 
 # from huey_monitor.models import TaskModel
-
+unique_tasks = set()
 # @periodic_task(crontab( minute='*/1'))
 @on_startup()
 def schedule_update():
@@ -51,6 +51,11 @@ def schedule_update():
 
 @db_task(retries=3)
 def update_original_feed(sid: str):
+    if sid in unique_tasks:
+        return
+    else:
+        unique_tasks.add(sid)
+
     try:
         #obj = O_Feed.objects.get(sid=sid)
         obj = O_Feed.objects.prefetch_related('t_feed_set').get(sid=sid)
@@ -95,6 +100,7 @@ def update_original_feed(sid: str):
         obj.last_pull = datetime.now(timezone.utc)
         update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
         obj.save()
+        unique_tasks.remove(sid)
 
     # Update T_Feeds
     t_feeds = obj.t_feed_set.all()
@@ -107,6 +113,11 @@ def update_original_feed(sid: str):
 
 @db_task(retries=3)
 def update_translated_feed(sid: str, force=False):
+    if sid in unique_tasks and not force:
+        return
+    else:
+        unique_tasks.add(sid)
+
     try:
         #obj = T_Feed.objects.get(sid=sid)
         obj = T_Feed.objects.select_related('o_feed').get(sid=sid)
@@ -195,6 +206,7 @@ def update_translated_feed(sid: str, force=False):
         obj.status = False
     finally:
         obj.save()
+        unique_tasks.remove(sid)
 
 
 def translate_feed(
@@ -215,23 +227,13 @@ def translate_feed(
     total_tokens = 0
     translated_characters = 0
     need_cache_objs = {}
-
-    unique_tasks = set()
-
+    
     try:
         for entry in translated_feed.entries[:max_posts]:
             title = entry["title"]
-            cache_key = f"title_{title}_{target_language}"
-            unique_tasks.add(cache_key)
+        
             # Translate title
             if translate_title:
-                #logging.info("Start Translate Title")
-                # title = entry["title"]
-                # cache_key = f"title_{title}_{target_language}"
-
-                # 任务去重
-                # if cache_key not in unique_tasks:
-                #     unique_tasks.add(cache_key)
                 cached = Translated_Content.is_translated(title, target_language)  # check cache db
                 translated_text = ''
                 if not cached:
@@ -282,12 +284,6 @@ def translate_feed(
                 content = original_content[0].value if original_content else entry.get('summary')
 
                 if content:
-                    #cache_key = cityhash.CityHash64(f"description_{original_description}_{target_language}")
-
-                    # 任务去重
-                    # if cache_key not in unique_tasks:
-                    #     unique_tasks.add(cache_key)
-
                     translated_summary, tokens, characters, need_cache = content_translate(content,
                                                                                            target_language,
                                                                                            translate_engine,
@@ -319,10 +315,6 @@ def translate_feed(
                 content = original_content[0].get('value') if original_content else entry.get('summary')
 
                 if content:
-                    #cache_key = cityhash.CityHash64(f"summary_{content}_{target_language}")
-                    # 任务去重
-                    # if cache_key not in unique_tasks:
-                    #     unique_tasks.add(cache_key)
                     summary_text, tokens, need_cache = content_summarize(content,
                                                                          target_language=target_language,
                                                                          detail=summary_detail,

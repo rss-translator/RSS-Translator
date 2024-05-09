@@ -1,25 +1,116 @@
 import logging
-
+from ast import literal_eval
 from django import forms
 from django.contrib import admin
 from django.conf import settings
+from django.shortcuts import render
+from django.urls import path
+from django.shortcuts import render,redirect
+from django.core.paginator import Paginator
 
 from django.contrib.auth.models import User, Group
-from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
-
-from django_text_translator.models import TranslatorEngine
-
 from .models import O_Feed, T_Feed
 from .tasks import update_original_feed, update_translated_feed
-from utils.modelAdmin_actions import ExportMixin, ForceUpdateMixin
+from utils.modelAdmin_utils import CustomModelActions, get_translator_and_summary_choices, get_all_app_models, valid_icon
 
-admin.site.site_header = _('RSS Translator Admin')
-admin.site.site_title = _('RSS Translator')
-admin.site.index_title = _('Dashboard')
+class CoreAdminSite(admin.AdminSite):
+    site_header = _('RSS Translator Admin')
+    site_title = _('RSS Translator')
+    index_title = _('Dashboard')
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path("translator/add", translator_add_view, name="translator_add"),
+            path("translator/list", translator_list_view, name="translator_list"),
+        ]
+        return custom_urls + urls
+    
+    def get_app_list(self, request, app_label=None):
+        app_list = super().get_app_list(request, app_label)
+        app_list += [{
+                "name": _("Engine"),
+                "app_label": "engine",
+                "models": [
+                    {
+                        "name": _("Translator"),
+                        "object_name": "Translator",
+                        "admin_url": "/translator/list",
+                        "add_url": "/translator/add",
+                        #"view_only": False,
+                    }
+                ],
+            }
+        ]
+        
+        return app_list
+    
+core_admin_site = CoreAdminSite()
+
+class TranslatorPaginator(Paginator):
+    def __init__(self):
+        super().__init__(self, 100)
+
+        self.translator_count = len(get_all_app_models('translator'))
+
+    @property
+    def count(self):
+        return self.translator_count
+
+    def page(self, number):
+        limit = self.per_page
+        offset = (number - 1) * self.per_page
+        return self._get_page(
+            self.enqueued_items(limit, offset),
+            number,
+            self,
+        )
+
+    # Copied from Huey's SqliteStorage with some modifications to allow pagination
+    def enqueued_items(self, limit, offset):
+        translators = get_all_app_models('translator')
+        translator_list = []
+        for model in translators:
+            objects = model.objects.all().order_by('name').values_list('id', 'name', 'valid')[offset:offset+limit]
+            for obj_id, obj_name, obj_valid in objects:
+                translator_list.append({'id':obj_id, 'table_name': model._meta.db_table.split('_')[1], 'name':obj_name,'valid': valid_icon(obj_valid), 'provider': model._meta.verbose_name})
+
+        return translator_list
+ 
+
+def translator_list_view(request):
+    page_number = int(request.GET.get("p", 1))
+    paginator = TranslatorPaginator()
+    page = paginator.get_page(page_number)
+    page_range = paginator.get_elided_page_range(page_number, on_each_side=2, on_ends=2)
+
+    context = {
+        **core_admin_site.each_context(request),
+        "title": "Translator",
+        "page": page,
+        "page_range": page_range,
+        "translators": page.object_list,
+    }
+    return render(request, 'admin/translator.html', context)
+
+def translator_add_view(request):
+    if request.method == 'POST':
+        translator_name = request.POST.get('translator_name','/')
+        # redirect to example.com/translator/translator_name/add
+        return redirect(f"/translator/{translator_name}/add")
+    else:
+        models = get_all_app_models('translator')
+        translator_list = []
+        for model in models:
+            translator_list.append({'table_name': model._meta.db_table.split('_')[1], 'provider': model._meta.verbose_name})
+        context = {
+            **core_admin_site.each_context(request),
+            "translator_choices": translator_list,
+        }
+        return render(request, 'admin/translator_add.html', context)
 
 class T_FeedForm(forms.ModelForm):
     class Meta:
@@ -69,18 +160,7 @@ class T_FeedInline(admin.TabularInline):
     def obj_status(self, obj):
         if not obj.pk:
             return ''
-        if obj.status is None:
-            return format_html(
-                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
-            )
-        elif obj.status is True:
-            return format_html(
-                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
-            )
-        else:
-            return format_html(
-                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
-            )
+        return valid_icon(obj.status)
 
     obj_status.short_description = _('Status')
     def get_formset(self, request, obj=None, **kwargs):
@@ -88,39 +168,14 @@ class T_FeedInline(admin.TabularInline):
         self.request = request
         return super(T_FeedInline, self).get_formset(request, obj, **kwargs)
 
-def get_all_subclasses(cls):
-    subclasses = set()
-    for subclass in cls.__subclasses__():
-        if not subclass.__subclasses__():
-            subclasses.add(subclass)
-        subclasses.update(get_all_subclasses(subclass))
-    return subclasses
-
 class O_FeedForm(forms.ModelForm):
     # 自定义字段，使用ChoiceField生成下拉菜单
     translator = forms.ChoiceField(choices=(), required=False, help_text=_("Select a valid translator"), label=_("Translator"))
     summary_engine = forms.ChoiceField(choices=(), required=False, help_text=_("Select a valid AI engine"), label=_("Summary Engine"))
     def __init__(self, *args, **kwargs):
         super(O_FeedForm, self).__init__(*args, **kwargs)
-        translator_models = get_all_subclasses(TranslatorEngine)
-        #translator_models = TranslatorEngine.__subclasses__()
-        # Cache ContentTypes to avoid repetitive database calls
-        content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
 
-        # Build all choices in one list comprehension
-        translator_choices = [
-            (f"{content_types[model].id}:{obj_id}", obj_name)
-            for model in translator_models
-            for obj_id, obj_name in model.objects.filter(valid=True).values_list('id', 'name')
-        ]
-        self.fields['translator'].choices = translator_choices
-
-        summary_engine_choices = [
-            (f"{content_types[model].id}:{obj_id}", obj_name)
-            for model in translator_models
-            for obj_id, obj_name in model.objects.filter(valid=True, is_ai=True).values_list('id', 'name')
-        ]
-        self.fields['summary_engine'].choices = summary_engine_choices
+        self.fields['translator'].choices, self.fields['summary_engine'].choices = get_translator_and_summary_choices()
 
         # 如果已经有关联的对象，设置默认值
         instance = getattr(self, 'instance', None)
@@ -157,16 +212,14 @@ class O_FeedForm(forms.ModelForm):
 
         return super(O_FeedForm, self).save(commit=commit)
 
-
-@admin.register(O_Feed)
-class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
+class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
     form = O_FeedForm
     inlines = [T_FeedInline]
     list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
                     "update_frequency", "last_updated", "last_pull"]
     search_fields = ["name", "feed_url"]
     list_filter = ["valid"]
-    actions = ['o_feed_force_update', 'o_feed_export_as_opml']
+    actions = ['o_feed_force_update', 'o_feed_export_as_opml', 'o_feed_batch_modify']
 
 
     def save_formset(self, request, form, formset, change):
@@ -217,18 +270,7 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
     size_in_kb.short_description = _('Size(KB)')
 
     def is_valid(self, obj):
-        if obj.valid is None:
-            return format_html(
-                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
-            )
-        elif obj.valid is True:
-            return format_html(
-                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
-            )
-        else:
-            return format_html(
-                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
-            )
+        return valid_icon(obj.valid)
 
     is_valid.short_description = _('Valid')
 
@@ -254,15 +296,66 @@ class O_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
                 obj.sid
             )
         return ''
+    
+    def o_feed_batch_modify(self, request, queryset):
+        if 'apply' in request.POST:
+            logging.info("Apply o_feed_batch_modify")
+            post_data = request.POST
+            fields = {
+                'update_frequency': 'update_frequency_value',
+                'max_posts': 'max_posts_value',
+                'translator': 'translator_value',
+                'translation_display': 'translation_display_value',
+                'summary_engine': 'summary_engine_value',
+                'summary_detail': 'summary_detail_value', 
+                'additional_prompt': 'additional_prompt_value',
+                'fetch_article': 'fetch_article',
+                'quality': 'quality'
+            }
+            field_types = {
+                'update_frequency': int,
+                'max_posts': int,
+                'translation_display': int,
+                'summary_detail': float, 
+                'additional_prompt': str,
+                'fetch_article': literal_eval,
+                'quality': literal_eval        
+            }
+            update_fields = {}
+            for field, value_field in fields.items():
+                value = post_data.get(value_field)
+                if post_data.get(field, 'Keep') != 'Keep' and value:
+                    match field:
+                        case 'translator':
+                            content_type_id, object_id = map(int, value.split(':'))
+                            update_fields['content_type_id'] = content_type_id
+                            update_fields['object_id'] = object_id
+                        case 'summary_engine':
+                            content_type_summary_id, object_id_summary = map(int, value.split(':'))
+                            update_fields['content_type_summary_id'] = content_type_summary_id
+                            update_fields['object_id_summary'] = object_id_summary
+                        case _:
+                            update_fields[field] = field_types.get(field, str)(value)
 
-@admin.register(T_Feed)
-class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
+            if update_fields:
+                queryset.update(**update_fields)
+
+            #self.message_user(request, f"Successfully modified {queryset.count()} items.")
+            #return HttpResponseRedirect(request.get_full_path())
+            return redirect(request.get_full_path())
+        
+        translator_choices, summary_engine_choices = get_translator_and_summary_choices() 
+        logging.info("translator_choices: %s, summary_engine_choices: %s", translator_choices, summary_engine_choices)
+        return render(request, 'admin/o_feed_batch_modify.html', context={**core_admin_site.each_context(request), 'items': queryset,'translator_choices': translator_choices, 'summary_engine_choices': summary_engine_choices})
+    o_feed_batch_modify.short_description = _("Batch modification")
+
+
+class T_FeedAdmin(admin.ModelAdmin, CustomModelActions):
     list_display = ["id", "feed_url", "o_feed", "status_icon", "language", "translate_title", "translate_content", "summary", "total_tokens", "total_characters", "size_in_kb", "modified"]
     list_filter = ["status", "translate_title", "translate_content"]
     search_fields = ["sid"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
-    actions = ['t_feed_force_update', 't_feed_export_as_opml']
-
+    actions = ['t_feed_force_update', 't_feed_export_as_opml', 't_feed_batch_modify']
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         queryset |= self.model.objects.filter(o_feed__feed_url__icontains=search_term)
@@ -287,22 +380,52 @@ class T_FeedAdmin(admin.ModelAdmin, ExportMixin, ForceUpdateMixin):
         return False
     
     def status_icon(self, obj):
-        if obj.status is None:
-            return format_html(
-                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
-            )
-        elif obj.status is True:
-            return format_html(
-                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
-            )
-        else:
-            return format_html(
-                "<img src='/static/admin/img/icon-no.svg' alt='Error'>"
-            )
-
+        return valid_icon(obj.status)
+    
     status_icon.short_description = _('Status')
     status_icon.admin_order_field = 'status'
+    
+    def t_feed_batch_modify(self, request, queryset):
+        if 'apply' in request.POST:
+            logging.info("Apply t_feed_batch_modify")
+            translate_title = request.POST.get('translate_title', 'Keep')
+            translate_content = request.POST.get('translate_content', 'Keep')
+            summary = request.POST.get('summary', 'Keep')
+            match translate_title:
+                case 'Keep':
+                    pass
+                case "True":
+                    queryset.update(translate_title=True)
+                case "False":
+                    queryset.update(translate_title=False)
 
-if not settings.USER_MANAGEMENT:
-    admin.site.unregister(User)
-    admin.site.unregister(Group)
+            match translate_content:
+                case 'Keep':
+                    pass
+                case "True":
+                    queryset.update(translate_content=True)
+                case "False":
+                    queryset.update(translate_content=False)
+
+            match summary:
+                case 'Keep':
+                    pass
+                case "True":
+                    queryset.update(summary=True)
+                case "False":
+                    queryset.update(summary=False)
+
+            #self.message_user(request, f"Successfully modified {queryset.count()} items.")
+            #return HttpResponseRedirect(request.get_full_path())
+            return redirect(request.get_full_path())
+        return render(request, 'admin/t_feed_batch_modify.html', context={**core_admin_site.each_context(request), 'items': queryset})
+    
+    t_feed_batch_modify.short_description = _("Batch modification")
+   
+
+core_admin_site.register(O_Feed, O_FeedAdmin)
+core_admin_site.register(T_Feed, T_FeedAdmin)
+
+if settings.USER_MANAGEMENT:
+    core_admin_site.register(User)
+    core_admin_site.register(Group)

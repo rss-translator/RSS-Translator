@@ -1,5 +1,4 @@
 django>=5.0.2
-django-text-translator>=2024.5.1
 opyml
 tiktoken
 feedparser
@@ -22,3 +21,9 @@ html2text
 mistune
 newspaper4k
 feed2json
+deepl
+PyDeepLX
+anthropic
+django-encrypted-model-fields
+openai
+google-generativeai
