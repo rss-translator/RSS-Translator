@@ -37,7 +37,7 @@ if settings.DEMO:
     class AccessUser:
         has_module_perms = has_perm = __getattr__ = lambda s, *a, **kw: True
 
-    admin.site.has_permission = lambda r: setattr(r, 'user', AccessUser()) or True
+    core_admin_site.has_permission = lambda r: setattr(r, 'user', AccessUser()) or True
 
 urlpatterns = [
     path("favicon.ico", favicon_view),
