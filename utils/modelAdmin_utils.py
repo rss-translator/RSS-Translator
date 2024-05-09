@@ -30,7 +30,7 @@ class CustomModelActions:
         response['Content-Disposition'] = 'attachment; filename="rsstranslator_original_feeds.opml"'
         return response
 
-    o_feed_export_as_opml.short_description = _("Export selected original feeds as OPML")
+    o_feed_export_as_opml.short_description = _("Export selected feeds as OPML")
 
     def t_feed_export_as_opml(self, request, queryset):
         opml_obj = OPML()
@@ -44,7 +44,7 @@ class CustomModelActions:
         response = HttpResponse(opml_obj.to_xml(), content_type='application/xml')
         response['Content-Disposition'] = 'attachment; filename="rsstranslator_translated_feeds.opml"'
         return response
-    t_feed_export_as_opml.short_description = _("Export selected translated feeds as OPML")
+    t_feed_export_as_opml.short_description = _("Export selected feeds as OPML")
 
     def o_feed_force_update(self, request, queryset):
         logging.info("Call o_feed_force_update: %s", queryset)
