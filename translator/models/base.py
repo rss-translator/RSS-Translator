@@ -84,11 +84,11 @@ class OpenAIInterface(TranslatorEngine):
     model = models.CharField(max_length=100, default="gpt-3.5-turbo", help_text="e.g. gpt-3.5-turbo, gpt-4-turbo")
     translate_prompt = models.TextField(default="Translate only the text into {target_language},only returns translations.")
     
-    temperature = models.FloatField(default=0.5)
-    top_p = models.FloatField(default=0.95)
+    temperature = models.FloatField(default=0.2)
+    top_p = models.FloatField(default=0.2)
     frequency_penalty = models.FloatField(default=0)
     presence_penalty = models.FloatField(default=0)
-    max_tokens = models.IntegerField(default=1000)
+    max_tokens = models.IntegerField(default=2000)
 
     summary_prompt = models.TextField(default="Summarize the following text in {target_language}.")
 
