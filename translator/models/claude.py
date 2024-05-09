@@ -12,7 +12,9 @@ class ClaudeTranslator(TranslatorEngine):
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     max_tokens = models.IntegerField(default=1000)
     base_url = models.URLField(_("API URL"), default="https://api.anthropic.com")
-    translate_prompt = models.TextField(default="Translate only the text into {target_language},only returns translations.")
+    translate_prompt = models.TextField(_("Title Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+ 
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
     temperature = models.FloatField(default=0.7)
     top_p = models.FloatField(null=True, blank=True, default=0.7)
@@ -36,12 +38,12 @@ class ClaudeTranslator(TranslatorEngine):
             res = self.translate("hi", "Chinese Simplified")
             return res.get("text") != ""
 
-    def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None) -> dict:
+    def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None, text_type:str='title') -> dict:
         logging.info(">>> Claude Translate [%s]:", target_language)
         client = self._init()
         tokens = client.count_tokens(text)
         translated_text = ''
-        system_prompt = system_prompt or self.translate_prompt
+        system_prompt = system_prompt or self.translate_prompt if text_type == 'title' else self.content_translate_prompt
         try:
             system_prompt = system_prompt.replace('{target_language}', target_language)
             if user_prompt is not None:

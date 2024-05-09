@@ -82,7 +82,8 @@ class OpenAIInterface(TranslatorEngine):
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
     model = models.CharField(max_length=100, default="gpt-3.5-turbo", help_text="e.g. gpt-3.5-turbo, gpt-4-turbo")
-    translate_prompt = models.TextField(default="Translate only the text into {target_language},only returns translations.")
+    translate_prompt = models.TextField(_("Title Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
     
     temperature = models.FloatField(default=0.2)
     top_p = models.FloatField(default=0.2)
@@ -118,12 +119,12 @@ class OpenAIInterface(TranslatorEngine):
                 logging.error("OpenAIInterface validate ->%s", e)
                 return False
 
-    def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None) -> dict:
+    def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None, text_type:str='title') -> dict:
         logging.info(">>> Translate [%s]:", target_language)
         client = self._init()
         tokens = 0
         translated_text = ''
-        system_prompt = system_prompt or self.translate_prompt
+        system_prompt = system_prompt or self.translate_prompt if text_type == 'title' else self.content_translate_prompt
         try:
             system_prompt = system_prompt.replace('{target_language}', target_language)
             if user_prompt:

@@ -237,7 +237,7 @@ def translate_feed(
                 cached = Translated_Content.is_translated(title, target_language)  # check cache db
                 translated_text = ''
                 if not cached:
-                    results = translate_engine.translate(title, target_language=target_language)
+                    results = translate_engine.translate(title, target_language=target_language, text_type="title")
                     translated_text = results.get("text", title)
                     total_tokens += results.get("tokens", 0)
                     translated_characters += len(title)
@@ -371,7 +371,7 @@ def content_translate(original_content: str, target_language: str, engine: Trans
             cached = Translated_Content.is_translated(text, target_language)
 
             if not cached:
-                results = engine.translate(text, target_language=target_language)
+                results = engine.translate(text, target_language=target_language, text_type="content")
                 total_tokens += results.get("tokens", 0)
                 total_characters += len(text)
 

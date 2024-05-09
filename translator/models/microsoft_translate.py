@@ -43,7 +43,7 @@ class MicrosoftTranslator(TranslatorEngine):
         result = self.translate("Hi", "Chinese Simplified")
         return result.get("text") != ""
 
-    def translate(self, text:str, target_language:str) -> dict:
+    def translate(self, text:str, target_language:str, **kwargs) -> dict:
         logging.info(">>> Microsoft Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
         translated_text = ''

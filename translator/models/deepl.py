@@ -49,7 +49,7 @@ class DeepLTranslator(TranslatorEngine):
             logging.error("DeepLTranslator validate ->%s", e)
             return False
 
-    def translate(self, text:str, target_language:str) -> dict:
+    def translate(self, text:str, target_language:str, **kwargs) -> dict:
         logging.info(">>> DeepL Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
         translated_text = ''

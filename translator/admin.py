@@ -12,7 +12,8 @@ from utils.modelAdmin_utils import valid_icon
 
 
 class BaseTranslatorAdmin(admin.ModelAdmin):
-    get_model_perms = lambda self, request: {} # 不显示在admin页面
+    get_model_perms = lambda self, request: {}  # 不显示在admin页面
+
     def save_model(self, request, obj, form, change):
         logging.info("Call save_model: %s", obj)
         # obj.valid = None
@@ -24,7 +25,7 @@ class BaseTranslatorAdmin(admin.ModelAdmin):
             logging.error("Error in translator: %s", e)
         finally:
             obj.save()
-        return redirect('/translator')
+        return redirect("/translator")
 
     def is_valid(self, obj):
         return valid_icon(obj.valid)
@@ -38,11 +39,12 @@ class BaseTranslatorAdmin(admin.ModelAdmin):
         return ""
 
     masked_api_key.short_description = "API Key"
-    
+
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
         # 重定向到指定URL
-        return redirect('/translator')
+        return redirect("/translator")
+
 
 class OpenAITranslatorAdmin(BaseTranslatorAdmin):
     fields = [
@@ -51,6 +53,7 @@ class OpenAITranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -64,6 +67,7 @@ class OpenAITranslatorAdmin(BaseTranslatorAdmin):
         "masked_api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "base_url",
@@ -78,6 +82,7 @@ class AzureAITranslatorAdmin(BaseTranslatorAdmin):
         "version",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -92,6 +97,7 @@ class AzureAITranslatorAdmin(BaseTranslatorAdmin):
         "model",
         "version",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "base_url",
@@ -144,6 +150,7 @@ class GeminiTranslatorAdmin(BaseTranslatorAdmin):
         "api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -157,6 +164,7 @@ class GeminiTranslatorAdmin(BaseTranslatorAdmin):
         "masked_api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "interval",
@@ -182,6 +190,7 @@ class ClaudeTranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -195,6 +204,7 @@ class ClaudeTranslatorAdmin(BaseTranslatorAdmin):
         "masked_api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "base_url",
@@ -208,6 +218,7 @@ class MoonshotAITranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -221,6 +232,7 @@ class MoonshotAITranslatorAdmin(BaseTranslatorAdmin):
         "masked_api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "base_url",
@@ -234,6 +246,7 @@ class TogetherAITranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -247,6 +260,7 @@ class TogetherAITranslatorAdmin(BaseTranslatorAdmin):
         "masked_api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "base_url",
@@ -260,6 +274,7 @@ class OpenRouterAITranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -273,6 +288,7 @@ class OpenRouterAITranslatorAdmin(BaseTranslatorAdmin):
         "masked_api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "base_url",
@@ -286,6 +302,7 @@ class GroqTranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "temperature",
         "top_p",
@@ -299,6 +316,7 @@ class GroqTranslatorAdmin(BaseTranslatorAdmin):
         "masked_api_key",
         "model",
         "translate_prompt",
+        "content_translate_prompt",
         "summary_prompt",
         "max_tokens",
         "base_url",
@@ -332,6 +350,7 @@ class TestTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "translated_text", "max_characters", "interval"]
     list_display = ["name", "is_valid", "translated_text", "max_characters", "interval"]
 
+
 core_admin_site.register(OpenAITranslator, OpenAITranslatorAdmin)
 core_admin_site.register(AzureAITranslator, AzureAITranslatorAdmin)
 core_admin_site.register(DeepLTranslator, DeepLTranslatorAdmin)
@@ -340,7 +359,9 @@ core_admin_site.register(DeepLXTranslator, DeepLXTranslatorAdmin)
 core_admin_site.register(MicrosoftTranslator, MicrosoftTranslatorAdmin)
 core_admin_site.register(CaiYunTranslator, CaiYunTranslatorAdmin)
 core_admin_site.register(GeminiTranslator, GeminiTranslatorAdmin)
-core_admin_site.register(GoogleTranslateWebTranslator, GoogleTranslateWebTranslatorAdmin)
+core_admin_site.register(
+    GoogleTranslateWebTranslator, GoogleTranslateWebTranslatorAdmin
+)
 core_admin_site.register(ClaudeTranslator, ClaudeTranslatorAdmin)
 core_admin_site.register(MoonshotAITranslator, MoonshotAITranslatorAdmin)
 core_admin_site.register(TogetherAITranslator, TogetherAITranslatorAdmin)

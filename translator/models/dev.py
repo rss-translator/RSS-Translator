@@ -18,7 +18,7 @@ class TestTranslator(TranslatorEngine):
     def validate(self) -> bool:
         return True
 
-    def translate(self, text:str, target_language:str) -> dict:
+    def translate(self, text:str, target_language:str, **kwargs) -> dict:
         logging.info(">>> Test Translate [%s]: %s", target_language, text)
         sleep(self.interval)
         return {'text': f"{target_language} {self.translated_text} {text}", "tokens": 0, "characters": len(text)}

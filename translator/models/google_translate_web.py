@@ -41,7 +41,7 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
         results = self.translate("hi", "Chinese Simplified")
         return results.get("text") != ""
 
-    def translate(self, text:str, target_language:str) -> dict:
+    def translate(self, text:str, target_language:str, **kwargs) -> dict:
         logging.info(">>> Google Translate Web Translate [%s]:", target_language)
         target_language = self.language_code_map.get(target_language)
         translated_text = ''

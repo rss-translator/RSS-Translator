@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-09 13:01+0000\n"
+"POT-Creation-Date: 2024-05-09 22:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,15 +38,15 @@ msgstr "引擎"
 msgid "Translator"
 msgstr "翻译器"
 
-#: core/admin.py:150 core/admin.py:376
+#: core/admin.py:150 core/admin.py:377
 msgid "Translated Feed URL"
 msgstr "翻译源地址"
 
-#: core/admin.py:158 core/admin.py:270 core/admin.py:367
+#: core/admin.py:158 core/admin.py:270 core/admin.py:368
 msgid "Size(KB)"
 msgstr "文件大小(KB)"
 
-#: core/admin.py:165 core/admin.py:384
+#: core/admin.py:165 core/admin.py:385
 msgid "Status"
 msgstr "状态"
 
@@ -70,11 +70,11 @@ msgstr "翻译语言"
 msgid "Valid"
 msgstr "验证"
 
-#: core/admin.py:289 core/models.py:16
+#: core/admin.py:290 core/models.py:16
 msgid "Feed URL"
 msgstr "源地址"
 
-#: core/admin.py:349 core/admin.py:422
+#: core/admin.py:350 core/admin.py:423
 msgid "Batch modification"
 msgstr "批量修改"
 
@@ -302,7 +302,17 @@ msgstr ""
 msgid "API URL"
 msgstr ""
 
-#: translator/models/claude.py:16 translator/models/deepl.py:13
+#: translator/models/base.py:85 translator/models/claude.py:15
+#: translator/models/gemini.py:15
+msgid "Title Translate Prompt"
+msgstr "标题翻译提示词"
+
+#: translator/models/base.py:86 translator/models/claude.py:16
+#: translator/models/gemini.py:16
+msgid "Content Translate Prompt"
+msgstr "内容翻译提示词"
+
+#: translator/models/claude.py:18 translator/models/deepl.py:13
 #: translator/models/deeplweb.py:12
 #: translator/models/google_translate_web.py:10
 msgid "Proxy(optional)"
@@ -313,7 +323,7 @@ msgid "API URL(optional)"
 msgstr ""
 
 #: translator/models/deeplweb.py:11 translator/models/deeplx.py:13
-#: translator/models/dev.py:11 translator/models/gemini.py:21
+#: translator/models/dev.py:11 translator/models/gemini.py:22
 #: translator/models/google_translate_web.py:11
 msgid "Request Interval(s)"
 msgstr "请求间隔"
@@ -322,10 +332,10 @@ msgstr "请求间隔"
 msgid "URL"
 msgstr ""
 
-#: utils/modelAdmin_utils.py:33 utils/modelAdmin_utils.py:47
+#: utils/modelAdmin_utils.py:34 utils/modelAdmin_utils.py:48
 msgid "Export selected feeds as OPML"
 msgstr "导出为 OPML"
 
-#: utils/modelAdmin_utils.py:58 utils/modelAdmin_utils.py:69
+#: utils/modelAdmin_utils.py:59 utils/modelAdmin_utils.py:70
 msgid "Force update"
 msgstr "强制更新"

@@ -12,8 +12,9 @@ class GeminiTranslator(TranslatorEngine):
     # base_url = models.URLField(_("API URL"), default="https://generativelanguage.googleapis.com/v1beta/")
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     model = models.CharField(max_length=100, default="gemini-pro", help_text="e.g. gemini-pro, gemini-1.5-pro-latest")
-    translate_prompt = models.TextField(
-        default="Translate only the text from the following into {target_language},only returns translations.")
+    translate_prompt = models.TextField(_("Title Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+ 
     temperature = models.FloatField(default=0.5)
     top_p = models.FloatField(default=1)
     top_k = models.IntegerField(default=1)
@@ -43,12 +44,12 @@ class GeminiTranslator(TranslatorEngine):
                 logging.error("GeminiTranslator validate ->%s", e)
                 return False
 
-    def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None) -> dict:
+    def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None, text_type:str='title') -> dict:
         logging.info(">>> Gemini Translate [%s]:", target_language)
         
         tokens = 0
         translated_text = ''
-        system_prompt = system_prompt or self.translate_prompt
+        system_prompt = system_prompt or self.translate_prompt if text_type == 'title' else self.content_translate_prompt
         prompt = f"{system_prompt.replace('{target_language}', target_language)}\n{user_prompt}\n{text}"
         try:
             model = self._init()
