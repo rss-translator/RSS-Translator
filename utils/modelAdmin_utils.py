@@ -1,8 +1,8 @@
 import logging
 from django.urls import reverse
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.utils.html import format_html
+from django.apps import apps
 
 
 from opyml import OPML, Outline
@@ -10,7 +10,6 @@ from huey.contrib.djhuey import HUEY as huey
 #from django.conf import settings
 from django.utils.translation import gettext_lazy  as _
 from django.db import transaction
-from translator.models import TranslatorEngine
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -80,16 +79,22 @@ class CustomModelActions:
                 #     TaskModel.objects.filter(task_id=task.id).delete()
 
 
-def get_all_subclasses(cls):
-    subclasses = set()
-    for subclass in cls.__subclasses__():
-        if not subclass.__subclasses__():
-            subclasses.add(subclass)
-        subclasses.update(get_all_subclasses(subclass))
-    return subclasses
+# def get_all_subclasses(cls):
+#     subclasses = set()
+#     for subclass in cls.__subclasses__():
+#         if not subclass.__subclasses__():
+#             subclasses.add(subclass)
+#         subclasses.update(get_all_subclasses(subclass))
+#     return subclasses
+def get_all_app_models(app_name):
+    app = apps.get_app_config(app_name)
+    models = app.get_models()
+    #exclude Translated_Content
+    models = [model for model in models if model.__name__ != 'Translated_Content']
+    return models
 
 def get_translator_and_summary_choices():
-    translator_models = get_all_subclasses(TranslatorEngine)
+    translator_models = get_all_app_models('translator')
     # Cache ContentTypes to avoid repetitive database calls
     content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
 
