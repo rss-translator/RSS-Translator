@@ -33,7 +33,7 @@ def log(request):
 
 
 if settings.DEMO:
-    from django.contrib import admin
+    #from django.contrib import admin
     class AccessUser:
         has_module_perms = has_perm = __getattr__ = lambda s, *a, **kw: True
 
