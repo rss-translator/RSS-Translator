@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse
 from django.utils.html import format_html
@@ -90,7 +91,12 @@ def get_all_app_models(app_name):
     app = apps.get_app_config(app_name)
     models = app.get_models()
     #exclude Translated_Content
-    models = [model for model in models if model.__name__ != 'Translated_Content']
+    exclude_models = ['Translated_Content']
+    if not settings.DEBUG:
+        exclude_models.append('TestTranslator')
+
+    models = [model for model in models if model.__name__ not in exclude_models]
+
     return models
 
 def get_translator_and_summary_choices():
