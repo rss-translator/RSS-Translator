@@ -2,6 +2,7 @@ import logging
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 import cityhash
+from config import settings
 from openai import OpenAI
 from encrypted_model_fields.fields import EncryptedCharField
 
@@ -82,8 +83,8 @@ class OpenAIInterface(TranslatorEngine):
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
     model = models.CharField(max_length=100, default="gpt-3.5-turbo", help_text="e.g. gpt-3.5-turbo, gpt-4-turbo")
-    translate_prompt = models.TextField(_("Title Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
-    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+    translate_prompt = models.TextField(_("Title Translate Prompt"), default=settings.default_title_translate_prompt)
+    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default=settings.default_content_translate_prompt)
     
     temperature = models.FloatField(default=0.2)
     top_p = models.FloatField(default=0.2)
@@ -91,7 +92,7 @@ class OpenAIInterface(TranslatorEngine):
     presence_penalty = models.FloatField(default=0)
     max_tokens = models.IntegerField(default=2000)
 
-    summary_prompt = models.TextField(default="Summarize the following text in {target_language}.")
+    summary_prompt = models.TextField(default=settings.default_summary_prompt)
 
     class Meta:
         abstract = True

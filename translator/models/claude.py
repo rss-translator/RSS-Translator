@@ -1,4 +1,5 @@
 import anthropic
+from config import settings
 from .base import TranslatorEngine
 import logging
 from django.db import models
@@ -12,15 +13,15 @@ class ClaudeTranslator(TranslatorEngine):
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     max_tokens = models.IntegerField(default=1000)
     base_url = models.URLField(_("API URL"), default="https://api.anthropic.com")
-    translate_prompt = models.TextField(_("Title Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
-    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+    translate_prompt = models.TextField(_("Title Translate Prompt"), default=settings.default_title_translate_prompt)
+    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default=settings.default_content_translate_prompt)
  
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
     temperature = models.FloatField(default=0.7)
     top_p = models.FloatField(null=True, blank=True, default=0.7)
     top_k = models.IntegerField(default=1)
 
-    summary_prompt = models.TextField(default="Summarize the following text in {target_language}.")
+    summary_prompt = models.TextField(default=settings.default_summary_prompt)
 
     class Meta:
         verbose_name = "Anthropic Claude"

@@ -1,3 +1,4 @@
+from config import settings
 import google.generativeai as genai
 from .base import TranslatorEngine
 import logging
@@ -12,8 +13,8 @@ class GeminiTranslator(TranslatorEngine):
     # base_url = models.URLField(_("API URL"), default="https://generativelanguage.googleapis.com/v1beta/")
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     model = models.CharField(max_length=100, default="gemini-pro", help_text="e.g. gemini-pro, gemini-1.5-pro-latest")
-    translate_prompt = models.TextField(_("Title Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
-    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default="Translate only the text into {target_language}, return only the translations, do not explain the original text.")
+    translate_prompt = models.TextField(_("Title Translate Prompt"), default=settings.default_title_translate_prompt)
+    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default=settings.default_content_translate_prompt)
  
     temperature = models.FloatField(default=0.5)
     top_p = models.FloatField(default=1)
@@ -21,7 +22,7 @@ class GeminiTranslator(TranslatorEngine):
     max_tokens = models.IntegerField(default=1000)
     interval = models.IntegerField(_("Request Interval(s)"), default=3)
 
-    summary_prompt = models.TextField(default="Summarize the following text in {target_language}.")
+    summary_prompt = models.TextField(default=settings.default_summary_prompt)
 
 
     class Meta:
