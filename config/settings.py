@@ -224,6 +224,7 @@ LOGGING = {
            'filename': DATA_FOLDER / 'app.log',
            'maxBytes': 1024 * 1024 * 10,  # 10 MB
            'encoding': 'utf-8',
+           'backupCount': 3,
            'formatter': 'verbose',
        },
    },
