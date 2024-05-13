@@ -71,10 +71,8 @@ class Translated_Content(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.hash:
-            self.hash = cityhash.CityHash64(f"{self.original_content}{self.translated_language}").to_bytes(8, byteorder='little')
-        # if self.hash not is binary, convert it to binary
-        else:
-            self.hash = self.hash.to_bytes(8, byteorder='little')
+            self.hash = cityhash.CityHash64(f"{self.original_content}{self.translated_language}")
+
         super(Translated_Content, self).save(*args, **kwargs)
 
 
