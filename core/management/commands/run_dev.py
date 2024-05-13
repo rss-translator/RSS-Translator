@@ -19,6 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Set DEBUG environment variable to '1'
+        os.environ['DEMO'] = '1'
         os.environ['DEBUG'] = '1'
         os.environ['LOG_LEVEL'] = 'INFO'
         os.environ['CSRF_TRUSTED_ORIGINS'] = 'http://localhost,http://localhost:8000,http://127.0.0.1,http://127.0.0.1:8000,https://localhost,https://localhost:8000,https://127.0.0.1,https://127.0.0.1:8000'
