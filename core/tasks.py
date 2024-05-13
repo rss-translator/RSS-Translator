@@ -447,7 +447,7 @@ def content_summarize(original_content: str,
             # Compile final summary from partial summaries
             final_summary = '<br/>'.join(accumulated_summaries)
 
-            hash64 = cityhash.CityHash64(f"Summary_{original_content}")
+            hash64 = cityhash.CityHash64(f"Summary_{original_content}{target_language}")
             logging.info("[Summary] Will cache:%s", final_summary)
             need_cache_objs[hash64] = Translated_Content(
                 hash=hash64.to_bytes(8, byteorder='little'),
