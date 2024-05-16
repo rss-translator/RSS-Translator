@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
+from tagulous.models import TagField
 
 
 class O_Feed(models.Model):
@@ -48,6 +49,7 @@ class O_Feed(models.Model):
                                        help_text=_("Level of detail of summaries of longer articles. 0: Normal, 1: Most detailed (cost more tokens)"))
 
     additional_prompt = models.TextField(_("Addtional Prompt"), default=None, blank=True, null=True, help_text=_("Addtional Prompt for translation and summary"))
+    tags = TagField(force_lowercase=True, blank=True, help_text=_("Enter a comma-separated tag string"))
 
     def __str__(self):
         return self.feed_url
