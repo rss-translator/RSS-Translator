@@ -9,6 +9,7 @@ __pycache__/
 .pdm-python
 .eggs/
 .git/
+.github/
 !.git/HEAD
 !.git/refs/heads/*
 
@@ -16,6 +17,7 @@ venv/
 .venv/
 .venv-old/
 .docker-venv/
+.vscode/
 node_modules/
 
 docs/
@@ -31,3 +33,4 @@ docker/
 data/
 output/
 deploy/
+website/

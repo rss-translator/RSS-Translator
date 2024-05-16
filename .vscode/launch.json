@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debug: Django",
+            "type": "debugpy",
+            "python": "${workspaceFolder}/venv/bin/python",
+            "env": {"GEVENT_SUPPORT": "True"},
+            "request": "launch",
+            "args": [
+                "run_dev"
+            ],
+            "django": true,
+            "autoStartBrowser": false,
+            "program": "${workspaceFolder}/manage.py"
+        }
+    ]
+}

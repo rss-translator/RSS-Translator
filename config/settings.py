@@ -58,12 +58,20 @@ INSTALLED_APPS = [
     'translator.apps.TranslatorConfig',
     'core.apps.CoreConfig',
     'encrypted_model_fields', # must set FIELD_ENCRYPTION_KEY value
+    'tagulous',
 ]
 DEBUG_PLUGINS = [
     "debug_toolbar",
     'bx_django_utils',  # https://github.com/boxine/bx_django_utils
     #'huey_monitor',
 ]
+
+SERIALIZATION_MODULES = {
+    'xml':    'tagulous.serializers.xml_serializer',
+    'json':   'tagulous.serializers.json',
+    'python': 'tagulous.serializers.python',
+    'yaml':   'tagulous.serializers.pyyaml',
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

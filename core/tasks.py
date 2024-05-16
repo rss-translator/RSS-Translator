@@ -233,7 +233,7 @@ def translate_feed(
             title = entry["title"]
         
             # Translate title
-            if translate_title:
+            if translate_engine and translate_title:
                 cached = Translated_Content.is_translated(title, target_language)  # check cache db
                 translated_text = ''
                 if not cached:
@@ -274,7 +274,7 @@ def translate_feed(
                         logging.warning("Fetch original article error:%s", e)
 
             # Translate content
-            if translate_content:
+            if translate_engine and translate_content:
                 if translate_engine == None:
                     logging.warning("No translate engine")
                     continue
@@ -305,7 +305,7 @@ def translate_feed(
                     bulk_save_cache(need_cache_objs)
                     need_cache_objs = {}
 
-            if summary:
+            if summary_engine and summary:
                 if summary_engine == None:
                     logging.warning("No Summarize engine")
                     continue

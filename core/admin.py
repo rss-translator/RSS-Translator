@@ -7,12 +7,12 @@ from django.shortcuts import render
 from django.urls import path
 from django.shortcuts import render,redirect
 from django.core.paginator import Paginator
-
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy  as _
 from .models import O_Feed, T_Feed
+#from taggit.models import Tag
 from .tasks import update_original_feed, update_translated_feed
 from utils.modelAdmin_utils import CustomModelActions, get_translator_and_summary_choices, get_all_app_models, valid_icon
 
@@ -189,7 +189,7 @@ class O_FeedForm(forms.ModelForm):
 
     class Meta:
         model = O_Feed
-        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'translation_display', 'summary_engine', 'summary_detail', 'additional_prompt', 'name', 'fetch_article', 'quality']
+        fields = ['feed_url', 'update_frequency', 'max_posts', 'translator', 'translation_display', 'summary_engine', 'summary_detail', 'additional_prompt', 'fetch_article', 'quality', 'name', 'tags', ]
 
     # 重写save方法，以处理自定义字段的数据
     def save(self, commit=True):
@@ -216,9 +216,9 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
     form = O_FeedForm
     inlines = [T_FeedInline]
     list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
-                    "update_frequency", "last_updated", "last_pull"]
-    search_fields = ["name", "feed_url"]
-    list_filter = ["valid"]
+                    "update_frequency", "last_updated", "last_pull", "tag_list"]
+    search_fields = ["name", "feed_url", "tags__name"]
+    list_filter = ["valid","tags"]
     actions = ['o_feed_force_update', 'o_feed_export_as_opml', 'o_feed_batch_modify']
 
 
@@ -264,6 +264,12 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
         return ", ".join(t_feed.language for t_feed in obj.t_feed_set.all())
     translated_language.short_description = _('Translated Language')
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('tags')
+
+    def tag_list(self, obj):
+        return ", ".join(o.name for o in obj.tags.all())
+    
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
 
@@ -310,7 +316,8 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
                 'summary_detail': 'summary_detail_value', 
                 'additional_prompt': 'additional_prompt_value',
                 'fetch_article': 'fetch_article',
-                'quality': 'quality'
+                'quality': 'quality',
+                'tags': 'tags_value'
             }
             field_types = {
                 'update_frequency': int,
@@ -322,6 +329,7 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
                 'quality': literal_eval        
             }
             update_fields = {}
+            tags_value = None
             for field, value_field in fields.items():
                 value = post_data.get(value_field)
                 if post_data.get(field, 'Keep') != 'Keep' and value:
@@ -334,11 +342,19 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
                             content_type_summary_id, object_id_summary = map(int, value.split(':'))
                             update_fields['content_type_summary_id'] = content_type_summary_id
                             update_fields['object_id_summary'] = object_id_summary
+                        case 'tags':
+                            tags_value = value.split(",")
                         case _:
                             update_fields[field] = field_types.get(field, str)(value)
 
             if update_fields:
                 queryset.update(**update_fields)
+
+            if tags_value is not None:
+                for obj in queryset:
+                    obj.tags = [*tags_value]
+                    obj.save()
+                #O_Feed.objects.bulk_update(queryset, ['tags'])??
 
             #self.message_user(request, f"Successfully modified {queryset.count()} items.")
             #return HttpResponseRedirect(request.get_full_path())
@@ -348,19 +364,21 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
         logging.info("translator_choices: %s, summary_engine_choices: %s", translator_choices, summary_engine_choices)
         return render(request, 'admin/o_feed_batch_modify.html', context={**core_admin_site.each_context(request), 'items': queryset,'translator_choices': translator_choices, 'summary_engine_choices': summary_engine_choices})
     o_feed_batch_modify.short_description = _("Batch modification")
-
+        
 
 class T_FeedAdmin(admin.ModelAdmin, CustomModelActions):
     list_display = ["id", "feed_url", "o_feed", "status_icon", "language", "translate_title", "translate_content", "summary", "total_tokens", "total_characters", "size_in_kb", "modified"]
-    list_filter = ["status", "translate_title", "translate_content"]
-    search_fields = ["sid"]
+    list_filter = ["status", "translate_title", "translate_content", "o_feed__tags__name"]
+    search_fields = ["sid", "o_feed__tags__name", "o_feed__feed_url"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
     actions = ['t_feed_force_update', 't_feed_export_as_opml', 't_feed_batch_modify']
-    def get_search_results(self, request, queryset, search_term):
-        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
-        queryset |= self.model.objects.filter(o_feed__feed_url__icontains=search_term)
-        return queryset, use_distinct
-        
+    # def get_search_results(self, request, queryset, search_term):
+    #     queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+    #     queryset |= self.model.objects.filter(o_feed__feed_url__icontains=search_term)
+    #     return queryset, use_distinct
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('o_feed__tags')
     
     def size_in_kb(self, obj):
         return int(obj.size / 1024)

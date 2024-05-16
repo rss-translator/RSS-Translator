@@ -27,3 +27,5 @@ anthropic
 django-encrypted-model-fields
 openai
 google-generativeai
+#django-taggit
+django-tagulous

@@ -6,6 +6,7 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
 from .models import O_Feed, T_Feed
+#from taggit.models import TaggedItem
 
 @receiver(post_delete, sender=O_Feed)
 def delete_o_feed_xml(sender, instance, **kwargs):
@@ -20,3 +21,10 @@ def delete_t_feed_xml(sender, instance, **kwargs):
     feed_file_path = f"{settings.DATA_FOLDER}/feeds/{instance.sid}.xml"
     if os.path.exists(feed_file_path):
         os.remove(feed_file_path)
+
+#For django-taggit
+# @receiver(post_delete, sender=TaggedItem)
+# def delete_unused_tags(sender, instance, **kwargs):
+#     n_tagged = TaggedItem.objects.filter(tag_id=instance.tag_id).count()
+#     if n_tagged == 0:
+#         instance.tag.delete()
