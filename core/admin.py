@@ -368,7 +368,7 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
 
 class T_FeedAdmin(admin.ModelAdmin, CustomModelActions):
     list_display = ["id", "feed_url", "o_feed", "status_icon", "language", "translate_title", "translate_content", "summary", "total_tokens", "total_characters", "size_in_kb", "modified"]
-    list_filter = ["status", "translate_title", "translate_content", "o_feed__tags__name"]
+    list_filter = ["status", "translate_title", "translate_content", "o_feed__tags"]
     search_fields = ["sid", "o_feed__tags__name", "o_feed__feed_url"]
     readonly_fields = ["status", "language", "sid", "o_feed", "total_tokens", "total_characters", "size", "modified"]
     actions = ['t_feed_force_update', 't_feed_export_as_opml', 't_feed_batch_modify']
