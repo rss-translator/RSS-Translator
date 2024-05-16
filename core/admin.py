@@ -378,7 +378,7 @@ class T_FeedAdmin(admin.ModelAdmin, CustomModelActions):
     #     return queryset, use_distinct
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('o_feed__tags__name')
+        return super().get_queryset(request).prefetch_related('o_feed__tags')
     
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
