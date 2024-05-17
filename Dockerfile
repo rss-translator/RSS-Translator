@@ -15,7 +15,7 @@ RUN mkdir -p $DockerHOME/data
 WORKDIR $DockerHOME
 COPY . $DockerHOME
 RUN apt-get update && \
-    apt-get install -y gettext procps && \
+    apt-get install -y gettext procps git && \
     rm -rf /var/lib/apt/lists/*
 RUN pip install -r requirements/dev.txt --no-cache-dir -U && \
     python manage.py init_server && \
