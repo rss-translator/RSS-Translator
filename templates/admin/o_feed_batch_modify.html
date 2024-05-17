@@ -69,10 +69,10 @@
     <input type="radio" name="quality" value="True" required>{% trans " Enable" %}<br />
     <input type="radio" name="quality" value="False" required>{% trans " Disable" %}<br />
 
-    <br /><label>{% trans "Tags" %}</label><br />
-    <input type="radio" name="tags" value="Keep" checked required>{% trans " Keep Original" %}<br />
-    <input type="radio" name="tags" value="True" required>{% trans " Change to " %}
-    <textarea name="tags_value"></textarea><br />
+    <br /><label>{% trans "category" %}</label><br />
+    <input type="radio" name="category" value="Keep" checked required>{% trans " Keep Original" %}<br />
+    <input type="radio" name="category" value="True" required>{% trans " Change to " %}
+    <textarea name="category_value"></textarea><br />
 
     <br/>
     <input type="hidden" name="action" value="o_feed_batch_modify" />

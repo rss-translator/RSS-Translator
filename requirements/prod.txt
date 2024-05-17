@@ -26,4 +26,5 @@ django-encrypted-model-fields
 openai
 google-generativeai
 #django-taggit
-django-tagulous
+#django-tagulous
+git+https://github.com/versun/django-tagulous2

@@ -24,10 +24,10 @@ class CustomModelActions:
         opml_obj = OPML()
 
         for item in queryset:
-            tag_outline = Outline(text=item.tags)
+            category_outline = Outline(text=item.category.name)
             item_outline = Outline(title=item.name, text=item.name, type='rss', xml_url=item.feed_url)
-            tag_outline.outlines.append(item_outline)
-            opml_obj.body.outlines.append(tag_outline)
+            category_outline.outlines.append(item_outline)
+            opml_obj.body.outlines.append(category_outline)
 
         response = HttpResponse(opml_obj.to_xml(), content_type='application/xml')
         response['Content-Disposition'] = 'attachment; filename="rsstranslator_original_feeds.opml"'
@@ -42,10 +42,10 @@ class CustomModelActions:
             text = item.o_feed.name or 'No Name'
             xml_url = request.build_absolute_uri(reverse('core:rss', kwargs={'feed_sid': item.sid}))
 
-            tag_outline = Outline(text=item.o_feed.tags)
+            category_outline = Outline(text=item.o_feed.category.name)
             item_outline = Outline(title=text, text=text, type='rss', xml_url=xml_url)
-            tag_outline.outlines.append(item_outline)
-            opml_obj.body.outlines.append(tag_outline)
+            category_outline.outlines.append(item_outline)
+            opml_obj.body.outlines.append(category_outline)
 
         response = HttpResponse(opml_obj.to_xml(), content_type='application/xml')
         response['Content-Disposition'] = 'attachment; filename="rsstranslator_translated_feeds.opml"'
