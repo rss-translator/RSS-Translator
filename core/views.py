@@ -16,7 +16,7 @@ def get_modified(request, feed_sid):
     try:
         modified = T_Feed.objects.get(sid=feed_sid).modified
     except T_Feed.DoesNotExist:
-        logging.error("Translated feed not found, Maybe still in progress, Please confirm it's exist: %s", feed_sid)
+        logging.warning("Translated feed not found, Maybe still in progress, Please confirm it's exist: %s", feed_sid)
         modified = None
     return modified
 
@@ -25,7 +25,7 @@ def get_etag(request, feed_sid):
     try:
         modified = T_Feed.objects.get(sid=feed_sid).modified
     except T_Feed.DoesNotExist:
-        logging.error("Translated feed not found, Maybe still in progress, Please confirm it's exist: %s", feed_sid)
+        logging.warning("Translated feed not found, Maybe still in progress, Please confirm it's exist: %s", feed_sid)
         modified = None
     return modified.strftime("%Y-%m-%d %H:%M:%S") if modified else None
 

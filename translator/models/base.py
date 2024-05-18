@@ -120,7 +120,7 @@ class OpenAIInterface(TranslatorEngine):
                 return False
 
     def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None, text_type:str='title') -> dict:
-        logging.info(">>> Translate [%s]:", target_language)
+        logging.info(">>> Translate [%s]: %s", target_language, text)
         client = self._init()
         tokens = 0
         translated_text = ''
@@ -155,6 +155,6 @@ class OpenAIInterface(TranslatorEngine):
         return {'text': translated_text, "tokens": tokens}
     
     def summarize(self, text:str, target_language:str) -> dict:
-        logging.info(">>> Summarize [%s]:", target_language)
+        logging.info(">>> Summarize [%s]: %s", target_language, text)
         return self.translate(text, target_language, system_prompt=self.summary_prompt)
 
