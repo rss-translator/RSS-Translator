@@ -230,10 +230,10 @@ def translate_feed(
     
     try:
         for entry in translated_feed.entries[:max_posts]:
-            title = entry["title"]
-        
+            title = entry.get("title")
+
             # Translate title
-            if translate_engine and translate_title:
+            if title and translate_engine and translate_title:
                 cached = Translated_Content.is_translated(title, target_language)  # check cache db
                 translated_text = ''
                 if not cached:
@@ -274,9 +274,6 @@ def translate_feed(
 
             # Translate content
             if translate_engine and translate_content:
-                if translate_engine == None:
-                    logging.warning("No translate engine")
-                    continue
                 #logging.info("Start Translate Content")
                 # original_description = entry.get('summary', None)  # summary, description
                 original_content = entry.get('content')
