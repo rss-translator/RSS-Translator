@@ -230,10 +230,10 @@ def translate_feed(
     
     try:
         for entry in translated_feed.entries[:max_posts]:
-            title = entry["title"]
-        
+            title = entry.get("title")
+
             # Translate title
-            if translate_engine and translate_title:
+            if title and translate_engine and translate_title:
                 cached = Translated_Content.is_translated(title, target_language)  # check cache db
                 translated_text = ''
                 if not cached:
@@ -241,12 +241,11 @@ def translate_feed(
                     translated_text = results.get("text", title)
                     total_tokens += results.get("tokens", 0)
                     translated_characters += len(title)
-
                     if title and translated_text:
                         logging.info("[Title] Will cache:%s", translated_text)
-                        hash64 = cityhash.CityHash64(f"{title}{target_language}")
-                        need_cache_objs[hash64] = Translated_Content(
-                            hash=hash64.to_bytes(8, byteorder='little'),
+                        hash128 = cityhash.CityHash128(f"{title}{target_language}")
+                        need_cache_objs[hash128] = Translated_Content(
+                            hash=str(hash128),
                             original_content=title,
                             translated_language=target_language,
                             translated_content=translated_text,
@@ -275,9 +274,6 @@ def translate_feed(
 
             # Translate content
             if translate_engine and translate_content:
-                if translate_engine == None:
-                    logging.warning("No translate engine")
-                    continue
                 #logging.info("Start Translate Content")
                 # original_description = entry.get('summary', None)  # summary, description
                 original_content = entry.get('content')
@@ -377,9 +373,9 @@ def content_translate(original_content: str, target_language: str, engine: Trans
 
                 if results["text"]:
                     logging.info("[Content] Will cache:%s", results["text"])
-                    hash64 = cityhash.CityHash64(f"{text}{target_language}")
-                    need_cache_objs[hash64] = Translated_Content(
-                        hash=hash64.to_bytes(8, byteorder='little'),
+                    hash128 = cityhash.CityHash128(f"{text}{target_language}")
+                    need_cache_objs[hash128] = Translated_Content(
+                        hash=str(hash128),
                         original_content=text,
                         translated_language=target_language,
                         translated_content=results["text"],
@@ -447,10 +443,10 @@ def content_summarize(original_content: str,
             # Compile final summary from partial summaries
             final_summary = '<br/>'.join(accumulated_summaries)
 
-            hash64 = cityhash.CityHash64(f"Summary_{original_content}{target_language}")
+            hash128 = cityhash.CityHash128(f"Summary_{original_content}{target_language}")
             logging.info("[Summary] Will cache:%s", final_summary)
-            need_cache_objs[hash64] = Translated_Content(
-                hash=hash64.to_bytes(8, byteorder='little'),
+            need_cache_objs[hash128] = Translated_Content(
+                hash=str(hash128),
                 original_content=f"Summary_{original_content}",
                 translated_language=target_language,
                 translated_content=final_summary,
@@ -490,9 +486,9 @@ def chunk_translate(original_content: str, target_language: str, engine: Transla
 
             if chunk and results["text"]:
                 logging.info("Save to cache:%s", results["text"])
-                hash64 = cityhash.CityHash64(f"{chunk}{target_language}")
-                need_cache_objs[hash64] = Translated_Content(
-                    hash=hash64.to_bytes(8, byteorder='little'),
+                hash128 = cityhash.CityHash128(f"{chunk}{target_language}")
+                need_cache_objs[hash128] = Translated_Content(
+                    hash=str(hash128),
                     original_content=chunk,
                     translated_language=target_language,
                     translated_content=results["text"],
