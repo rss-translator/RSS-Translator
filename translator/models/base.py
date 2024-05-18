@@ -42,7 +42,8 @@ class TranslatorEngine(models.Model):
 
 
 class Translated_Content(models.Model):
-    hash = models.BinaryField(max_length=8, unique=True, primary_key=True, editable=False)
+    #hash = models.BinaryField(max_length=8, unique=True, primary_key=True, editable=False)
+    hash = models.CharField(max_length=39, editable=False, primary_key=True)
     original_content = models.TextField()
 
     translated_language = models.CharField(max_length=255)
@@ -56,7 +57,7 @@ class Translated_Content(models.Model):
 
     @classmethod
     def is_translated(cls, text, target_language):
-        text_hash = cityhash.CityHash64(f"{text}{target_language}").to_bytes(8, byteorder='little')
+        text_hash = str(cityhash.CityHash128(f"{text}{target_language}"))
         try:
             content = Translated_Content.objects.get(hash=text_hash)
             # logging.info("Using cached translations:%s", text)
@@ -71,7 +72,7 @@ class Translated_Content(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.hash:
-            self.hash = cityhash.CityHash64(f"{self.original_content}{self.translated_language}").to_bytes(8, byteorder='little')
+            self.hash = str(cityhash.CityHash128(f"{self.original_content}{self.translated_language}"))
 
         super(Translated_Content, self).save(*args, **kwargs)
 
