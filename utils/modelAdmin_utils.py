@@ -25,7 +25,7 @@ class CustomModelActions:
 
         for item in queryset:
             category_outline = Outline(text=item.category.name)
-            item_outline = Outline(title=item.name, text=item.name, type='rss', xml_url=item.feed_url)
+            item_outline = Outline(title=item.name, text=item.name, type='rss', xml_url=item.feed_url, html_url=item.feed_url)
             category_outline.outlines.append(item_outline)
             opml_obj.body.outlines.append(category_outline)
 
@@ -43,7 +43,7 @@ class CustomModelActions:
             xml_url = request.build_absolute_uri(reverse('core:rss', kwargs={'feed_sid': item.sid}))
 
             category_outline = Outline(text=item.o_feed.category.name)
-            item_outline = Outline(title=text, text=text, type='rss', xml_url=xml_url)
+            item_outline = Outline(title=text, text=text, type='rss', xml_url=xml_url, html_url=item.o_feed.feed_url)
             category_outline.outlines.append(item_outline)
             opml_obj.body.outlines.append(category_outline)
 
