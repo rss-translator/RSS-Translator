@@ -70,7 +70,6 @@ plugins:
               脚本自动安装: Installation Script
               一键部署: One Click
               Docker安装: Docker
-              手动安装: Manual
               升级: Upgrade
               开启SSL: Enable SSL
               使用说明: Guide
@@ -99,10 +98,9 @@ nav:
   - 截图: screenshots.md
   - Demo: demo.md
   - 安装:
-      - 脚本自动安装: install/install-script.md
-      - 一键部署: install/one-click.md
       - Docker安装: install/docker.md
-      - 手动安装: install/manual.md
+      - 一键部署: install/one-click.md
+      - 脚本自动安装: install/install-script.md
   - 升级: upgrade.md
   - 开启SSL: ssl.md
   - 使用说明: guide.md
