@@ -210,7 +210,7 @@ def merge_all_atom(input_files:list, filename:str):
         f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
         f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
         f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode('utf-8'))
-        f.write(b'<title>All Translated Feeds | RSS Translator</title>\n')
+        f.write(f'<title>Translated Feeds for {filename} | RSS Translator</title>\n'.encode('utf-8'))
         f.write(b'<link href="https://rsstranslator.com"/>\n')
         f.write(f'<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n'.encode('utf-8'))
 
