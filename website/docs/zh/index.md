@@ -48,7 +48,7 @@
     <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
 </a>
 <a href="https://www.gitpod.io">
-    <img src='/assets/gitpod-logo-light-theme.svg' width="180" height="105" alt="Gitpod"/>
+    <img src='/assets/gitpod-logo-light-theme.svg' alt="Gitpod"/>
 </a>
 
 非常感谢以下用户的支持:
