@@ -100,43 +100,56 @@ def all(request, name):
         # get all data from t_feed
         feeds = T_Feed.objects.all()
         # get all feed file path from feeds.sid
-        feed_file_paths = [os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed.sid}.xml') for feed in feeds]
+        feed_file_paths = get_feed_file_paths(feeds)
         merge_all_atom(feed_file_paths, "all_t")
 
         merge_file_path = os.path.join(settings.DATA_FOLDER, 'feeds', 'all_t.xml')
         response = StreamingHttpResponse(file_iterator(merge_file_path),
                                          content_type='application/xml')
-        response['Content-Disposition'] = f'inline; filename="t"'
+        response['Content-Disposition'] = 'inline; filename=all_t.xml'
         logging.info("All Translated Feed file served: %s",  merge_file_path)
         return response
-    except IOError as e:
+    except Exception as e:
         # Log the exception and return an appropriate error response
-        logging.exception("Failed to read the feed file: %s / %s", settings.merge_file_path, str(e))
+        logging.exception("Failed to read the all_t feed file: %s / %s", merge_file_path, str(e))
         return HttpResponse(status=500)
     
 @cache_page(60 * 15)  # Cache this view for 15 minutes
 def category(request, category:str):
     all_category = O_Feed.category.tag_model.objects.all()
+
     if category not in all_category:
         return HttpResponse(status=404)
     
     try:
-        # get all data from t_feed
+        # # get all data from t_feed
         feeds = T_Feed.objects.filter(o_feed__category__name=category)
-        # get all feed file path from feeds.sid
-        feed_file_paths = [os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed.sid}.xml') for feed in feeds]
+        # # get all feed file path from feeds.sid
+        # feed_file_paths = [os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed.sid}.xml') for feed in feeds]
+        feed_file_paths = get_feed_file_paths(feeds)
         merge_all_atom(feed_file_paths, category)
 
         merge_file_path = os.path.join(settings.DATA_FOLDER, 'feeds', f'{category}.xml')
         response = StreamingHttpResponse(file_iterator(merge_file_path),
                                          content_type='application/xml')
-        response['Content-Disposition'] = f'inline; filename={category}'
+        response['Content-Disposition'] = f'inline; filename={category}.xml'
         logging.info("Category Feed file served: %s",  merge_file_path)
         return response
-    except IOError as e:
+    except Exception as e:
         # Log the exception and return an appropriate error response
-        logging.exception("Failed to read the feed file: %s / %s", settings.merge_file_path, str(e))
+        logging.exception("Failed to read the category feed file: %s / %s", merge_file_path, str(e))
         return HttpResponse(status=500)
+
+def get_feed_file_paths(feeds:list)->list:
+    feed_file_dir = os.path.abspath(os.path.join(settings.DATA_FOLDER, 'feeds'))
+    feed_file_paths = []
+
+    for feed in feeds:
+        file_path = os.path.abspath(os.path.join(feed_file_dir, f'{feed.sid}.xml')) # 获取绝对路径
+        if os.path.commonpath((feed_file_dir, file_path)) != feed_file_dir: # 对比最长公共路径，防止目录遍历
+            raise ValueError(f'Invalid feed file path: {file_path}')
+        feed_file_paths.append(file_path)
+    return feed_file_paths
 
 def file_iterator(file_name, chunk_size=8192):
     with open(file_name, 'rb') as f:
