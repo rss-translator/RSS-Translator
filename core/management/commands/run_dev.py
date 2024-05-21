@@ -22,7 +22,7 @@ class Command(BaseCommand):
         os.environ['DEMO'] = '1'
         os.environ['DEBUG'] = '1'
         os.environ['LOG_LEVEL'] = 'INFO'
-        os.environ['CSRF_TRUSTED_ORIGINS'] = 'http://localhost,http://localhost:8000,http://127.0.0.1,http://127.0.0.1:8000,https://localhost,https://localhost:8000,https://127.0.0.1,https://127.0.0.1:8000'
+        os.environ['CSRF_TRUSTED_ORIGINS'] = 'http://localhost,http://localhost:8000,http://127.0.0.1,http://127.0.0.1:8000,https://localhost,https://localhost:8000,https://127.0.0.1,https://127.0.0.1:8000,https://*.gitpod.io'
         # Run collectstatic, makemigrations, and migrate
         call_command('collectstatic', '--no-input')
         call_command('makemigrations')

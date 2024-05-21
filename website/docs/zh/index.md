@@ -42,9 +42,14 @@
 
 ## 赞助
 
-感谢[JetBrains](https://www.jetbrains.com/)为本项目提供了[开源许可证](https://www.jetbrains.com/community/opensource/)。
+感谢[JetBrains](https://www.jetbrains.com/community/opensource/)和[Gitpod](https://www.gitpod.io/discover/opensource)为本项目提供了开源支持。
 
-<img src="/assets/jb_square.svg" alt="JetBrains Black Box Logo logo." width="150" height="150">
+<a href="https://www.jetbrains.com">
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
+</a>
+<a href="https://www.gitpod.io">
+    <img src='/assets/gitpod-logo-light-theme.svg' alt="Gitpod"/>
+</a>
 
 非常感谢以下用户的支持:
 <p align="center">

@@ -42,9 +42,14 @@ For more information, please check [translation service](translator.md).
 
 ## Sponsorship
 
-Thanks to [JetBrains](https://www.jetbrains.com/) for providing the [open source licence](https://www.jetbrains.com/community/opensource/) for this project.
+Thanks to [JetBrains](https://www.jetbrains.com/community/opensource/) and [Gitpod](https://www.gitpod.io/discover/opensource) for providing the open source plan for this project.
 
-<img src="/assets/jb_square.svg" alt="JetBrains Black Box Logo logo." width="150" height="150">
+<a href="https://www.jetbrains.com">
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
+</a>
+<a href="https://www.gitpod.io">
+    <img src='/assets/gitpod-logo-light-theme.svg' alt="Gitpod"/>
+</a>
 
 Many thanks to the following users for their support.
 
