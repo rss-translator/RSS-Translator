@@ -44,12 +44,14 @@ For more information, please check [translation service](translator.md).
 
 Thanks to [JetBrains](https://www.jetbrains.com/community/opensource/) and [Gitpod](https://www.gitpod.io/discover/opensource) for providing the open source plan for this project.
 
+<div>
 <a href="https://www.jetbrains.com">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm.png" alt="PyCharm logo." style="width:30%" />
 </a>
 <a href="https://www.gitpod.io">
-    <img src='/assets/gitpod-logo-light-theme.svg' alt="Gitpod"/>
+    <img src='/assets/gitpod-logo-light-theme.svg' alt="Gitpod" style="width:30%"/>
 </a>
+</div><br>
 
 Many thanks to the following users for their support.
 

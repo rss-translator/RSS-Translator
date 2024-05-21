@@ -44,12 +44,15 @@
 
 感谢[JetBrains](https://www.jetbrains.com/community/opensource/)和[Gitpod](https://www.gitpod.io/discover/opensource)为本项目提供了开源支持。
 
+<div>
 <a href="https://www.jetbrains.com">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm.png" alt="PyCharm logo." style="width:30%" />
 </a>
 <a href="https://www.gitpod.io">
-    <img src='/assets/gitpod-logo-light-theme.svg' alt="Gitpod"/>
+    <img src='/assets/gitpod-logo-light-theme.svg' alt="Gitpod" style="width:30%"/>
 </a>
+</div><br>
+
 
 非常感谢以下用户的支持:
 <p align="center">
