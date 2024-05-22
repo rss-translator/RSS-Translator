@@ -152,7 +152,8 @@ def get_feed_file_paths(feeds:list)->list:
     return feed_file_paths
 
 def file_iterator(file_name, chunk_size=8192):
-    with open(file_name, 'rb') as f:
+    fullpath  =  os.path.normpath(file_name)
+    with open(fullpath , 'rb') as f:
         while True:
             chunk = f.read(chunk_size)
             if not chunk:
