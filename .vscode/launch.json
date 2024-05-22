@@ -2,9 +2,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debug: Django",
+            "name": "Python Debug: RSS Translator",
             "type": "debugpy",
-            "python": "${workspaceFolder}/venv/bin/python",
+            "python": "${workspaceFolder}/.venv/bin/python",
             "env": {"GEVENT_SUPPORT": "True"},
             "request": "launch",
             "args": [
