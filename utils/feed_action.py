@@ -206,7 +206,7 @@ def merge_all_atom(input_files:list, filename:str):
     output_dir = os.path.join(settings.DATA_FOLDER, 'feeds')
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f'{filename}.xml')
-    with open(output_file, 'wb') as f:
+    with open(os.path.normpath(output_file), 'wb') as f:
         f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
         f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
         f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode('utf-8'))
