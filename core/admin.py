@@ -10,6 +10,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy  as _
 from .models import O_Feed, T_Feed
 #from taggit.models import Tag
@@ -100,7 +101,8 @@ def translator_add_view(request):
     if request.method == 'POST':
         translator_name = request.POST.get('translator_name','/')
         # redirect to example.com/translator/translator_name/add
-        return redirect(f"/translator/{translator_name}/add")
+        target = f"/translator/{translator_name}/add"
+        return redirect(target) if url_has_allowed_host_and_scheme(target, allowed_hosts=None) else redirect('/')
     else:
         models = get_all_app_models('translator')
         translator_list = []
