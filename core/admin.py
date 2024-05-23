@@ -218,7 +218,7 @@ class O_FeedAdmin(admin.ModelAdmin, CustomModelActions):
     form = O_FeedForm
     inlines = [T_FeedInline]
     list_display = ["name", "is_valid", "show_feed_url", "translated_language", "translator", "size_in_kb",
-                    "update_frequency", "last_updated", "last_pull", "category"]
+                    "update_frequency", "last_pull", "category"]
     search_fields = ["name", "feed_url", "category__name"]
     list_filter = ["valid","category"]
     actions = ['o_feed_force_update', 'o_feed_export_as_opml', 'o_feed_batch_modify']
