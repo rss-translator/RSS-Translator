@@ -41,14 +41,29 @@
 
 ## 赞助
 
-感谢[JetBrains](https://www.jetbrains.com/community/opensource/)和[Gitpod](https://www.gitpod.io/discover/opensource)为本项目提供了开源支持。
+感谢以下公司为本项目提供的开源支持。
 
-<a href="https://www.jetbrains.com">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
-</a>
-<a href="https://www.gitpod.io">
-    <img src='https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/website/docs/assets/gitpod-logo-light-theme.svg' width="180" height="105" alt="Gitpod"/>
-</a>
+<table>
+  <tr>
+    <td style="padding:10px;">
+      <a href="https://www.jetbrains.com/pycharm/">
+        <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm_icon.svg" alt="PyCharm logo." style="width:100px; height:100px;">
+      </a>
+    </td>
+    <td style="padding:10px;">
+      <a href="https://www.railway.app">
+        <img src="https://railway.app/brand/logo-light.png" alt="Railway" style="width:100px; height:100px;">
+      </a>
+    </td>
+    <td style="padding:10px;">
+      <a href="https://www.gitpod.io">
+        <img src="https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/website/docs/assets/gitpod.svg" alt="Gitpod" style="width:100px; height:100px;">
+      </a>
+    </td>
+  </tr>
+</table>
+
+
 
 非常感谢以下用户的支持:
 
