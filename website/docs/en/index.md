@@ -44,7 +44,7 @@ For more information, please check [translation service](translator.md).
 
 Thanks to the following companies for providing open source support for this project.
 
-<table>
+<table style="width:auto;">
   <tr>
     <td style="padding:10px;">
       <a href="https://www.jetbrains.com/pycharm/">

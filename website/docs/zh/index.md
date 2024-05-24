@@ -44,7 +44,7 @@
 
 感谢以下公司为本项目提供的开源支持。
 
-<table>
+<table style="width:auto;">
   <tr>
     <td style="padding:10px;">
       <a href="https://www.jetbrains.com/pycharm/">
