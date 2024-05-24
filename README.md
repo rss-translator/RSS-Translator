@@ -47,7 +47,7 @@
     <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains Black Box Logo logo.">
 </a>
 <a href="https://www.gitpod.io">
-    <img src='https://camo.githubusercontent.com/945d1e89d8edfd51e0a375c799f50731ce37ab251473ce522437cb8bf49a1a20/68747470733a2f2f7261696c7761792e6170702f6272616e642f6c6f676f2d6c696768742e706e67' width="105" height="105" alt="Railway"/>
+    <img src='https://avatars.githubusercontent.com/u/66716858?s=200&v=4' width="105" height="105" alt="Railway"/>
 </a>
 <a href="https://www.gitpod.io">
     <img src='https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/website/docs/assets/gitpod-logo-light-theme.svg' width="180" height="105" alt="Gitpod"/>
