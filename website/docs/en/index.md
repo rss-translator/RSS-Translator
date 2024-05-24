@@ -63,8 +63,14 @@ Thanks to the following companies for providing open source support for this pro
     </td>
   </tr>
 </table>
+Thank you for your support!
+<p>
+  <a href="https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg">
+    <img src='https://raw.githubusercontent.com/versun/54321-Weekly/main/scripts/sponsorkit/sponsorkit/sponsors.svg'/>
+  </a>
+</p>
 
-Sponsorships: [AFDIAN](https://afdian.net/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
+If it has helped you, please consider sponsoring me: [AFDIAN](https://afdian.net/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
 > Description: Sponsored avatars are refreshed every morning and afternoon at 5:30 a.m. (UTC time zone).
 
 ## Contribution
