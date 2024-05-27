@@ -84,7 +84,7 @@ class OpenAIInterface(TranslatorEngine):
     model = models.CharField(max_length=100, default="gpt-3.5-turbo", help_text="e.g. gpt-3.5-turbo, gpt-4-turbo")
     translate_prompt = models.TextField(_("Title Translate Prompt"), default=settings.default_title_translate_prompt)
     content_translate_prompt = models.TextField(_("Content Translate Prompt"), default=settings.default_content_translate_prompt)
-    
+
     temperature = models.FloatField(default=0.2)
     top_p = models.FloatField(default=0.2)
     frequency_penalty = models.FloatField(default=0)
@@ -95,7 +95,7 @@ class OpenAIInterface(TranslatorEngine):
 
     class Meta:
         abstract = True
-    
+
     def _init(self):
         return OpenAI(
                     api_key=self.api_key,
@@ -142,18 +142,18 @@ class OpenAIInterface(TranslatorEngine):
                 presence_penalty=self.presence_penalty,
                 max_tokens=self.max_tokens,
             )
-            if res.choices[0].finish_reason == "stop" or res.choices[0].message.content:
-                logging.info("OpenAITranslator->%s: %s", res.choices[0].finish_reason, text)
+            if res.choices[0].finish_reason.lower() == "stop" or res.choices[0].message.content:
                 translated_text = res.choices[0].message.content
+                logging.info("OpenAITranslator->%s: %s", res.choices[0].finish_reason, translated_text)
             # else:
             #     translated_text = ''
             #     logging.warning("Translator->%s: %s", res.choices[0].finish_reason, text)
             tokens = res.usage.total_tokens
         except Exception as e:
-            logging.error("Translator->%s: %s", e, text)
+            logging.error("ErrorTranslator->%s: %s", e, text)
 
         return {'text': translated_text, "tokens": tokens}
-    
+
     def summarize(self, text:str, target_language:str) -> dict:
         logging.info(">>> Summarize [%s]: %s", target_language, text)
         return self.translate(text, target_language, system_prompt=self.summary_prompt)
