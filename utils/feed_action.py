@@ -2,7 +2,8 @@ import logging
 import os
 import gc
 import json
-#import xml.dom.minidom
+
+# import xml.dom.minidom
 from datetime import datetime, timezone, date, timedelta
 from time import mktime
 from dateutil import parser
@@ -13,6 +14,7 @@ from typing import Dict
 import feedparser
 import httpx
 from lxml import etree
+
 # from django.utils.feedgenerator import Atom1Feed
 from feedgen.feed import FeedGenerator
 from fake_useragent import UserAgent
@@ -25,9 +27,9 @@ def fetch_feed(url: str, etag: str = "") -> Dict:
     response = None
     ua = UserAgent()
     headers = {
-        'If-None-Match': etag,
+        "If-None-Match": etag,
         #'If-Modified-Since': modified,
-        'User-Agent': ua.random.strip()
+        "User-Agent": ua.random.strip(),
     }
 
     client = httpx.Client()
@@ -55,7 +57,12 @@ def fetch_feed(url: str, etag: str = "") -> Dict:
             logging.warning("Get feed %s %s", url, feed.get("bozo_exception"))
             error = feed.get("bozo_exception")
 
-    return {"feed": feed, "xml": response.text if response else "", "update": update, "error": error}
+    return {
+        "feed": feed,
+        "xml": response.text if response else "",
+        "update": update,
+        "error": error,
+    }
 
 
 def generate_atom_feed(feed_url: str, feed_dict: dict):
@@ -63,25 +70,33 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         logging.error("generate_atom_feed: feed_dict is None")
         return None
     try:
-        source_feed = feed_dict['feed']
-        pubdate = source_feed.get('published_parsed')
-        pubdate = datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc) if pubdate else None
+        source_feed = feed_dict["feed"]
+        pubdate = source_feed.get("published_parsed")
+        pubdate = (
+            datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
+            if pubdate
+            else None
+        )
 
-        updated = source_feed.get('updated_parsed')
-        updated = datetime.fromtimestamp(mktime(updated), tz=timezone.utc) if updated else None
+        updated = source_feed.get("updated_parsed")
+        updated = (
+            datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
+            if updated
+            else None
+        )
 
-        title = get_first_non_none(source_feed, 'title', 'subtitle', 'info')
-        subtitle = get_first_non_none(source_feed, 'subtitle')
-        link = source_feed.get('link') or feed_url
-        language = source_feed.get('language')
-        author_name = source_feed.get('author')
+        title = get_first_non_none(source_feed, "title", "subtitle", "info")
+        subtitle = get_first_non_none(source_feed, "subtitle")
+        link = source_feed.get("link") or feed_url
+        language = source_feed.get("language")
+        author_name = source_feed.get("author")
         # logging.info("generate_atom_feed:%s,%s,%s,%s,%s",title,subtitle,link,language,author_name)
 
         fg = FeedGenerator()
-        fg.id(source_feed.get('id', link))
+        fg.id(source_feed.get("id", link))
         fg.title(title)
-        fg.author({'name': author_name})
-        fg.link(href=link, rel='alternate')
+        fg.author({"name": author_name})
+        fg.link(href=link, rel="alternate")
         fg.subtitle(subtitle)
         fg.language(language)
         fg.updated(updated)
@@ -94,36 +109,47 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         if not fg.id():
             fg.id(fg.title())
 
-        for entry in feed_dict['entries']:
-            pubdate = entry.get('published_parsed')
-            pubdate = datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc) if pubdate else None
+        for entry in feed_dict["entries"]:
+            pubdate = entry.get("published_parsed")
+            pubdate = (
+                datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
+                if pubdate
+                else None
+            )
 
-            updated = entry.get('updated_parsed')
-            updated = datetime.fromtimestamp(mktime(updated), tz=timezone.utc) if updated else None
+            updated = entry.get("updated_parsed")
+            updated = (
+                datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
+                if updated
+                else None
+            )
 
-            title = entry.get('title')
-            link = get_first_non_none(entry, 'link')
-            unique_id = entry.get('id', link)
+            title = entry.get("title")
+            link = get_first_non_none(entry, "link")
+            unique_id = entry.get("id", link)
 
-            author_name = get_first_non_none(entry, 'author', 'publisher')
-            content = entry.get('content')[0].get('value') if entry.get('content') else None
-            summary = entry.get('summary')
+            author_name = get_first_non_none(entry, "author", "publisher")
+            content = (
+                entry.get("content")[0].get("value") if entry.get("content") else None
+            )
+            summary = entry.get("summary")
 
-            fe = fg.add_entry(order='append')
+            fe = fg.add_entry(order="append")
             fe.title(title)
             fe.link(href=link)
-            fe.author({'name': author_name})
+            fe.author({"name": author_name})
             fe.id(unique_id)
-            fe.content(content, type='html')
+            fe.content(content, type="html")
             fe.updated(updated)
             fe.pubDate(pubdate)
-            fe.summary(summary, type='html')
+            fe.summary(summary, type="html")
 
-            for enclosure in entry.get('enclosures', []):
-                fe.enclosure(url=enclosure.get('href'),
-                             type=enclosure.get('type'),
-                             length=enclosure.get('length'),
-                             )
+            for enclosure in entry.get("enclosures", []):
+                fe.enclosure(
+                    url=enclosure.get("href"),
+                    type=enclosure.get("type"),
+                    length=enclosure.get("length"),
+                )
 
             # id, title, updated are required
             if not fe.updated():
@@ -147,9 +173,13 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 
     root = etree.fromstring(atom_string)
     tree = etree.ElementTree(root)
-    pi = etree.ProcessingInstruction("xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"')
+    pi = etree.ProcessingInstruction(
+        "xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"'
+    )
     root.addprevious(pi)
-    atom_string_with_pi = etree.tostring(tree, pretty_print=True, xml_declaration=True, encoding='utf-8').decode()
+    atom_string_with_pi = etree.tostring(
+        tree, pretty_print=True, xml_declaration=True, encoding="utf-8"
+    ).decode()
 
     return atom_string_with_pi
 
@@ -200,29 +230,41 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 #     return json_feed
 
 
-def merge_all_atom(input_files:list, filename:str):
+def merge_all_atom(input_files: list, filename: str):
     ATOM_NS = "http://www.w3.org/2005/Atom"
 
-    output_dir = os.path.join(settings.DATA_FOLDER, 'feeds')
+    output_dir = os.path.join(settings.DATA_FOLDER, "feeds")
     os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, f'{filename}.xml')
-    with open(os.path.normpath(output_file), 'wb') as f:
+    output_file = os.path.join(output_dir, f"{filename}.xml")
+    with open(os.path.normpath(output_file), "wb") as f:
         f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
         f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
-        f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode('utf-8'))
-        f.write(f'<title>Translated Feeds for {filename} | RSS Translator</title>\n'.encode('utf-8'))
+        f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode("utf-8"))
+        f.write(
+            f"<title>Translated Feeds for {filename} | RSS Translator</title>\n".encode(
+                "utf-8"
+            )
+        )
         f.write(b'<link href="https://rsstranslator.com"/>\n')
-        f.write(f'<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n'.encode('utf-8'))
+        f.write(
+            f"<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n".encode(
+                "utf-8"
+            )
+        )
 
         today = date.today()
         thirty_days_ago = today - timedelta(days=30)
         processed_entries = set()
 
         for input_file in input_files:
-            for _, entry in etree.iterparse(input_file, events=('end',), tag=f"{{{ATOM_NS}}}entry"):
+            for _, entry in etree.iterparse(
+                input_file, events=("end",), tag=f"{{{ATOM_NS}}}entry"
+            ):
                 id_elem = entry.find(f"{{{ATOM_NS}}}id")
                 if id_elem is not None and id_elem.text not in processed_entries:
-                    published_elem = entry.find(f"{{{ATOM_NS}}}published") or entry.find(f"{{{ATOM_NS}}}updated")
+                    published_elem = entry.find(
+                        f"{{{ATOM_NS}}}published"
+                    ) or entry.find(f"{{{ATOM_NS}}}updated")
                     if published_elem is not None:
                         published_date = parser.parse(published_elem.text).date()
                         if published_date >= thirty_days_ago:
@@ -232,7 +274,7 @@ def merge_all_atom(input_files:list, filename:str):
                 while entry.getprevious() is not None:
                     del entry.getparent()[0]
             gc.collect()
-        f.write(b'</feed>')
+        f.write(b"</feed>")
 
 
 def get_first_non_none(feed, *keys):

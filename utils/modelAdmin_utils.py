@@ -8,16 +8,18 @@ from django.apps import apps
 
 from opyml import OPML, Outline
 from huey.contrib.djhuey import HUEY as huey
-#from django.conf import settings
-from django.utils.translation import gettext_lazy  as _
+
+# from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 
 
 from core.tasks import update_original_feed, update_translated_feed
 
-#if settings.DEBUG:
+# if settings.DEBUG:
 #    from huey_monitor.models import TaskModel
+
 
 class CustomModelActions:
     def o_feed_export_as_opml(self, request, queryset):
@@ -25,12 +27,20 @@ class CustomModelActions:
 
         for item in queryset:
             category_outline = Outline(text=item.category.name)
-            item_outline = Outline(title=item.name, text=item.name, type='rss', xml_url=item.feed_url, html_url=item.feed_url)
+            item_outline = Outline(
+                title=item.name,
+                text=item.name,
+                type="rss",
+                xml_url=item.feed_url,
+                html_url=item.feed_url,
+            )
             category_outline.outlines.append(item_outline)
             opml_obj.body.outlines.append(category_outline)
 
-        response = HttpResponse(opml_obj.to_xml(), content_type='application/xml')
-        response['Content-Disposition'] = 'attachment; filename="rsstranslator_original_feeds.opml"'
+        response = HttpResponse(opml_obj.to_xml(), content_type="application/xml")
+        response["Content-Disposition"] = (
+            'attachment; filename="rsstranslator_original_feeds.opml"'
+        )
         return response
 
     o_feed_export_as_opml.short_description = _("Export selected feeds as OPML")
@@ -39,28 +49,42 @@ class CustomModelActions:
         opml_obj = OPML()
 
         for item in queryset:
-            text = item.o_feed.name or 'No Name'
-            xml_url = request.build_absolute_uri(reverse('core:rss', kwargs={'feed_sid': item.sid}))
+            text = item.o_feed.name or "No Name"
+            xml_url = request.build_absolute_uri(
+                reverse("core:rss", kwargs={"feed_sid": item.sid})
+            )
 
             category_outline = Outline(text=item.o_feed.category.name)
-            item_outline = Outline(title=text, text=text, type='rss', xml_url=xml_url, html_url=item.o_feed.feed_url)
+            item_outline = Outline(
+                title=text,
+                text=text,
+                type="rss",
+                xml_url=xml_url,
+                html_url=item.o_feed.feed_url,
+            )
             category_outline.outlines.append(item_outline)
             opml_obj.body.outlines.append(category_outline)
 
-        response = HttpResponse(opml_obj.to_xml(), content_type='application/xml')
-        response['Content-Disposition'] = 'attachment; filename="rsstranslator_translated_feeds.opml"'
+        response = HttpResponse(opml_obj.to_xml(), content_type="application/xml")
+        response["Content-Disposition"] = (
+            'attachment; filename="rsstranslator_translated_feeds.opml"'
+        )
         return response
+
     t_feed_export_as_opml.short_description = _("Export selected feeds as OPML")
 
     def o_feed_force_update(self, request, queryset):
         logging.info("Call o_feed_force_update: %s", queryset)
         with transaction.atomic():
             for instance in queryset:
-                instance.etag = ''
+                instance.etag = ""
                 instance.valid = None
                 instance.save()
                 self.revoke_tasks_by_arg(instance.sid)
-                update_original_feed.schedule(args=(instance.sid,), delay=1)  # 会执行一次save()
+                update_original_feed.schedule(
+                    args=(instance.sid,), delay=1
+                )  # 会执行一次save()
+
     o_feed_force_update.short_description = _("Force update")
 
     def t_feed_force_update(self, request, queryset):
@@ -71,7 +95,10 @@ class CustomModelActions:
                 instance.status = None
                 instance.save()
                 self.revoke_tasks_by_arg(instance.sid)
-                update_translated_feed.schedule(args=(instance.sid,), delay=1)  # 会执行一次save()
+                update_translated_feed.schedule(
+                    args=(instance.sid,), delay=1
+                )  # 会执行一次save()
+
     t_feed_force_update.short_description = _("Force update")
 
     def revoke_tasks_by_arg(self, arg_to_match):
@@ -95,40 +122,51 @@ class CustomModelActions:
 def get_all_app_models(app_name):
     app = apps.get_app_config(app_name)
     models = app.get_models()
-    #exclude Translated_Content
-    exclude_models = ['Translated_Content']
+    # exclude Translated_Content
+    exclude_models = ["Translated_Content"]
     if not settings.DEBUG:
-        exclude_models.append('TestTranslator')
+        exclude_models.append("TestTranslator")
 
     models = [model for model in models if model.__name__ not in exclude_models]
 
     return models
 
+
 def get_translator_and_summary_choices():
-    translator_models = get_all_app_models('translator')
+    translator_models = get_all_app_models("translator")
     # Cache ContentTypes to avoid repetitive database calls
-    content_types = {model: ContentType.objects.get_for_model(model) for model in translator_models}
+    content_types = {
+        model: ContentType.objects.get_for_model(model) for model in translator_models
+    }
 
     # Build all choices in one list comprehension
     translator_choices = [
         (f"{content_types[model].id}:{obj_id}", obj_name)
         for model in translator_models
-        for obj_id, obj_name in model.objects.filter(valid=True).values_list('id', 'name')
+        for obj_id, obj_name in model.objects.filter(valid=True).values_list(
+            "id", "name"
+        )
     ]
 
     summary_engine_choices = [
-            (f"{content_types[model].id}:{obj_id}", obj_name)
-            for model in translator_models
-            for obj_id, obj_name in model.objects.filter(valid=True, is_ai=True).values_list('id', 'name')
-        ]
+        (f"{content_types[model].id}:{obj_id}", obj_name)
+        for model in translator_models
+        for obj_id, obj_name in model.objects.filter(
+            valid=True, is_ai=True
+        ).values_list("id", "name")
+    ]
     return translator_choices, summary_engine_choices
+
 
 def valid_icon(status):
     match status:
         case None:
-            return format_html("<img src='/static/img/icon-loading.svg' alt='In Progress'>")
+            return format_html(
+                "<img src='/static/img/icon-loading.svg' alt='In Progress'>"
+            )
         case True:
-            return format_html("<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>")
+            return format_html(
+                "<img src='/static/admin/img/icon-yes.svg' alt='Succeed'>"
+            )
         case False:
             return format_html("<img src='/static/admin/img/icon-no.svg' alt='Error'>")
-

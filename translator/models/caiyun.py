@@ -11,7 +11,9 @@ from django.utils.translation import gettext_lazy as _
 class CaiYunTranslator(TranslatorEngine):
     # https://docs.caiyunapp.com/blog/2018/09/03/lingocloud-api/
     token = EncryptedCharField(max_length=255)
-    url = models.URLField(max_length=255, default="http://api.interpreter.caiyunai.com/v1/translator")
+    url = models.URLField(
+        max_length=255, default="http://api.interpreter.caiyunai.com/v1/translator"
+    )
     max_characters = models.IntegerField(default=5000)
     language_code_map = {
         "English": "en",
@@ -34,10 +36,12 @@ class CaiYunTranslator(TranslatorEngine):
     def translate(self, text: str, target_language: str, **kwargs) -> dict:
         logging.info(">>> CaiYun Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
-        translated_text = ''
+        translated_text = ""
         try:
             if target_code is None:
-                logging.error("CaiYunTranslator->Not support target language:%s", target_language)
+                logging.error(
+                    "CaiYunTranslator->Not support target language:%s", target_language
+                )
 
             payload = {
                 "source": text,
@@ -51,11 +55,12 @@ class CaiYunTranslator(TranslatorEngine):
                 "x-authorization": f"token {self.token}",
             }
 
-            resp = httpx.post(url=self.url, headers=headers, data=json.dumps(payload), timeout=10)
+            resp = httpx.post(
+                url=self.url, headers=headers, data=json.dumps(payload), timeout=10
+            )
             resp.raise_for_status()
             translated_text = resp.json()["target"]
         except Exception as e:
             logging.error("CaiYunTranslator->%s: %s", e, text)
         finally:
-            return {'text': translated_text, "characters": len(text)}
-
+            return {"text": translated_text, "characters": len(text)}
