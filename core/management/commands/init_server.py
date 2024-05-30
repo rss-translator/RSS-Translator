@@ -3,12 +3,11 @@ from django.core.management import call_command
 
 
 class Command(BaseCommand):
-    help = 'Initialize the server by running collectstatic, makemigrations, migrate and create_default_superuser commands.'
+    help = "Initialize the server by running collectstatic, makemigrations, migrate and create_default_superuser commands."
 
     def handle(self, *args, **options):
-        call_command('collectstatic', '--no-input')
-        call_command('makemigrations')
-        call_command('migrate')
-        call_command('create_default_superuser')
-        call_command('compilemessages', verbosity=0)
-
+        call_command("collectstatic", "--no-input")
+        call_command("makemigrations")
+        call_command("migrate")
+        call_command("create_default_superuser")
+        call_command("compilemessages", verbosity=0)

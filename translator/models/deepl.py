@@ -5,6 +5,7 @@ from django.db import models
 from encrypted_model_fields.fields import EncryptedCharField
 from django.utils.translation import gettext_lazy as _
 
+
 class DeepLTranslator(TranslatorEngine):
     # https://github.com/DeepLcom/deepl-python
     api_key = EncryptedCharField(_("API Key"), max_length=255)
@@ -38,7 +39,9 @@ class DeepLTranslator(TranslatorEngine):
         verbose_name_plural = "DeepL"
 
     def _init(self):
-        return deepl.Translator(self.api_key, server_url=self.server_url, proxy=self.proxy)
+        return deepl.Translator(
+            self.api_key, server_url=self.server_url, proxy=self.proxy
+        )
 
     def validate(self) -> bool:
         try:
@@ -49,17 +52,23 @@ class DeepLTranslator(TranslatorEngine):
             logging.error("DeepLTranslator validate ->%s", e)
             return False
 
-    def translate(self, text:str, target_language:str, **kwargs) -> dict:
+    def translate(self, text: str, target_language: str, **kwargs) -> dict:
         logging.info(">>> DeepL Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
-        translated_text = ''
+        translated_text = ""
         try:
             if target_code is None:
-                logging.error("DeepLTranslator->Not support target language:%s", target_language)
+                logging.error(
+                    "DeepLTranslator->Not support target language:%s", target_language
+                )
             translator = self._init()
-            resp = translator.translate_text(text, target_lang=target_code, preserve_formatting=True,
-                                             split_sentences='nonewlines')
+            resp = translator.translate_text(
+                text,
+                target_lang=target_code,
+                preserve_formatting=True,
+                split_sentences="nonewlines",
+            )
             translated_text = resp.text
         except Exception as e:
             logging.error("DeepLTranslator->%s: %s", e, text)
-        return {'text': translated_text, "characters": len(text)}
+        return {"text": translated_text, "characters": len(text)}

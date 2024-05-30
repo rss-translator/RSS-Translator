@@ -6,16 +6,25 @@ from django.db import models
 from encrypted_model_fields.fields import EncryptedCharField
 from django.utils.translation import gettext_lazy as _
 
+
 class ClaudeTranslator(TranslatorEngine):
     # https://docs.anthropic.com/claude/reference/getting-started-with-the-api
     is_ai = models.BooleanField(default=True, editable=False)
-    model = models.CharField(max_length=50, default="claude-3-haiku-20240307", help_text="e.g. claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229")
+    model = models.CharField(
+        max_length=50,
+        default="claude-3-haiku-20240307",
+        help_text="e.g. claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229",
+    )
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     max_tokens = models.IntegerField(default=1000)
     base_url = models.URLField(_("API URL"), default="https://api.anthropic.com")
-    translate_prompt = models.TextField(_("Title Translate Prompt"), default=settings.default_title_translate_prompt)
-    content_translate_prompt = models.TextField(_("Content Translate Prompt"), default=settings.default_content_translate_prompt)
- 
+    translate_prompt = models.TextField(
+        _("Title Translate Prompt"), default=settings.default_title_translate_prompt
+    )
+    content_translate_prompt = models.TextField(
+        _("Content Translate Prompt"), default=settings.default_content_translate_prompt
+    )
+
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
     temperature = models.FloatField(default=0.7)
     top_p = models.FloatField(null=True, blank=True, default=0.7)
@@ -39,17 +48,28 @@ class ClaudeTranslator(TranslatorEngine):
             res = self.translate("hi", "Chinese Simplified")
             return res.get("text") != ""
 
-    def translate(self, text:str, target_language:str, system_prompt:str=None, user_prompt:str=None, text_type:str='title') -> dict:
+    def translate(
+        self,
+        text: str,
+        target_language: str,
+        system_prompt: str = None,
+        user_prompt: str = None,
+        text_type: str = "title",
+    ) -> dict:
         logging.info(">>> Claude Translate [%s]:", target_language)
         client = self._init()
         tokens = client.count_tokens(text)
-        translated_text = ''
-        system_prompt = system_prompt or self.translate_prompt if text_type == 'title' else self.content_translate_prompt
+        translated_text = ""
+        system_prompt = (
+            system_prompt or self.translate_prompt
+            if text_type == "title"
+            else self.content_translate_prompt
+        )
         try:
-            system_prompt = system_prompt.replace('{target_language}', target_language)
+            system_prompt = system_prompt.replace("{target_language}", target_language)
             if user_prompt is not None:
                 system_prompt += f"\n\n{user_prompt}"
-                
+
             res = client.messages.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
@@ -68,8 +88,8 @@ class ClaudeTranslator(TranslatorEngine):
         except Exception as e:
             logging.error("ClaudeTranslator->%s: %s", e, text)
         finally:
-            return {'text': translated_text, "tokens": tokens}
-        
-    def summarize(self, text:str, target_language:str) -> dict:
+            return {"text": translated_text, "tokens": tokens}
+
+    def summarize(self, text: str, target_language: str) -> dict:
         logging.info(">>> Claude Summarize [%s]:", target_language)
         return self.translate(text, target_language, system_prompt=self.summary_prompt)

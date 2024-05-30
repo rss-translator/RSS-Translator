@@ -5,8 +5,11 @@ import logging
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+
 class GoogleTranslateWebTranslator(TranslatorEngine):
-    base_url = models.URLField(_("URL"), default="https://translate.googleapis.com/translate_a/single")
+    base_url = models.URLField(
+        _("URL"), default="https://translate.googleapis.com/translate_a/single"
+    )
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
     interval = models.IntegerField(_("Request Interval(s)"), default=3)
     max_characters = models.IntegerField(default=1000)
@@ -41,13 +44,16 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
         results = self.translate("hi", "Chinese Simplified")
         return results.get("text") != ""
 
-    def translate(self, text:str, target_language:str, **kwargs) -> dict:
+    def translate(self, text: str, target_language: str, **kwargs) -> dict:
         logging.info(">>> Google Translate Web Translate [%s]:", target_language)
         target_language = self.language_code_map.get(target_language)
-        translated_text = ''
+        translated_text = ""
         if target_language is None:
-            logging.error("GoogleTranslateWebTranslator->Not support target language:%s", target_language)
-            return {'text': translated_text, "characters": len(text)}
+            logging.error(
+                "GoogleTranslateWebTranslator->Not support target language:%s",
+                target_language,
+            )
+            return {"text": translated_text, "characters": len(text)}
         try:
             params = {
                 "client": "gtx",
@@ -62,9 +68,11 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
             if resp_json:
                 translated_text = resp_json[0][0][0]
             else:
-                logging.error("GoogleTranslateWebTranslator->Invalid response: %s", resp.text)
+                logging.error(
+                    "GoogleTranslateWebTranslator->Invalid response: %s", resp.text
+                )
         except Exception as e:
             logging.error("GoogleTranslateWebTranslator->%s: %s", e, text)
         finally:
             sleep(self.interval)
-            return {'text': translated_text, "characters": len(text)}
+            return {"text": translated_text, "characters": len(text)}
