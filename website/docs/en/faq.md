@@ -32,7 +32,7 @@ If you deployed on other way, wait for 5 minutes and still can't solve the probl
 
 ## Error: CSRF Authentication Failure
 
-If you get a 403 CSRF authentication failure error after logging in, you need to set the environment variable CSRF_TRUSTED_ORIGINS to the domain name or IP address:https://*.example.com
+If you get a 403 CSRF authentication failure error after logging in, you need to set the environment variable CSRF_TRUSTED_ORIGINS to the domain name or IP address:https://example.com:port,http://example.com:port
 
 ### IPv6
 
