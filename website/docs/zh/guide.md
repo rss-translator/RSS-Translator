@@ -23,10 +23,9 @@
 ![translator_list](/assets/translator_list.png)
 
 ## 添加源
-点击左侧Original Feeds的 +增加 按钮
+点击左侧原始源的 +增加 按钮
 ![core_feeds](/assets/core_feeds.png)
 输入相关信息
-![add_feed](/assets/add_feed.png)
 保存后会跳转到源列表
 ![feed_list](/assets/feeds_list_2.png)
 需要确保添加的源是有效的(Valid)，然后点击名称进入详情页
@@ -37,14 +36,18 @@
 
 如果勾选了翻译内容，为了保持翻译后的格式，将会耗时较长时间。
 
-## 强制更新/删除/导出源
+## 动作
 勾选需要操作的源，点击Action，选择对应选项，点击执行(Go)即可
 ![action](/assets/action.png)
 
-## 统一订阅链接
+## 合并订阅链接
 使用以下链接可将所有翻译源合并为一个源：
 
 `http://127.0.0.1:8000/rss/all/t`
+
+也可以单独订阅某个类别的源：
+
+`http://127.0.0.1:8000/rss/category/mycategory-1`
 
 访问该网址后会实时进行合并，相对耗费资源，页面会缓存15分钟。
 

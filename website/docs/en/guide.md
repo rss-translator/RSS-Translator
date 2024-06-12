@@ -26,7 +26,6 @@ Check that it is valid, if it is not, you need to check the information you have
 Click the +Add button in Original Feeds on the left.
 ![core_feeds](/assets/core_feeds.png)
 Enter the relevant information
-![add_feed](/assets/add_feed.png)
 Save and jump to the list of feeds
 ![feed_list](/assets/feeds_list_2.png)
 You need to make sure that the added feed is valid, then click on the name to go to the detail page
@@ -37,14 +36,18 @@ If you just translate the title and use the paid translation engine, it will tak
 
 If translated content is ticked, it will take longer in order to maintain the translated format.
 
-## Force update/delete/export sources
+## Actions
 Tick the source you want to operate, click Action, select the corresponding option, and click Go.
 ![action](/assets/action.png)
 
-## Unified Subscription Link
+## Combine Subscription Link
 Use the following link to merge all translation sources into one source:
 
 `http://127.0.0.1:8000/rss/all/t`.
+
+It is also possible to subscribe to a category of sources individually:
+
+`http://127.0.0.1:8000/rss/category/mycategory-1`
 
 The merge is done in real time when you visit this URL, it is relatively resource intensive and the page is cached for 15 minutes.
 

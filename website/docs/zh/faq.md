@@ -28,7 +28,7 @@
 
 ## 报错:CSRF验证失败
 
-如果在登录后出现403 CSRF验证失败的错误，则需要设置环境变量CSRF_TRUSTED_ORIGINS，值为域名或IP地址:https://*.example.com
+如果在登录后出现403 CSRF验证失败的错误，则需要设置环境变量CSRF_TRUSTED_ORIGINS，值为域名或IP地址:https://example.com:port,http://example.com:port
 
 ### IPv6
 目前无法同时支持IPv4和IPv6；
