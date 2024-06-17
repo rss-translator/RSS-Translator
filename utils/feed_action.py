@@ -257,6 +257,9 @@ def merge_all_atom(input_files: list, filename: str):
         processed_entries = set()
 
         for input_file in input_files:
+            if not os.path.exists(input_file):
+                logging.warning(f"{input_file} does not exist, skipping")
+                continue
             for _, entry in etree.iterparse(
                 input_file, events=("end",), tag=f"{{{ATOM_NS}}}entry"
             ):
