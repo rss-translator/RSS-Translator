@@ -1,12 +1,12 @@
 import logging
 import os
-import gc
-import json
+# import json
 
 # import xml.dom.minidom
 from datetime import datetime, timezone, date, timedelta
 from time import mktime
-from dateutil import parser
+
+# from dateutil import parser
 from django.conf import settings
 
 from typing import Dict
@@ -15,9 +15,12 @@ import feedparser
 import httpx
 from lxml import etree
 
-# from django.utils.feedgenerator import Atom1Feed
 from feedgen.feed import FeedGenerator
 from fake_useragent import UserAgent
+
+
+def get_first_non_none(feed, *keys):
+    return next((feed.get(key) for key in keys if feed.get(key) is not None), None)
 
 
 def fetch_feed(url: str, etag: str = "") -> Dict:
@@ -184,59 +187,127 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
     return atom_string_with_pi
 
 
-# def atom2jsonfeed(atom_file_path: str) -> dict:
-#     feed = feedparser.parse(atom_file_path)
-
-#     json_feed = {
-#         "version": "https://jsonfeed.org/version/1.1",
-#         "title": feed.feed.title,
-#         "feed_url": feed.feed.id,
-#         "home_page_url": feed.feed.get("link", None)
-#     }
-
-#     if hasattr(feed.feed, "subtitle"):
-#         json_feed["description"] = feed.feed.subtitle
-#     if hasattr(feed.feed, "updated"):
-#         json_feed["updated"] = feed.feed.updated
-
-#     json_feed["items"] = []
-#     for entry in feed.entries:
-#         item = {
-#             "id": entry.id,
-#             "url": entry.link,
-#             "title": entry.title,
-#         }
-#         if hasattr(entry, "summary"):
-#             item["content_html"] = entry.summary
-#         if hasattr(entry, "published"):
-#             item["date_published"] = entry.published
-#         if hasattr(entry, "updated"):
-#             item["date_modified"] = entry.updated
-#         if hasattr(entry, "author"):
-#             authors = entry.author
-#             if not isinstance(authors, list):
-#                 authors = [authors]
-#             item["authors"] = [{"name": author} for author in authors]
-#         if hasattr(entry, "content"):
-#             item["content_html"] = ""
-#             for content in entry.content:
-#                 if content["type"] == "text/html":
-#                     item["content_html"] += content["value"]
-#                 elif content["type"] == "text/plain":
-#                     item["content_text"] = content["value"]
-
-#         json_feed["items"].append(item)
-
-#     return json_feed
+ATOM_NS = "http://www.w3.org/2005/Atom"
+ENTRY_ID = f"{{{ATOM_NS}}}id"
+ENTRY_PUBLISHED = f"{{{ATOM_NS}}}published"
+ENTRY_UPDATED = f"{{{ATOM_NS}}}updated"
 
 
-def merge_all_atom(input_files: list, filename: str):
+class FeedMerger:
+    def __init__(self, feed_name, feed_files):
+        self.feed_name = feed_name
+        self.feed_files = feed_files
+        self.output_dir = os.path.join(settings.DATA_FOLDER, "feeds")
+        self.output_file = os.path.join(self.output_dir, f"{feed_name}.xml")
+        self.processed_entries = set()
+
+    def merge_feeds(self):
+        os.makedirs(self.output_dir, exist_ok=True)
+        self._write_feed_header()
+
+        for feed_file in self.feed_files:
+            if not os.path.exists(feed_file):
+                logging.warning(f"{feed_file} does not exist, skipping")
+                continue
+
+            self._process_feed_file(feed_file)
+
+        self._write_feed_footer()
+
+    def _write_feed_header(self):
+        with open(os.path.normpath(self.output_file), "wb") as f:
+            f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
+            f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
+            f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode("utf-8"))
+            f.write(
+                f"<title>Translated Feeds for {self.feed_name} | RSS Translator</title>\n".encode(
+                    "utf-8"
+                )
+            )
+            f.write(b'<link href="https://rsstranslator.com"/>\n')
+            f.write(
+                f"<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n".encode(
+                    "utf-8"
+                )
+            )
+
+    def _process_feed_file(self, feed_file):
+        try:
+            feed_tree = etree.parse(feed_file)
+            feed_root = feed_tree.getroot()
+            feed_title = feed_root.findtext(f"{{{ATOM_NS}}}title", "")
+            feed_url = feed_root.find(f"{{{ATOM_NS}}}link").get("href", "")
+            self.processed_entries.update(
+                entry.find(ENTRY_ID).text
+                for entry in feed_root.iterfind(f"{{{ATOM_NS}}}entry")
+                if self._should_process_entry(entry, feed_title, feed_url)
+            )
+
+        except Exception as e:
+            logging.error(f"FeedMerger::_process_feed_file: {feed_file}: {e}")
+
+    def _should_process_entry(self, entry, feed_title, feed_url):
+        try:
+            id_elem = entry.find(ENTRY_ID)
+            if id_elem is None or id_elem.text in self.processed_entries:
+                return False
+
+            published_elem = entry.find(ENTRY_PUBLISHED) or entry.find(ENTRY_UPDATED)
+            if published_elem is None:
+                return False
+
+            published_date = self._parse_date(published_elem.text)
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+
+            if published_date < thirty_days_ago.date():
+                return False
+
+            self._add_author_info(entry, feed_title, feed_url)
+            self._write_entry(entry)
+            return True
+        except Exception as e:
+            logging.error(f"FeedMerger::_should_process_entry:{e}")
+            return False
+
+    def _parse_date(self, date_str):
+        try:
+            return datetime.fromisoformat(date_str).date()
+        except ValueError:
+            logging.error(f"Error parsing date: {date_str}")
+            return None
+
+    def _add_author_info(self, entry, feed_title, feed_url):
+        author_elem = etree.Element(f"{{{ATOM_NS}}}author")
+        name_elem = etree.SubElement(author_elem, f"{{{ATOM_NS}}}name")
+        name_elem.text = feed_title
+        uri_elem = etree.SubElement(author_elem, f"{{{ATOM_NS}}}uri")
+        uri_elem.text = feed_url
+        entry.append(author_elem)
+
+    def _write_entry(self, entry):
+        with open(os.path.normpath(self.output_file), "ab") as f:
+            f.write(etree.tostring(entry, pretty_print=True))
+
+    def _write_feed_footer(self):
+        with open(os.path.normpath(self.output_file), "ab") as f:
+            f.write(b"</feed>")
+
+
+def merge_all_atom(feed_files, feed_name):
+    merger = FeedMerger(feed_name, feed_files)
+    merger.merge_feeds()
+
+
+"""
+def merge_all_atom(feed_files: list, filename: str):
     ATOM_NS = "http://www.w3.org/2005/Atom"
 
     output_dir = os.path.join(settings.DATA_FOLDER, "feeds")
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f"{filename}.xml")
+    
     with open(os.path.normpath(output_file), "wb") as f:
+        # Write Feed Header
         f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
         f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
         f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode("utf-8"))
@@ -256,33 +327,58 @@ def merge_all_atom(input_files: list, filename: str):
         thirty_days_ago = today - timedelta(days=30)
         processed_entries = set()
 
-        for input_file in input_files:
-            if not os.path.exists(input_file):
-                logging.warning(f"{input_file} does not exist, skipping")
+        for feed_file in feed_files:
+            if not os.path.exists(feed_file):
+                logging.warning(f"{feed_file} does not exist, skipping")
                 continue
-            for _, entry in etree.iterparse(
-                input_file, events=("end",), tag=f"{{{ATOM_NS}}}entry"
-            ):
+            
+            try:
+                feed_tree = etree.parse(feed_file)
+                feed_root = feed_tree.getroot()
+                
+                feed_title = feed_root.findtext(f"{{{ATOM_NS}}}title", "")
+                feed_url = feed_root.findtext(f"{{{ATOM_NS}}}link[@rel='self']/@href", "")
+
+                processed_entries.update(
+                    {
+                        entry.find(f"{{{ATOM_NS}}}id").text
+                        for entry in feed_root.xpath(f".//{{{ATOM_NS}}}entry")
+                        if _should_process_entry(entry, feed_title, feed_url)
+                    }
+                )
+            except Exception as e:
+                logging.error(f"Error processing {feed_file}: {e}")
+            
+            # for _, entry in etree.iterparse(
+            #     feed_file, events=("end",), tag=f"{{{ATOM_NS}}}entry"
+            # ):
+            def _should_process_entry(entry, feed_title, feed_url):
                 id_elem = entry.find(f"{{{ATOM_NS}}}id")
-                if id_elem is not None and id_elem.text not in processed_entries:
-                    published_elem = entry.find(
-                        f"{{{ATOM_NS}}}published"
-                    ) or entry.find(f"{{{ATOM_NS}}}updated")
-                    if published_elem is not None:
-                        published_date = parser.parse(published_elem.text).date()
-                        if published_date >= thirty_days_ago:
-                            f.write(etree.tostring(entry, pretty_print=True))
-                            processed_entries.add(id_elem.text)
-                entry.clear()
-                while entry.getprevious() is not None:
-                    del entry.getparent()[0]
-            gc.collect()
+                if id_elem is None and id_elem.text in processed_entries:
+                    return False
+
+                published_elem = entry.find(
+                    f"{{{ATOM_NS}}}published"
+                ) or entry.find(f"{{{ATOM_NS}}}updated")
+                if published_elem is None:
+                    return False
+
+                published_date = parser.parse(published_elem.text).date()
+                if published_date < thirty_days_ago.date():
+                    return False
+                    
+                author_elem = etree.Element(f"{{{ATOM_NS}}}author")
+                name_elem = etree.SubElement(author_elem, f"{{{ATOM_NS}}}name")
+                name_elem.text = feed_title
+                uri_elem = etree.SubElement(author_elem, f"{{{ATOM_NS}}}uri")
+                uri_elem.text = feed_url
+                entry.append(author_elem)
+
+                f.write(etree.tostring(entry, pretty_print=True))
+                return True
+
         f.write(b"</feed>")
-
-
-def get_first_non_none(feed, *keys):
-    return next((feed.get(key) for key in keys if feed.get(key) is not None), None)
-
+"""
 
 ''' old generate_atom_feed function, use django feedgenerator
 def generate_atom_feed_old(feed_url:str, feed_dict: dict):
