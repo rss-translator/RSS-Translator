@@ -281,22 +281,21 @@ class FeedMerger:
         if author_elem is None:
             author_elem = etree.Element(f"{{{ATOM_NS}}}author")
             entry.append(author_elem)
-            
+
         name_elem = author_elem.find(f"{{{ATOM_NS}}}name")
         if name_elem is None:
             name_elem = etree.SubElement(author_elem, f"{{{ATOM_NS}}}name")
-        
+
         # 将name元素的文本修改为feed_title+原author信息
         if name_elem.text:
             name_elem.text = f"{feed_title} - {name_elem.text}"
         else:
             name_elem.text = feed_title
-            
-        uri_elem = author_elem.find(f"{{{ATOM_NS}}}uri") 
+
+        uri_elem = author_elem.find(f"{{{ATOM_NS}}}uri")
         if uri_elem is None:
             uri_elem = etree.SubElement(author_elem, f"{{{ATOM_NS}}}uri")
         uri_elem.text = feed_url
-
 
     def _write_entry(self, entry):
         with open(os.path.normpath(self.output_file), "ab") as f:
