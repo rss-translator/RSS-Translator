@@ -2,6 +2,21 @@
 > 本人长期使用[OhMyGPT](https://www.ohmygpt.com?aff=FQcnRPCb)，支持多种主流模型，服务稳定价格低廉，非常建议使用。     
 > 邀请码：FQcnRPCb，双方均可获得额外奖励。  
 
+## Free Translators
+基于[UlionTse/translators](https://github.com/UlionTse/translators)打包的[easytranslator](https://github.com/versun/easytranslator/)，非常感谢。
+集合了市面上所有主流的翻译服务，包括但不限于：  
+- Google
+- DeepL
+- Alibaba
+- Bing
+- Baidu
+- DeepL
+- QQ Translate Smart
+- Sogou
+...
+通过负载均衡，实现高可用的翻译。   
+缺点：翻译质量一般，如果不追求高质量，可选择该服务  
+
 ## OpenAI
 官方网站：[openai.com/product](https://openai.com/product)  
 目前 OpenAI 官方暂不支持中国用户使用，请查看[官方支持的国家/地区](https://platform.openai.com/docs/supported-countries)

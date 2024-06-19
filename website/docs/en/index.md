@@ -23,6 +23,7 @@ Official website: [rsstranslator.com](https://rsstranslator.com)
    
 Currently supported translation services:
 
+- Free Translators(A collection of all major free translation services)
 - DeepL
 - DeepLX
 - Google Translate(Web)
