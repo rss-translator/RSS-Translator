@@ -3,7 +3,6 @@ name: dev:Docker Image CI
 on:
   release:
     types: [prereleased]
-  push:
     branches:    
       - next
     
