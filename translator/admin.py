@@ -322,6 +322,18 @@ class GroqTranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
     ]
 
+class FreeTranslatorsAdmin(BaseTranslatorAdmin):
+    fields = [
+        "name",
+        "proxies",
+        "max_characters",
+    ]
+    list_display = [
+        "name",
+        "is_valid",
+        "proxies",
+    ]
+
 
 class Translated_ContentAdmin(admin.ModelAdmin):
     fields = [
@@ -367,6 +379,7 @@ core_admin_site.register(MoonshotAITranslator, MoonshotAITranslatorAdmin)
 core_admin_site.register(TogetherAITranslator, TogetherAITranslatorAdmin)
 core_admin_site.register(OpenRouterAITranslator, OpenRouterAITranslatorAdmin)
 core_admin_site.register(GroqTranslator, GroqTranslatorAdmin)
+core_admin_site.register(FreeTranslators, FreeTranslatorsAdmin)
 
 if settings.DEBUG:
     core_admin_site.register(Translated_Content, Translated_ContentAdmin)
