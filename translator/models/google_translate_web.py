@@ -4,14 +4,15 @@ from .base import TranslatorEngine
 import logging
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+import translators as ts
 
 
 class GoogleTranslateWebTranslator(TranslatorEngine):
     base_url = models.URLField(
-        _("URL"), default="https://translate.googleapis.com/translate_a/single"
-    )
+        _("URL"), null=True, blank=True, help_text=_("It is recommended to leave this blank in order to automatically select the best server")
+    ) # https://translate.googleapis.com/translate_a/single
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True, default=None)
-    interval = models.IntegerField(_("Request Interval(s)"), default=3)
+    interval = models.IntegerField(_("Request Interval(s)"), default=1)
     max_characters = models.IntegerField(default=1000)
     language_code_map = {
         "English": "en",
@@ -55,22 +56,19 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
             )
             return {"text": translated_text, "characters": len(text)}
         try:
-            params = {
-                "client": "gtx",
-                "sl": "auto",
-                "tl": target_language,
-                "dt": "t",
-                "q": text,
-            }
-            resp = httpx.get(self.base_url, params=params, timeout=10, proxy=self.proxy)
-            resp.raise_for_status()
-            resp_json = resp.json()
-            if resp_json:
-                translated_text = resp_json[0][0][0]
-            else:
-                logging.error(
-                    "GoogleTranslateWebTranslator->Invalid response: %s", resp.text
-                )
+            # params = {
+            #     "client": "gtx",
+            #     "sl": "auto",
+            #     "tl": target_language,
+            #     "dt": "t",
+            #     "q": text,
+            # }
+            # resp = httpx.get(self.base_url, params=params, timeout=10, proxy=self.proxy)
+            # resp.raise_for_status()
+            # resp_json = resp.json()
+            results = ts.translate_text(text, to_language=target_language, translator="google", reset_host_url=self.base_url, proxies=self.proxy)
+            if results:
+                translated_text = results
         except Exception as e:
             logging.error("GoogleTranslateWebTranslator->%s: %s", e, text)
         finally:

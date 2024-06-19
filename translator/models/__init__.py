@@ -13,6 +13,6 @@ from .openai import OpenAITranslator
 from .togetherai import TogetherAITranslator
 from .openrouterai import OpenRouterAITranslator
 from .groq import GroqTranslator
-
+from .free_translators import FreeTranslators
 
 from .dev import TestTranslator

@@ -160,7 +160,7 @@ def category(request, category: str):
     except Exception as e:
         # Log the exception and return an appropriate error response
         logging.exception(
-            "Failed to read the category feed file: %s / %s", merge_file_path, str(e)
+            "Failed to read the category feed file: %s / %s", category, str(e)
         )
         return HttpResponse(status=500)
 
