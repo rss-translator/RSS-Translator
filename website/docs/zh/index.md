@@ -23,6 +23,7 @@
    
 目前支持的翻译服务：
 
+- Free Translators(集合了所有主流的免费翻译服务)
 - DeepL
 - DeepLX
 - Google Translate(Web)
