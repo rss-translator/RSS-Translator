@@ -3,18 +3,18 @@
 > Invitation code: FQcnRPCb, both sides can get extra bonus.  
 
 ## Free Translators
-Based on [easytranslator](https://github.com/versun/easytranslator/) packaged with [UlionTse/translators](https://github.com/UlionTse/translators). Thank you very much.
-A collection of all major translation services, including but not limited to:  
-- Google
-- DeepL
-- Alibaba
-- Bing
-- Baidu
-- DeepL
-- QQ Translate Smart
-- Sogou
-...
-Highly available translations through load balancing.   
+Based on [easytranslator](https://github.com/versun/easytranslator/) packaged with [UlionTse/translators](https://github.com/UlionTse/translators). Thank you very much.   
+A collection of all major translation services, including but not limited to:     
+- Google   
+- DeepL   
+- Alibaba   
+- Bing   
+- Baidu   
+- DeepL   
+- QQ Translate Smart   
+- Sogou   
+...   
+Highly available translations through load balancing.      
 Disadvantages: translation quality is pool, if you don't pursue high quality, you can choose this service!  
 
 ## OpenAI

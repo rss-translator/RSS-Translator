@@ -3,17 +3,17 @@
 > 邀请码：FQcnRPCb，双方均可获得额外奖励。  
 
 ## Free Translators
-基于[UlionTse/translators](https://github.com/UlionTse/translators)打包的[easytranslator](https://github.com/versun/easytranslator/)，非常感谢。
-集合了市面上所有主流的翻译服务，包括但不限于：  
-- Google
-- DeepL
-- Alibaba
-- Bing
-- Baidu
-- DeepL
-- QQ Translate Smart
-- Sogou
-...
+基于[UlionTse/translators](https://github.com/UlionTse/translators)打包的[easytranslator](https://github.com/versun/easytranslator/)，非常感谢。  
+集合了市面上所有主流的翻译服务，包括但不限于：     
+- Google   
+- DeepL   
+- Alibaba   
+- Bing   
+- Baidu   
+- DeepL   
+- QQ Translate Smart   
+- Sogou   
+...   
 通过负载均衡，实现高可用的翻译。   
 缺点：翻译质量一般，如果不追求高质量，可选择该服务  
 
