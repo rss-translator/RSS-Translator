@@ -3,8 +3,7 @@ name: latest:Docker Image CI
 on:
   release:
     types: [published]
-  push:
-    branches:    
+    branches:
       - main
     
 jobs:
