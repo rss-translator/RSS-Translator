@@ -24,7 +24,7 @@ class FreeTranslators(TranslatorEngine):
     def _init(self):
         # if not self.translators:
         #     self.translators = []
-        return EasyTranslator(translators=[], top_n=10)
+        return EasyTranslator(translators=[])
 
     def validate(self) -> bool:
         return True
