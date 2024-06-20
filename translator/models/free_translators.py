@@ -31,7 +31,12 @@ class FreeTranslators(TranslatorEngine):
 
     def translate(self, text: str, target_language: str, source_language:str="auto", **kwargs) -> dict:
         et = self._init()
-        source_language = detect(text) if source_language == "auto" else source_language
+        try:
+            source_language = detect(text) if source_language == "auto" else source_language
+        except:
+            source_language == "auto"
+            logging.warning("Cannot detect source language:%s", text)
+            
         results = et.translate(
             text=text, dest_lang=target_language, src_lang=source_language, proxies=self.proxies
         )
