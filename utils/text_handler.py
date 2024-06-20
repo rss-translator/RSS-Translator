@@ -15,7 +15,7 @@ def detect_language(entry):
         if original_content
         else entry.get("summary")
     )
-    text = title + " " + content
+    text =f"{title} {content}"
     source_language = "auto"
     try:
         source_language = detect(text)
