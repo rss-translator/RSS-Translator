@@ -250,11 +250,13 @@ def translate_feed(
     total_tokens = 0
     translated_characters = 0
     need_cache_objs = {}
+    source_language = "auto"
 
     try:
         for entry in translated_feed.entries[:max_posts]:
             title = entry.get("title")
-
+            source_language = text_handler.detect_language(entry)
+            
             # Translate title
             if title and translate_engine and translate_title:
                 cached = Translated_Content.is_translated(
@@ -263,7 +265,7 @@ def translate_feed(
                 translated_text = ""
                 if not cached:
                     results = translate_engine.translate(
-                        title, target_language=target_language, text_type="title"
+                        title, target_language=target_language, source_language=source_language, text_type="title"
                     )
                     translated_text = results.get("text", title)
                     total_tokens += results.get("tokens", 0)
@@ -315,7 +317,7 @@ def translate_feed(
                 if content:
                     translated_summary, tokens, characters, need_cache = (
                         content_translate(
-                            content, target_language, translate_engine, quality
+                            content, target_language, translate_engine, quality, source_language=source_language
                         )
                     )
                     total_tokens += tokens
@@ -396,6 +398,7 @@ def content_translate(
     target_language: str,
     engine: TranslatorEngine,
     quality: bool = False,
+    source_language:str = "auto"
 ):
     total_tokens = 0
     total_characters = 0
@@ -417,7 +420,7 @@ def content_translate(
 
             if not cached:
                 results = engine.translate(
-                    text, target_language=target_language, text_type="content"
+                    text, target_language=target_language, source_language=source_language, text_type="content"
                 )
                 total_tokens += results.get("tokens", 0)
                 total_characters += len(text)

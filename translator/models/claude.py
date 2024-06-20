@@ -55,6 +55,7 @@ class ClaudeTranslator(TranslatorEngine):
         system_prompt: str = None,
         user_prompt: str = None,
         text_type: str = "title",
+        **kwargs
     ) -> dict:
         logging.info(">>> Claude Translate [%s]:", target_language)
         client = self._init()

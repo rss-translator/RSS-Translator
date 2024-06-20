@@ -12,7 +12,7 @@ class TranslatorEngine(models.Model):
     valid = models.BooleanField(_("Valid"), null=True)
     is_ai = models.BooleanField(default=False, editable=False)
 
-    def translate(self, text: str, target_language: str) -> dict:
+    def translate(self, text: str, target_language: str, source_language:str="auto", **kwargs) -> dict:
         raise NotImplementedError(
             "subclasses of TranslatorEngine must provide a translate() method"
         )
@@ -142,6 +142,7 @@ class OpenAIInterface(TranslatorEngine):
         system_prompt: str = None,
         user_prompt: str = None,
         text_type: str = "title",
+        **kwargs
     ) -> dict:
         logging.info(">>> Translate [%s]: %s", target_language, text)
         client = self._init()

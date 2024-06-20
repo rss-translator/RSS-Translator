@@ -5,6 +5,24 @@ from bs4 import Comment
 import tiktoken
 import html2text
 from translator.models import TranslatorEngine
+from langdetect import detect
+
+def detect_language(entry):
+    title = entry.get("title")
+    original_content = entry.get("content")
+    content = (
+        original_content[0].get("value")
+        if original_content
+        else entry.get("summary")
+    )
+    text = title + " " + content
+    source_language = "auto"
+    try:
+        source_language = detect(text)
+    except Exception as e:
+        logging.warning("Cannot detect source language:%s,%s", e, text)
+    
+    return source_language
 
 
 def clean_content(content: str) -> str:

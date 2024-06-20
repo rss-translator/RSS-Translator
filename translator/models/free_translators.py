@@ -34,7 +34,7 @@ class FreeTranslators(TranslatorEngine):
         try:
             source_language = detect(text) if source_language == "auto" else source_language
         except:
-            source_language == "auto"
+            source_language = "auto"
             logging.warning("Cannot detect source language:%s", text)
             
         results = et.translate(
