@@ -15,7 +15,7 @@ RUN mkdir -p $DockerHOME/data
 WORKDIR $DockerHOME
 COPY . $DockerHOME
 RUN apt-get update && \
-    apt-get install -y gettext procps git && \
+    apt-get install -y gettext procps git nodejs && \
     rm -rf /var/lib/apt/lists/*
 RUN pip install -r requirements/dev.txt --no-cache-dir -U && \
     python manage.py init_server && \
