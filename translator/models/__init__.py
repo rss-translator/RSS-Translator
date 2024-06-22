@@ -14,5 +14,6 @@ from .togetherai import TogetherAITranslator
 from .openrouterai import OpenRouterAITranslator
 from .groq import GroqTranslator
 from .free_translators import FreeTranslators
+from .doubao import DoubaoTranslator
 
 from .dev import TestTranslator
