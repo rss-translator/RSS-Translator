@@ -37,6 +37,7 @@ Currently supported translation services:
 - Together AI
 - OpenRouter AI
 - Groq
+- Doubao
 
 Continuously adding   
 For more information, please check [translation service](translator.md).

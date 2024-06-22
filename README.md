@@ -37,6 +37,7 @@
 - Together AI
 - OpenRouter AI
 - Groq
+- 豆包(Doubao)
 
 陆续增加中
 

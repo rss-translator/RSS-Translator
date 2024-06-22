@@ -30,11 +30,23 @@ Note: Azure OpenAI filtering rules are stricter, easy to translation failure, pl
 
 ## Google Gemini
 Website: [makersuite.google.com](https://makersuite.google.com)  
- Supported regions: [ai.google.dev/available_regions](https://ai.google.dev/available_regions)  
+Supported regions: [ai.google.dev/available_regions](https://ai.google.dev/available_regions)  
 Documents: [ai.google.dev/tutorials/setup?hl=zh-cn](https://ai.google.dev/tutorials/setup?hl=zh-cn)  
 
 ## Moonshot AI
 Website: [www.moonshot.cn](https://www.moonshot.cn)
+
+## Doubao
+Website：[www.volcengine.com/product/doubao](https://www.volcengine.com/product/doubao)
+
+## Together AI
+Website：[www.together.ai](https://www.together.ai)
+
+## OpenRouter AI
+Website：[openrouter.ai](https://openrouter.ai/)
+
+## Groq
+Website：[groq.com](https://groq.com/)
 
 ## DeepL
 Website: [www.deepl.com/zh/pro-api](https://www.deepl.com/zh/pro-api)

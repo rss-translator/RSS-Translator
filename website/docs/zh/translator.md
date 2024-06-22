@@ -37,6 +37,18 @@
 ## Moonshot AI
 官方网站：[www.moonshot.cn](https://www.moonshot.cn)
 
+## 豆包(Doubao)
+官方网站：[www.volcengine.com/product/doubao](https://www.volcengine.com/product/doubao)
+
+## Together AI
+官方网站：[www.together.ai](https://www.together.ai)
+
+## OpenRouter AI
+官方网站：[openrouter.ai](https://openrouter.ai/)
+
+## Groq
+官方网站：[groq.com](https://groq.com/)
+
 ## DeepL
 官方网站：[www.deepl.com/zh/pro-api](https://www.deepl.com/zh/pro-api)  
 需要提供一张 DeepL 支持的国家或地区发行的 VISA 或 MASTER 信用卡，目前国内发行的任何信用卡（包括双币卡和外币卡）均不被支持。  
@@ -51,3 +63,4 @@
 
 ## Caiyun API
 官方网站：[dashboard.caiyunapp.com](https://dashboard.caiyunapp.com)
+
