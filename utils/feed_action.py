@@ -198,7 +198,7 @@ class FeedMerger:
         self.feed_name = feed_name
         self.feed_files = feed_files
         self.output_dir = os.path.join(settings.DATA_FOLDER, "feeds")
-        self.output_file = os.path.join(self.output_dir, f"{feed_name}.xml")
+        self.output_file = check_file_path(self.output_dir, f"{feed_name}.xml")
         self.processed_entries = set()
 
     def merge_feeds(self):
@@ -215,7 +215,7 @@ class FeedMerger:
         self._write_feed_footer()
 
     def _write_feed_header(self):
-        with open(os.path.normpath(self.output_file), "wb") as f:
+        with open(self.output_file, "wb") as f:
             f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
             f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
             f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode("utf-8"))
@@ -304,6 +304,12 @@ class FeedMerger:
     def _write_feed_footer(self):
         with open(os.path.normpath(self.output_file), "ab") as f:
             f.write(b"</feed>")
+    
+def check_file_path(base_path:str, filename:str) -> str:
+    fullpath = os.path.normpath(os.path.join(base_path, filename))
+    if not fullpath.startswith(base_path):
+        raise Exception("not allowed")
+    return fullpath
 
 
 def merge_all_atom(feed_files, feed_name):
