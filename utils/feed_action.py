@@ -3,7 +3,7 @@ import os
 # import json
 
 # import xml.dom.minidom
-from datetime import datetime, timezone, date, timedelta
+from datetime import datetime, timezone, timedelta
 from time import mktime
 
 # from dateutil import parser

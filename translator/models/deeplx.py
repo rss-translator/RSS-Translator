@@ -44,7 +44,7 @@ class DeepLXTranslator(TranslatorEngine):
         try:
             resp = self.translate("Hello World", "Chinese Simplified")
             return resp.get("text") != ""
-        except Exception as e:
+        except Exception:
             return False
 
     def translate(self, text: str, target_language: str, **kwargs) -> dict:

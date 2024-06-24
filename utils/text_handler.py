@@ -4,7 +4,6 @@ from typing import List, Tuple, Optional
 from bs4 import Comment
 import tiktoken
 import html2text
-from translator.models import TranslatorEngine
 from langdetect import detect
 
 def detect_language(entry):

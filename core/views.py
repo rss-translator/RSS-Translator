@@ -3,7 +3,7 @@ import os
 import json
 
 from django.conf import settings
-from django.http import HttpResponse, Http404, StreamingHttpResponse, JsonResponse
+from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import condition

@@ -1,4 +1,3 @@
-import httpx
 from time import sleep
 from .base import TranslatorEngine
 import logging

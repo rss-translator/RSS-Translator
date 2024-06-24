@@ -2,7 +2,6 @@ import json
 from datetime import datetime, timezone
 import logging
 import os
-import re
 from pathlib import Path
 from time import mktime
 
@@ -12,7 +11,7 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from huey.contrib.djhuey import HUEY as huey
-from huey.contrib.djhuey import on_startup, on_shutdown, task, db_task
+from huey.contrib.djhuey import on_startup, db_task
 
 from .models import O_Feed, T_Feed
 from translator.models import TranslatorEngine, Translated_Content
@@ -23,7 +22,7 @@ from feed2json import feed2json
 from bs4 import BeautifulSoup
 import mistune
 import newspaper
-from typing import List, Tuple, Optional
+from typing import Optional
 
 
 # from huey_monitor.models import TaskModel

@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
-from tagulous.models import TagField, SingleTagField
+from tagulous.models import SingleTagField
 
 
 class O_Feed(models.Model):

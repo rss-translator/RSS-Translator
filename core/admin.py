@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.shortcuts import render
 from django.urls import path
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
