@@ -59,7 +59,8 @@ class CustomModelActions:
             )
             return response
         except Exception as e:
-            return HttpResponse(f"An error occurred: {str(e)}", status=500)
+            logging.error("o_feed_export_as_opml: %s", str(e))
+            return HttpResponse("An error occurred", status=500)
 
     o_feed_export_as_opml.short_description = _("Export selected feeds as OPML")
 
@@ -100,7 +101,8 @@ class CustomModelActions:
             )
             return response
         except Exception as e:
-            return HttpResponse(f"An error occurred: {str(e)}", status=500)
+            logging.error("t_feed_export_as_opml: %s", str(e))
+            return HttpResponse("An error occurred", status=500)
 
     t_feed_export_as_opml.short_description = _("Export selected feeds as OPML")
 
