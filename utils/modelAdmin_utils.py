@@ -24,9 +24,10 @@ from core.tasks import update_original_feed, update_translated_feed
 class CustomModelActions:
     def o_feed_export_as_opml(self, request, queryset):
         opml_obj = OPML()
-
+        
         for item in queryset:
-            category_outline = Outline(text=item.category.name)
+            category = item.category.name if item.category else 'default'
+            category_outline = Outline(text=category)
             item_outline = Outline(
                 title=item.name,
                 text=item.name,
@@ -49,12 +50,13 @@ class CustomModelActions:
         opml_obj = OPML()
 
         for item in queryset:
+            category = item.o_feed.category.name if item.o_feed.category else 'default'
             text = item.o_feed.name or "No Name"
             xml_url = request.build_absolute_uri(
                 reverse("core:rss", kwargs={"feed_sid": item.sid})
             )
 
-            category_outline = Outline(text=item.o_feed.category.name)
+            category_outline = Outline(text=category)
             item_outline = Outline(
                 title=text,
                 text=text,
