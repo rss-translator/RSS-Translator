@@ -158,7 +158,7 @@ class T_Feed(models.Model):
         editable=False,
     )
 
-    translate_title = models.BooleanField(_("Translate Title"), default=True)
+    translate_title = models.BooleanField(_("Translate Title"), default=False)
     translate_content = models.BooleanField(_("Translate Content"), default=False)
     summary = models.BooleanField(_("Summary"), default=False)
 
