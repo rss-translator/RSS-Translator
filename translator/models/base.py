@@ -159,6 +159,10 @@ class OpenAIInterface(TranslatorEngine):
                 system_prompt += f"\n\n{user_prompt}"
 
             res = client.with_options(max_retries=3).chat.completions.create(
+                extra_headers={
+                    "HTTP-Referer": "https://www.rsstranslator.com",
+                    "X-Title": "RSS Translator"
+                },
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
