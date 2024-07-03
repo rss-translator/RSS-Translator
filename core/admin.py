@@ -3,12 +3,10 @@ from ast import literal_eval
 from django import forms
 from django.contrib import admin
 from django.conf import settings
-from django.shortcuts import render
-from django.urls import path
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect
+from django.urls import path, reverse
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
-from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
