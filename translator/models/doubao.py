@@ -72,7 +72,8 @@ class DoubaoTranslator(TranslatorEngine):
             if res.choices and res.choices[0].message.content:
                 translated_text = res.choices[0].message.content
                 logging.info("DoubaoTranslator->%s: %s", res.choices[0].finish_reason, translated_text)
-            tokens = res.usage.total_tokens
+            
+            tokens = res.usage.total_tokens if res.usage else 0
         except Exception as e:
             logging.error("DoubaoTranslator->%s: %s", e, text)
 

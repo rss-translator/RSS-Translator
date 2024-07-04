@@ -181,7 +181,7 @@ class OpenAIInterface(TranslatorEngine):
             # else:
             #     translated_text = ''
             #     logging.warning("Translator->%s: %s", res.choices[0].finish_reason, text)
-            tokens = res.usage.total_tokens
+            tokens = res.usage.total_tokens if res.usage else 0
         except Exception as e:
             logging.error("OpenAIInterface->%s: %s", e, text)
 
