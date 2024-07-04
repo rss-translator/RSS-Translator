@@ -147,6 +147,7 @@ class T_FeedAdmin(admin.ModelAdmin):
         "modified",
     ]
     actions = [t_feed_force_update, t_feed_export_as_opml, t_feed_batch_modify]
+    list_per_page = 20
     # def get_search_results(self, request, queryset, search_term):
     #     queryset, use_distinct = super().get_search_results(request, queryset, search_term)
     #     queryset |= self.model.objects.filter(o_feed__feed_url__icontains=search_term)
