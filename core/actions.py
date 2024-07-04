@@ -111,7 +111,7 @@ def o_feed_force_update(modeladmin, request, queryset):
             #logging.info("Call revoke_tasks_by_arg in o_feed_force_update")
             #revoke_tasks_by_arg(instance.sid)
             update_original_feed.schedule(
-                args=(instance.sid,), delay=1, force=True
+                args=(instance.sid,True), delay=1,
             )  # 会执行一次save()
 
 
@@ -126,7 +126,7 @@ def t_feed_force_update(modeladmin, request, queryset):
             #logging.info("Call revoke_tasks_by_arg in o_feed_force_update")
             #revoke_tasks_by_arg(instance.sid) #will check in update_translated_feed task
             update_translated_feed.schedule(
-                args=(instance.sid,), delay=1
+                args=(instance.sid,True), delay=1
             )  # 会执行一次save()
 
 
