@@ -42,12 +42,12 @@ class DeepLXTranslator(TranslatorEngine):
 
     def validate(self) -> bool:
         try:
-            resp = self.translate("Hello World", "Chinese Simplified")
+            resp = self.translate("Hello World", "Chinese Simplified", validate=True)
             return resp.get("text") != ""
         except Exception:
             return False
 
-    def translate(self, text: str, target_language: str, **kwargs) -> dict:
+    def translate(self, text: str, target_language: str, validate:bool=False, **kwargs) -> dict:
         logging.info(">>> DeepLX Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
         translated_text = ""
@@ -73,5 +73,6 @@ class DeepLXTranslator(TranslatorEngine):
         except Exception as e:
             logging.error("DeepLXTranslator->%s: %s", e, text)
         finally:
-            sleep(self.interval)
+            if not validate:
+                sleep(self.interval)
             return {"text": translated_text, "characters": len(text)}

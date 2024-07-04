@@ -41,10 +41,10 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
         verbose_name_plural = "Google Translate(Web)"
 
     def validate(self) -> bool:
-        results = self.translate("hi", "Chinese Simplified")
+        results = self.translate("hi", "Chinese Simplified", validate=True)
         return results.get("text") != ""
 
-    def translate(self, text: str, target_language: str, **kwargs) -> dict:
+    def translate(self, text: str, target_language: str, validate:bool=False, **kwargs) -> dict:
         logging.info(">>> Google Translate Web Translate [%s]:", target_language)
         target_language = self.language_code_map.get(target_language)
         translated_text = ""
@@ -71,5 +71,6 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
         except Exception as e:
             logging.error("GoogleTranslateWebTranslator->%s: %s", e, text)
         finally:
-            sleep(self.interval)
+            if not validate:
+                sleep(self.interval)
             return {"text": translated_text, "characters": len(text)}
