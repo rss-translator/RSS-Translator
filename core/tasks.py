@@ -11,7 +11,7 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from huey.contrib.djhuey import HUEY as huey
-from huey.contrib.djhuey import on_startup, db_task
+from huey.contrib.djhuey import on_startup, db_task, on_shutdown
 
 from .models import O_Feed, T_Feed
 from translator.models import TranslatorEngine, Translated_Content
@@ -28,6 +28,12 @@ from typing import Optional
 # from huey_monitor.models import TaskModel
 unique_tasks = set()
 
+def revoke_tasks_by_arg(arg_to_match):
+    for task in huey.scheduled():
+        # Assuming the first argument is the one we're interested in (e.g., obj.pk)
+        if task.args and task.args[0] == arg_to_match:
+            logging.info("Revoke task: %s", task)
+            huey.revoke_by_id(task)
 
 # @periodic_task(crontab( minute='*/1'))
 @on_startup()
@@ -42,19 +48,15 @@ def schedule_update():
                 args=(feed.sid,), delay=feed.update_frequency * 60
             )
 
-
-# @on_shutdown()
-# def flush_all():
-#     huey.storage.flush_queue()
-#     huey.storage.flush_schedule()
-#     huey.storage.flush_results()
-# clean TaskModel all data
-# TaskModel.objects.all().delete()
+@on_shutdown()
+def cleanup_tasks():
+    huey.storage.flush_all()
 
 
 @db_task(retries=3)
-def update_original_feed(sid: str):
+def update_original_feed(sid: str, force:bool = False):
     if sid in unique_tasks:
+        logging.warning("(skip)This task update_original_feed is executing: %s",sid)
         return
     else:
         unique_tasks.add(sid)
@@ -65,7 +67,9 @@ def update_original_feed(sid: str):
     except O_Feed.DoesNotExist:
         return False
 
+    revoke_tasks_by_arg(sid)
     logging.info("Call task update_original_feed: %s", obj.feed_url)
+    
     feed_dir_path = Path(settings.DATA_FOLDER) / "feeds"
 
     if not os.path.exists(feed_dir_path):
@@ -119,8 +123,9 @@ def update_original_feed(sid: str):
 
 
 @db_task(retries=3)
-def update_translated_feed(sid: str, force=False):
-    if sid in unique_tasks and not force:
+def update_translated_feed(sid: str, force:bool = False):
+    if sid in unique_tasks:
+        logging.warning("(skip)The task update_translated_feed is executing: %s",sid)
         return
     else:
         unique_tasks.add(sid)
@@ -157,9 +162,6 @@ def update_translated_feed(sid: str, force=False):
             return False
 
         translated_feed_file_path = f"{feed_dir_path}/{obj.sid}"
-        # if not os.path.exists(translated_feed_file_path):
-        #     with open(translated_feed_file_path, "w", encoding="utf-8") as f:
-        #         f.write("Translation in progress...")
 
         original_feed = feedparser.parse(original_feed_file_path)
 
