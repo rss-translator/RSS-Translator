@@ -29,7 +29,7 @@ from typing import Optional
 unique_tasks = set()
 
 def revoke_tasks_by_arg(arg_to_match):
-    for task in huey.scheduled():
+    for task in huey.scheduled() + huey.pending():
         # Assuming the first argument is the one we're interested in (e.g., obj.pk)
         if task.args and task.args[0] == arg_to_match:
             logging.info("Revoke task: %s", task)
@@ -55,7 +55,7 @@ def cleanup_tasks():
 
 @db_task(retries=3)
 def update_original_feed(sid: str, force:bool = False):
-    if sid in unique_tasks:
+    if sid in unique_tasks: # 如果判断force的话，是没法停止正在执行的task
         logging.warning("(skip)This task update_original_feed is executing: %s",sid)
         return
     else:
@@ -124,7 +124,7 @@ def update_original_feed(sid: str, force:bool = False):
 
 @db_task(retries=3)
 def update_translated_feed(sid: str, force:bool = False):
-    if sid in unique_tasks:
+    if sid in unique_tasks: # 如果判断force的话，是没法停止正在执行的task
         logging.warning("(skip)The task update_translated_feed is executing: %s",sid)
         return
     else:
@@ -138,6 +138,7 @@ def update_translated_feed(sid: str, force:bool = False):
         return False
 
     try:
+        revoke_tasks_by_arg(sid)
         logging.info("Call task update_translated_feed: %s", obj.o_feed.feed_url)
 
         if obj.o_feed.pk is None:
