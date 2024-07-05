@@ -47,7 +47,7 @@ class O_FeedAdmin(admin.ModelAdmin):
                 instance.status = None
                 instance.save()
                 #revoke_tasks_by_arg(instance.sid)
-                update_translated_feed.schedule(args=(instance.sid,), force=True)
+                update_translated_feed.schedule(args=(instance.sid,True), delay=1)
 
         for instance in formset.deleted_objects:
             #revoke_tasks_by_arg(instance.sid)
@@ -66,7 +66,7 @@ class O_FeedAdmin(admin.ModelAdmin):
             obj.name = obj.name or "Loading"
             obj.save()
             update_original_feed.schedule(
-                args=(obj.sid,), delay=1, force=True
+                args=(obj.sid,True), delay=1
             )  # 会执行一次save() # 不放在model的save里是为了排除translator的更新，省流量
         elif frequency_changed:
             obj.save()
