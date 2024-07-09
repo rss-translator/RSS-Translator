@@ -2,7 +2,7 @@ name: latest:Docker Image CI
 
 on:
   release:
-    types: [published]
+    types: [released]
     branches:
       - main
     

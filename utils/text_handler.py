@@ -137,6 +137,7 @@ def should_skip(element):
         "bdo",
         "cite",
         "dfn",
+        "iframe",
     ]
     if isinstance(element, Comment):
         return True
