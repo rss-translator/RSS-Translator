@@ -1,3 +1,9 @@
+# 2024-07-22
+加了OpenL翻译引擎，这个确实不错，集成了很多第三方翻译服务，价格也还可以
+还加了Kagi的fastgpt和summarize，fastgpt翻译的话没法关掉网络搜索，总是会有角标，不是很建议用来翻译，不过summarize测试下来还不错，价格的话有点贵，用不起
+
+还有一个bug待修复：google gemini的内容审核参数得加下，实在很不喜欢google的文档，ai有好几个平台，api还不一样，好烦
+
 # 2024-07-04
 想使用[django-tasks](https://github.com/RealOrangeOne/django-tasks)来代替huey做为任务管理，但因为还在开发中，所以担心稳定性。主要是因为它的issues中有几个我在使用huey时遇到的问题，且正在解决，但huey还遥遥无期。。。。
 
