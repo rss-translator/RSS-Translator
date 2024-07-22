@@ -38,6 +38,8 @@ Currently supported translation services:
 - OpenRouter AI
 - Groq
 - Doubao
+- OpenL
+- Kagi API
 
 Continuously adding   
 For more information, please check [translation service](translator.md).

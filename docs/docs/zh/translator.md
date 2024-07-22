@@ -1,6 +1,7 @@
 > 强烈建议使用收费服务，免费的服务限制较多且容易出错。  
 > 本人长期使用[OhMyGPT](https://www.ohmygpt.com?aff=FQcnRPCb)，支持多种主流模型，服务稳定价格低廉，非常建议使用。     
 > 邀请码：FQcnRPCb，双方均可获得额外奖励。  
+> 如需常规的翻译服务，建议使用[OpenL](https://my.openl.club/login/wechat?ref=CKXJN)，集成了众多第三方翻译服务，价格很实惠
 
 ## Free Translators
 基于[UlionTse/translators](https://github.com/UlionTse/translators)打包的[easytranslator](https://github.com/versun/easytranslator/)，非常感谢。  
@@ -64,3 +65,8 @@
 ## Caiyun API
 官方网站：[dashboard.caiyunapp.com](https://dashboard.caiyunapp.com)
 
+## OpenL
+官方网站：[my.openl.club/login/wechat?ref=CKXJN](https://my.openl.club/login/wechat?ref=CKXJN)
+
+## Kagi
+官方网站：[kagi.com/settings?p=api](https://kagi.com/settings?p=api)

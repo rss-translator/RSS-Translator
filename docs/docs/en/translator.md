@@ -60,3 +60,9 @@ Website: [learn.microsoft.com/zh-cn/azure/ai-services/translator/create-translat
 
 ## Caiyun API
 Website: [dashboard.caiyunapp.com](https://dashboard.caiyunapp.com)
+
+## OpenL
+Website: [my.openl.club/login/wechat?ref=CKXJN](https://my.openl.club/login/wechat?ref=CKXJN)
+
+## Kagi
+Website: [kagi.com/settings?p=api](https://kagi.com/settings?p=api)
