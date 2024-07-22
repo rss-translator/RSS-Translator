@@ -372,6 +372,25 @@ class OpenlTranslatorAdmin(BaseTranslatorAdmin):
         "max_characters",
     ]
 
+class KagiTranslatorAdmin(BaseTranslatorAdmin):
+    fields = [
+        "name",
+        "api_key",
+        "summarization_engine",
+        "summary_type",
+        "translate_prompt",
+        "content_translate_prompt",
+    ]
+    list_display = [
+        "name",
+        "is_valid",
+        "masked_api_key",
+        "summarization_engine",
+        "summary_type",
+        "translate_prompt",
+        "content_translate_prompt",
+    ]
+
 class Translated_ContentAdmin(admin.ModelAdmin):
     fields = [
         "original_content",
@@ -419,6 +438,7 @@ core_admin_site.register(GroqTranslator, GroqTranslatorAdmin)
 core_admin_site.register(FreeTranslators, FreeTranslatorsAdmin)
 core_admin_site.register(DoubaoTranslator, DoubaoTranslatorAdmin)
 core_admin_site.register(OpenlTranslator, OpenlTranslatorAdmin)
+core_admin_site.register(KagiTranslator, KagiTranslatorAdmin)
 
 if settings.DEBUG:
     core_admin_site.register(Translated_Content, Translated_ContentAdmin)

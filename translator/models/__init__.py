@@ -16,5 +16,6 @@ from .groq import GroqTranslator
 from .free_translators import FreeTranslators
 from .doubao import DoubaoTranslator
 from .openl import OpenlTranslator
+from .kagi import KagiTranslator
 
 from .dev import TestTranslator
