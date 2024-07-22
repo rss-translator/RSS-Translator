@@ -15,8 +15,8 @@ class KagiTranslator(TranslatorEngine):
         max_length=255, default="https://kagi.com/api/v0",help_text=_("We'll use fastgpt for the translation and summarise for the summary")
     )
     is_ai = models.BooleanField(default=True)
-    summarization_engine = models.TextField(max_length=20,default="cecil",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summarization-engines")
-    summary_type = models.TextField(max_length=20,default="summary",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summary-types")
+    summarization_engine = models.CharField(max_length=20,default="cecil",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summarization-engines")
+    summary_type = models.CharField(max_length=20,default="summary",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summary-types")
     translate_prompt = models.TextField(
         _("Title Translate Prompt"), default=settings.default_title_translate_prompt
     )
