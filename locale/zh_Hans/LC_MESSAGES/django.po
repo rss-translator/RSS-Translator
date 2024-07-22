@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-19 06:24+0000\n"
+"POT-Creation-Date: 2024-07-22 02:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -301,8 +301,8 @@ msgid "Deloyment Name"
 msgstr ""
 
 #: translator/models/base.py:88 translator/models/claude.py:18
-#: translator/models/deepl.py:11 translator/models/gemini.py:15
-#: translator/models/microsoft_translate.py:12
+#: translator/models/deepl.py:11 translator/models/doubao.py:13
+#: translator/models/gemini.py:15 translator/models/microsoft_translate.py:12
 msgid "API Key"
 msgstr ""
 
@@ -313,18 +313,18 @@ msgid "API URL"
 msgstr ""
 
 #: translator/models/base.py:96 translator/models/claude.py:22
-#: translator/models/gemini.py:22
+#: translator/models/doubao.py:18 translator/models/gemini.py:22
 msgid "Title Translate Prompt"
 msgstr "标题翻译提示词"
 
 #: translator/models/base.py:99 translator/models/claude.py:25
-#: translator/models/gemini.py:25
+#: translator/models/doubao.py:21 translator/models/gemini.py:25
 msgid "Content Translate Prompt"
 msgstr "内容翻译提示词"
 
 #: translator/models/claude.py:28 translator/models/deepl.py:14
 #: translator/models/deeplweb.py:13 translator/models/free_translators.py:12
-#: translator/models/google_translate_web.py:14
+#: translator/models/google_translate_web.py:13
 msgid "Proxy(optional)"
 msgstr ""
 
@@ -334,25 +334,40 @@ msgstr ""
 
 #: translator/models/deeplweb.py:12 translator/models/deeplx.py:16
 #: translator/models/dev.py:11 translator/models/gemini.py:32
-#: translator/models/google_translate_web.py:15
+#: translator/models/google_translate_web.py:14
 msgid "Request Interval(s)"
 msgstr "请求间隔"
 
-#: translator/models/google_translate_web.py:12
+#: translator/models/doubao.py:25 translator/models/doubao.py:26
+msgid "Doubao"
+msgstr ""
+
+#: translator/models/google_translate_web.py:11
 msgid "URL"
 msgstr ""
 
-#: translator/models/google_translate_web.py:12
+#: translator/models/google_translate_web.py:11
 msgid ""
 "It is recommended to leave this blank in order to automatically select the "
 "best server"
 msgstr "建议留空，以自动选择最佳服务器"
 
-#: utils/modelAdmin_utils.py:46 utils/modelAdmin_utils.py:74
+#: translator/models/openl.py:17
+msgid "Translate Service Name"
+msgstr "翻译服务代码名"
+
+#: translator/models/openl.py:17
+msgid ""
+"Please get it from https://docs.openl."
+"club/#/API/format?"
+"id=%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1%e4%bb%a3%e7%a0%81%e5%90%8d"
+msgstr "请从官网中获取: https://docs.openl.club/#/API/format?id=%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1%e4%bb%a3%e7%a0%81%e5%90%8d"
+
+#: utils/modelAdmin_utils.py:65 utils/modelAdmin_utils.py:107
 msgid "Export selected feeds as OPML"
 msgstr "导出为 OPML"
 
-#: utils/modelAdmin_utils.py:88 utils/modelAdmin_utils.py:102
+#: utils/modelAdmin_utils.py:121 utils/modelAdmin_utils.py:135
 msgid "Force update"
 msgstr "强制更新"
 

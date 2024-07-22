@@ -356,6 +356,22 @@ class DoubaoTranslatorAdmin(BaseTranslatorAdmin):
         "max_tokens",
     ]
 
+class OpenlTranslatorAdmin(BaseTranslatorAdmin):
+    fields = [
+        "name",
+        "api_key",
+        "url",
+        "service_name",
+        "max_characters",
+    ]
+    list_display = [
+        "name",
+        "is_valid",
+        "masked_api_key",
+        "url",
+        "max_characters",
+    ]
+
 class Translated_ContentAdmin(admin.ModelAdmin):
     fields = [
         "original_content",
@@ -402,6 +418,7 @@ core_admin_site.register(OpenRouterAITranslator, OpenRouterAITranslatorAdmin)
 core_admin_site.register(GroqTranslator, GroqTranslatorAdmin)
 core_admin_site.register(FreeTranslators, FreeTranslatorsAdmin)
 core_admin_site.register(DoubaoTranslator, DoubaoTranslatorAdmin)
+core_admin_site.register(OpenlTranslator, OpenlTranslatorAdmin)
 
 if settings.DEBUG:
     core_admin_site.register(Translated_Content, Translated_ContentAdmin)
