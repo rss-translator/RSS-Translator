@@ -23,12 +23,10 @@ class OpenlTranslator(TranslatorEngine):
         "Spanish": "es",
         "French": "fr",
         "Russian": "ru",
-        "Danish": "de",
         "Italian": "it",
         "Spanish": "es",
         "Polish": "pl",
         "Portuguese": "pt",
-        "Russian": "ru",
     }
 
     class Meta:
