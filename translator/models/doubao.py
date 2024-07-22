@@ -79,3 +79,7 @@ class DoubaoTranslator(TranslatorEngine):
 
         return {"text": translated_text, "tokens": tokens}
 
+    def summarize(self, text: str, target_language: str) -> dict:
+        logging.info(">>> Doubao Summarize [%s]: %s", target_language, text)
+        return self.translate(text, target_language, system_prompt=self.summary_prompt)
+
