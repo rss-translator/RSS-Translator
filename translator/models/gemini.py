@@ -1,5 +1,6 @@
 from config import settings
 import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from .base import TranslatorEngine
 import logging
 from time import sleep
@@ -82,7 +83,13 @@ class GeminiTranslator(TranslatorEngine):
                 top_k=self.top_k,
                 max_output_tokens=self.max_tokens,
             )
-            res = model.generate_content(prompt, generation_config=generation_config)
+            safety_settings = {
+                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            }
+            res = model.generate_content(prompt, generation_config=generation_config, safety_settings=safety_settings)
             finish_reason = res.candidates[0].finish_reason if res.candidates else None
             if finish_reason == 1:
                 translated_text = res.text
