@@ -76,7 +76,7 @@
   </a>
 </p>
 
-如有余力，请考虑成为赞助者：[爱发电](https://afdian.net/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
+如有余力，请考虑成为赞助者：[爱发电](https://afdian.com/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
 > 说明： 赞助头像每天早上和下午的5:30分刷新(UTC时区)。
 ## 开发贡献
 [请查看Wiki](https://github.com/rss-translator/RSS-Translator/wiki)

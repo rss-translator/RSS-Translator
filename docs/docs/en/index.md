@@ -74,7 +74,7 @@ Thank you for your support!
   </a>
 </p>
 
-If it has helped you, please consider sponsoring me: [AFDIAN](https://afdian.net/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
+If it has helped you, please consider sponsoring me: [AFDIAN](https://afdian.com/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
 > Description: Sponsored avatars are refreshed every morning and afternoon at 5:30 a.m. (UTC time zone).
 
 ## Contribution
