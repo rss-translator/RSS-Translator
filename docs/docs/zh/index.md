@@ -62,7 +62,7 @@
     </td>
     <td style="padding:10px;">
       <a href="https://www.gitpod.io">
-        <img src="https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/website/docs/assets/gitpod.svg" alt="Gitpod" style="width:100px; height:100px;">
+        <img src="https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/docs/docs/assets/gitpod.svg" alt="Gitpod" style="width:100px; height:100px;">
       </a>
     </td>
   </tr>
