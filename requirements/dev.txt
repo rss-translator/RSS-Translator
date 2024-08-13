@@ -1,4 +1,4 @@
-django>=5.0.2
+django==5.0.8
 opyml
 tiktoken
 feedparser
