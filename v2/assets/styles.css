@@ -1,0 +1,17 @@
+body {
+    overflow-y: scroll;
+}
+
+.recharts-cartesian-grid-horizontal line {
+	stroke-dasharray: 0;
+	stroke-opacity: 0.6 !important;
+	stroke: var(--gray-7);
+}
+
+.recharts-cartesian-grid-vertical line {
+	stroke-opacity: 0 !important;
+}
+
+.rt-BaseTabList {
+	box-shadow: none;
+}
