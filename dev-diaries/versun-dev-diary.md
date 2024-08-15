@@ -1,3 +1,10 @@
+# 2024-08-15
+还是前后端分离开发吧，reflex这种合并开发有点麻烦，分离开发起码前后端可以独立，后期更换也方便。。。。
+那要选哪个前端框架呢，个人看好svelte和htmx，但htmx虽然简洁，但能做的事太少了。。。学下svelte吧。。。哎，这该死的前端
+看了10几分钟svelte和django的适配。。。算了算了算了算了，还是试一试reflex吧，怎么简单怎么来吧
+
+reflex的model用的是SQLModel，而SQLModel是重新打包了Pydantic和SQLAlchemy，为了兼容性，还是直接使用SQLAlchemy吧
+
 # 2024-08-14
 先把django的model转为reflex的支持的格式，即sqlmodel
 然后测试用例也要更上，最好能面向测试开发，省的以后麻烦
