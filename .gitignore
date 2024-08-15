@@ -1,4 +1,6 @@
 # Project
+.web
+assets/external/
 /static
 data/
 *.ipynb
