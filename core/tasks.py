@@ -362,7 +362,7 @@ def translate_feed(
                     )
                     total_tokens += tokens
                     need_cache_objs.update(need_cache)
-                    html_summary = f"<br />AI Summary:<br />{mistune.html(summary_text)}<br />---------------<br />"
+                    html_summary = f"<br />🤖:{mistune.html(summary_text)}<br />---------------<br />"
 
                     entry["summary"] = summary_text
                     entry["content"] = [{"value": html_summary + content}]
