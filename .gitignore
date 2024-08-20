@@ -9,6 +9,8 @@ data/
 env*
 *.csv
 .idea/
+.vscode/
+.ruff_cache/
 .DS_Store
 ### Python ###
 # Byte-compiled / optimized / DLL files
