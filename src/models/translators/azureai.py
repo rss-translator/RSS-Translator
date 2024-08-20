@@ -1,6 +1,5 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
-from sqlalchemy_utils import URLType
-from ..core import OpenAIInterface
+from sqlalchemy import Column, String
+from src.models.core import OpenAIInterface
 
 class AzureAI(OpenAIInterface):
     # https://learn.microsoft.com/azure/ai-services/openai/

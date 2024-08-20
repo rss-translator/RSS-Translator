@@ -1,6 +1,6 @@
 from .azureai import AzureAI
-# from .caiyun import CaiYun
-# from .claude import Claude
+from .caiyun import CaiYun
+from .claude import Claude
 # from .deepl import DeepL
 # from .deeplx import DeepLX
 # from .deeplweb import DeepLWeb

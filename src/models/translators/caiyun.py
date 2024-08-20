@@ -1,19 +1,21 @@
 import uuid
 import json
 import httpx
-from .base import TranslatorEngine
 import logging
-from django.db import models
-from encrypted_model_fields.fields import EncryptedCharField
+from sqlalchemy import Column, Integer, String
+from sqlalchemy_utils import URLType
+from src.models.core import Engine
 
+class CaiYun(Engine):
+    
+    token = Column(String(255))
+    url = Column(URLType, default="http://api.interpreter.caiyunapi.com/v1/translator")
+    max_characters = Column(Integer, default=5000)
 
-class CaiYunTranslator(TranslatorEngine):
-    # https://docs.caiyunapp.com/blog/2018/09/03/lingocloud-api/
-    token = EncryptedCharField(max_length=255)
-    url = models.URLField(
-        max_length=255, default="http://api.interpreter.caiyunai.com/v1/translator"
-    )
-    max_characters = models.IntegerField(default=5000)
+    __mapper_args__ = {
+        'polymorphic_identity': 'CaiYun'
+    }
+
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh",
@@ -23,10 +25,6 @@ class CaiYunTranslator(TranslatorEngine):
         "French": "fr",
         "Russian": "ru",
     }
-
-    class Meta:
-        verbose_name = "CaiYun"
-        verbose_name_plural = "CaiYun"
 
     def validate(self) -> bool:
         result = self.translate("Hi", "Chinese Simplified")
@@ -38,7 +36,7 @@ class CaiYunTranslator(TranslatorEngine):
         translated_text = ""
         try:
             if target_code is None:
-                logging.error(
+                raise(
                     "CaiYunTranslator->Not support target language:%s", target_language
                 )
 
