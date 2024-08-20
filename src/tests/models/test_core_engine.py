@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch
-from ..models.core import Engine, OpenAIInterface
+from src.models.core import Engine
 
 def test_engine_min_size():
     engine = Engine()

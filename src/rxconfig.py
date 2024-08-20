@@ -1,7 +1,7 @@
 import reflex as rx
 
 config = rx.Config(
-    app_name="core",
+    app_name="rsstranslator",
     db_url="sqlite:///data/db.sqlite3",
     frontend_port=8000,
     backend_port=8001,

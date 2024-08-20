@@ -1,5 +1,5 @@
 import pytest
-from ..models.core import O_Feed
+from src.models.core import O_Feed
 
 @pytest.fixture
 def o_feed():

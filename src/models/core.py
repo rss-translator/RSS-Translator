@@ -4,11 +4,13 @@ import re
 import logging
 import cityhash
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy import Index, Column, Integer, String, Boolean, Text, DateTime, Float, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relationship, declarative_base, Session
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy_utils import URLType, ChoiceType
 from sqlalchemy.dialects.postgresql import UUID
+from typing import Optional, Dict
+
 from openai import OpenAI
 
 
@@ -16,17 +18,18 @@ Base = declarative_base()
 
 class Engine(Base):
     __tablename__ = 'engine'
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True)
     valid = Column(Boolean, nullable=True)
     is_ai = Column(Boolean, default=False)
+    type = Column(String(50))
     
     __mapper_args__ = {
-        'polymorphic_on': is_ai,
-        'polymorphic_identity': False
-    }
-    
+            'polymorphic_on': type,
+            'polymorphic_identity': 'Engine'
+        }
+
     def translate(self, text: str, target_language: str, source_language:str="auto", **kwargs) -> dict:
         raise NotImplementedError(
             "subclasses of Engine must provide a translate() method"
@@ -51,26 +54,24 @@ class Engine(Base):
             "subclasses of Engine must provide a validate() method"
         )
 
-class OpenAIInterface(Engine):
-    __tablename__ = 'openai_interface'
-    
-    id = Column(Integer, ForeignKey('engine.id'), primary_key=True)
-    api_key = Column(String(255))  # 注意:需要加密存储
-    base_url = Column(URLType, default="https://api.openai.com/v1")
-    model = Column(String(100), default="gpt-3.5-turbo")
-    translate_prompt = Column(String)
-    content_translate_prompt = Column(String)
+class OpenAIInterface(Engine): 
+    api_key = Column(String(255))  
+    base_url = Column(URLType, default="https://api.openai.com/v1", nullable=False)
+    model = Column(String(100), default="gpt-3.5-turbo",nullable=False)
+    translate_prompt = Column(Text)
+    content_translate_prompt = Column(Text)
     temperature = Column(Float, default=0.2)
     top_p = Column(Float, default=0.2)
     frequency_penalty = Column(Float, default=0)
     presence_penalty = Column(Float, default=0)
     max_tokens = Column(Integer, default=2000)
-    summary_prompt = Column(String)
+    summary_prompt = Column(Text)
+    is_ai = True
     
     __mapper_args__ = {
-        'polymorphic_identity': True
+        'polymorphic_identity': 'OpenAIInterface'
     }
-    
+
     @property
     def client(self):
         return OpenAI(
@@ -157,12 +158,12 @@ class O_Feed(Base):
     
     id = Column(Integer, primary_key=True)
     sid = Column(String(255), unique=True, nullable=False)
-    name = Column(String(255), nullable=True)
+    name = Column(String(100), nullable=True)
     feed_url = Column(URLType, unique=True, nullable=False)
     last_updated = Column(DateTime, nullable=True)
     last_pull = Column(DateTime, nullable=True)
     translation_display = Column(Integer, default=0)
-    etag = Column(String(255), default="")
+    etag = Column(String(50), default="")
     size = Column(Integer, default=0)
     valid = Column(Boolean, nullable=True)
     update_frequency = Column(Integer, default=30)
@@ -172,8 +173,8 @@ class O_Feed(Base):
     translator_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
     summary_engine_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
     summary_detail = Column(Float, default=0.0)
-    additional_prompt = Column(String, nullable=True)
-    category = Column(String(255), nullable=True)
+    additional_prompt = Column(Text, nullable=True)
+    category = Column(String(50), nullable=True)
     
     translator = relationship("Engine", foreign_keys=[translator_id])
     summary_engine = relationship("Engine", foreign_keys=[summary_engine_id])
@@ -221,29 +222,32 @@ class T_Feed(Base):
 
 class Translated_Content(Base):
     __tablename__ = 'translated_content'
-    
-    hash = Column(String(39), primary_key=True)
-    original_content = Column(String)
-    translated_language = Column(String(255))
-    translated_content = Column(String)
+    __table_args__ = (
+        Index('idx_hash', 'hash'),
+        Index('idx_translated_language', 'translated_language'),
+    )
+
+    hash = Column(String(50), primary_key=True)
+    original_content = Column(Text)
+    translated_language = Column(String(50))
+    translated_content = Column(Text)
     tokens = Column(Integer, default=0)
     characters = Column(Integer, default=0)
     
     @classmethod
-    def is_translated(cls, text, target_language):
+    def is_translated(cls, text:str, target_language:str, session: Session):
         text_hash = str(cityhash.CityHash128(f"{text}{target_language}"))
-        try:
-            content = Translated_Content.objects.get(hash=text_hash)
-            # logging.info("Using cached translations:%s", text)
+        content = session.query(cls).filter_by(hash=text_hash).first()
+        # logging.info("Using cached translations:%s", text)
+        if content:
             return {
                 "text": content.translated_content,
                 "tokens": content.tokens,
                 "characters": content.characters,
             }
-        except Translated_Content.DoesNotExist:
-            logging.info("Does not exist in cache:%s", text)
-            return None
-    
+        logging.info("Does not exist in cache:%s", text)
+        return None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.hash:
