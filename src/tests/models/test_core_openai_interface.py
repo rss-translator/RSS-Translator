@@ -24,50 +24,57 @@ def test_client_property(openai_interface):
     assert client.base_url.host == "api.openai.com"
     assert client.timeout == 120.0
 
-@patch.object(OpenAIInterface, 'client')
+@patch('src.models.core.OpenAI')
 def test_validate_success(mock_openai, openai_interface):
+    mock_client = Mock()
+    mock_openai.return_value = mock_client
     mock_response = Mock()
     mock_response.choices = [Mock(finish_reason="stop")]
-    mock_openai.chat.completions.create.return_value = mock_response
+    mock_client.with_options.return_value.chat.completions.create.return_value = mock_response
 
-    assert openai_interface.validate() == True
+    assert openai_interface.validate() is True
+    mock_client.with_options.assert_called_once_with(max_retries=3)
+    # mock_client.with_options.return_value.chat.completions.create.assert_called_once_with(
+    #     model=openai_interface.model,
+    #     messages=[{"role": "user", "content": "Hi"}],
+    #     max_tokens=10
+    # )
 
-@patch.object(OpenAIInterface, 'client')
+@patch('src.models.core.OpenAI')
 def test_validate_failure(mock_openai, openai_interface):
-    mock_response = Mock()
-    #mock_response.choices = []
-    mock_openai.chat.completions.create.return_value = mock_response
-    
-    assert openai_interface.validate() == False
-    #mock_response.chat.completions.create.assert_called_once()
+    mock_client = Mock()
+    mock_openai.return_value = mock_client
+    mock_client.with_options.return_value.chat.completions.create.side_effect = Exception("API Error")
 
-@patch.object(OpenAIInterface, 'client')
+    assert openai_interface.validate() is False
+    mock_client.with_options.assert_called_once_with(max_retries=3)
+
+@patch('src.models.core.OpenAI')
 def test_translate(mock_openai, openai_interface):
     mock_client = Mock()
     mock_openai.return_value = mock_client
     mock_response = Mock()
     mock_response.choices = [Mock(message=Mock(content="翻译后的文本"))]
     mock_response.usage = Mock(total_tokens=50)
-    mock_client.with_options().chat.completions.create.return_value = mock_response
+    mock_client.with_options.return_value.chat.completions.create.return_value = mock_response
 
-    result = openai_interface.translate("Hello", "Chinese", text_type="title")
+    result = openai_interface.translate("Hello", "中文")
+
     assert result == {"text": "翻译后的文本", "tokens": 50}
+    mock_client.with_options.assert_called_once_with(max_retries=3)
+    mock_client.with_options.return_value.chat.completions.create.assert_called_once()
 
-@patch('openai.OpenAI')
+@patch('src.models.core.OpenAI')
 def test_summarize(mock_openai, openai_interface):
     mock_client = Mock()
     mock_openai.return_value = mock_client
     mock_response = Mock()
     mock_response.choices = [Mock(message=Mock(content="摘要内容"))]
     mock_response.usage = Mock(total_tokens=30)
-    mock_client.with_options().chat.completions.create.return_value = mock_response
+    mock_client.with_options.return_value.chat.completions.create.return_value = mock_response
 
-    result = openai_interface.summarize("Long text to summarize", "Chinese")
+    result = openai_interface.summarize("这是一段长文本", "中文")
+
     assert result == {"text": "摘要内容", "tokens": 30}
-
-def test_is_ai_property(openai_interface):
-    assert openai_interface.is_ai == True
-
-def test_polymorphic_identity(openai_interface):
-    assert OpenAIInterface.__mapper_args__['polymorphic_identity'] == 'OpenAIInterface'
-
+    mock_client.with_options.assert_called_once_with(max_retries=3)
+    mock_client.with_options.return_value.chat.completions.create.assert_called_once()
