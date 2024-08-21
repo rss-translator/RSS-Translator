@@ -1,28 +1,21 @@
 import logging
 import json
 import httpx
-from .base import TranslatorEngine
-from django.utils.translation import gettext_lazy as _
-from django.db import models
-from config import settings
-from encrypted_model_fields.fields import EncryptedCharField
 
+from sqlalchemy import Column, String, Text
+from sqlalchemy.orm import mapped_column
+from sqlalchemy_utils import URLType
+from src.models.core import Engine
 
-class KagiTranslator(TranslatorEngine):
+class Kagi(Engine):
     # https://docs.Kagi.club/
-    api_key = EncryptedCharField(max_length=255)
-    url = models.URLField(
-        max_length=255, default="https://kagi.com/api/v0",help_text=_("We'll use fastgpt for the translation and summarise for the summary")
-    )
-    is_ai = models.BooleanField(default=True)
-    summarization_engine = models.CharField(max_length=20,default="cecil",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summarization-engines")
-    summary_type = models.CharField(max_length=20,default="summary",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summary-types")
-    translate_prompt = models.TextField(
-        _("Title Translate Prompt"), default=settings.default_title_translate_prompt
-    )
-    content_translate_prompt = models.TextField(
-        _("Content Translate Prompt"), default=settings.default_content_translate_prompt
-    )
+    is_ai = True
+    api_key = mapped_column(String(255),nullable=False,use_existing_column=True)  
+    base_url = mapped_column(URLType, nullable=False, default="https://kagi.com/api/v0", use_existing_column=True, help_text="We'll use fastgpt for the translation and summarise for the summary")
+    summarization_engine = Column(String(20),nullable=False, default="cecil",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summarization-engines")
+    summary_type = Column(String(20),nullable=False, default="summary",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summary-types")
+    translate_prompt = mapped_column(Text,use_existing_column=True)
+    content_translate_prompt = mapped_column(Text,use_existing_column=True)
     language_code_map = {
             "English": "EN",
             "Chinese Simplified": "ZH",
@@ -46,9 +39,9 @@ class KagiTranslator(TranslatorEngine):
             "Portuguese": "PT",
         }
 
-    class Meta:
-        verbose_name = "Kagi"
-        verbose_name_plural = "Kagi"
+    __mapper_args__ = {
+        'polymorphic_identity': 'Kagi'
+    }
 
     def validate(self) -> bool:
         try:
@@ -64,8 +57,8 @@ class KagiTranslator(TranslatorEngine):
             logging.info(results)
             return results.get("data",[]).get("output") is not None
         except Exception as e:
-            logging.error("KagiTranslator Validate->%s", e)
-            return False
+            logging.error("Kagi Validate->%s", e)
+        return False
 
     def translate(
         self,
@@ -103,9 +96,9 @@ class KagiTranslator(TranslatorEngine):
                  translated_text = data.get("output")
             tokens = data.get("tokens",0)
         except Exception as e:
-            logging.error("KagiTranslator->%s: %s", e, text)
-        finally:
-            return {"text": translated_text, "tokens": tokens}
+            logging.error("Kagi->%s: %s", e, text)
+
+        return {"text": translated_text, "tokens": tokens}
 
     def summarize(self, text: str, target_language: str) -> dict:
         logging.info(">>> Kagi Universal Summarizer [%s]:", target_language)
@@ -132,7 +125,7 @@ class KagiTranslator(TranslatorEngine):
                  summarized_text = data.get("output")
             tokens = data.get("tokens",0)
         except Exception as e:
-            logging.error("KagiTranslator->%s: %s", e, text)
-        finally:
-            return {"text": summarized_text, "tokens": tokens}
+            logging.error("Kagi->%s: %s", e, text)
+
+        return {"text": summarized_text, "tokens": tokens}
 

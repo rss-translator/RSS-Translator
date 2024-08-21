@@ -9,7 +9,7 @@ from src.models.core import Engine
 class CaiYun(Engine):
     
     token = Column(String(255))
-    url = Column(URLType, default="http://api.interpreter.caiyunapi.com/v1/translator")
+    base_url = Column(URLType, default="http://api.interpreter.caiyunapi.com/v1/translator")
     max_characters = Column(Integer, default=5000)
 
     __mapper_args__ = {
@@ -37,7 +37,7 @@ class CaiYun(Engine):
         try:
             if target_code is None:
                 raise(
-                    "CaiYunTranslator->Not support target language:%s", target_language
+                    "CaiYun->Not support target language:%s", target_language
                 )
 
             payload = {
@@ -58,6 +58,6 @@ class CaiYun(Engine):
             resp.raise_for_status()
             translated_text = resp.json()["target"]
         except Exception as e:
-            logging.error("CaiYunTranslator->%s: %s", e, text)
+            logging.error("CaiYun->%s: %s", e, text)
         finally:
             return {"text": translated_text, "characters": len(text)}

@@ -1,17 +1,16 @@
-import deepl
-from .base import TranslatorEngine
 import logging
-from django.db import models
-from encrypted_model_fields.fields import EncryptedCharField
-from django.utils.translation import gettext_lazy as _
+from sqlalchemy import Column, Integer, String
+from sqlalchemy_utils import URLType
+from src.models.core import Engine
 
+import deepl
 
-class DeepLTranslator(TranslatorEngine):
+class DeepL(Engine):
     # https://github.com/DeepLcom/deepl-python
-    api_key = EncryptedCharField(_("API Key"), max_length=255)
-    max_characters = models.IntegerField(default=5000)
-    server_url = models.URLField(_("API URL(optional)"), null=True, blank=True)
-    proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True)
+    api_key = Column(String(255))
+    max_characters = Column(Integer, default=5000)
+    server_url = Column(URLType, nullable=True)
+    proxy = Column(URLType, nullable=True)
     language_code_map = {
         "English": "EN-US",
         "Chinese Simplified": "ZH",
@@ -34,35 +33,34 @@ class DeepLTranslator(TranslatorEngine):
         "Turkish": "TR",
     }
 
-    class Meta:
-        verbose_name = "DeepL"
-        verbose_name_plural = "DeepL"
+    __mapper_args__ = {
+        'polymorphic_identity': 'DeepL'
+    }
 
-    def _init(self):
+    @property
+    def client(self):
         return deepl.Translator(
             self.api_key, server_url=self.server_url, proxy=self.proxy
         )
 
     def validate(self) -> bool:
         try:
-            translator = self._init()
-            usage = translator.get_usage()
+            usage = self.client.get_usage()
             return usage.character.valid
         except Exception as e:
-            logging.error("DeepLTranslator validate ->%s", e)
+            logging.error("DeepL validate ->%s", e)
             return False
 
-    def translate(self, text: str, target_language: str, **kwargs) -> dict:
+    def translate(self, text: str, target_language: str, source_language:str="auto", **kwargs) -> dict:
         logging.info(">>> DeepL Translate [%s]: %s", target_language, text)
         target_code = self.language_code_map.get(target_language, None)
         translated_text = ""
         try:
             if target_code is None:
                 logging.error(
-                    "DeepLTranslator->Not support target language:%s", target_language
+                    "DeepL->Not support target language:%s", target_language
                 )
-            translator = self._init()
-            resp = translator.translate_text(
+            resp = self.client.translate_text(
                 text,
                 target_lang=target_code,
                 preserve_formatting=True,
@@ -70,5 +68,5 @@ class DeepLTranslator(TranslatorEngine):
             )
             translated_text = resp.text
         except Exception as e:
-            logging.error("DeepLTranslator->%s: %s", e, text)
+            logging.error("DeepL->%s: %s", e, text)
         return {"text": translated_text, "characters": len(text)}

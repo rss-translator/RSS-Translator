@@ -1,20 +1,20 @@
 import httpx
-from .base import TranslatorEngine
 import logging
-from django.db import models
-from encrypted_model_fields.fields import EncryptedCharField
-from django.utils.translation import gettext_lazy as _
 import uuid
 
+from sqlalchemy import Column, String, Text
+from sqlalchemy.orm import mapped_column
+from sqlalchemy_utils import URLType
+from src.models.core import Engine
 
-class MicrosoftTranslator(TranslatorEngine):
+
+class MicrosoftTranslator(Engine):
     # https://learn.microsoft.com/en-us/azure/ai-services/translator/language-support
-    api_key = EncryptedCharField(_("API Key"), max_length=255)
-    location = models.CharField(max_length=100)
-    endpoint = models.CharField(
-        max_length=255, default="https://api.cognitive.microsofttranslator.com"
+    api_key = mapped_column(String(255),nullable=False,use_existing_column=True)  
+    location = Column(String(100),nullable=False)
+    endpoint = Column(String(200),nullable=False, default="https://api.cognitive.microsofttranslator.com"
     )
-    max_characters = models.IntegerField(default=5000)
+    max_characters = Column(Integer, default=5000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh-Hans",
@@ -38,13 +38,17 @@ class MicrosoftTranslator(TranslatorEngine):
         "Turkish": "tr",
     }
 
-    class Meta:
-        verbose_name = "Microsoft Translator"
-        verbose_name_plural = "Microsoft Translator"
+    __mapper_args__ = {
+        'polymorphic_identity': "Microsoft Translator"
+    }
 
     def validate(self) -> bool:
-        result = self.translate("Hi", "Chinese Simplified")
-        return result.get("text") != ""
+        try:
+            result = self.translate("Hi", "Chinese Simplified")
+            return result.get("text") != ""
+        except Exception as e:
+            logging.error("MicrosoftTranslator->%s", e)
+        return False
 
     def translate(self, text: str, target_language: str, **kwargs) -> dict:
         logging.info(">>> Microsoft Translate [%s]: %s", target_language, text)

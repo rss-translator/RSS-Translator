@@ -1,19 +1,18 @@
 import json
 import httpx
-from .base import TranslatorEngine
 import logging
 from time import sleep
-from django.db import models
-from django.utils.translation import gettext_lazy as _
+
+from sqlalchemy import Column, Integer
+from sqlalchemy_utils import URLType
+from src.models.core import Engine
 
 
-class DeepLXTranslator(TranslatorEngine):
+class DeepLX(Engine):
     # https://github.com/OwO-Network/DeepLX
-    deeplx_api = models.CharField(
-        max_length=255, default="http://127.0.0.1:1188/translate"
-    )
-    max_characters = models.IntegerField(default=5000)
-    interval = models.IntegerField(_("Request Interval(s)"), default=3)
+    deeplx_api = Column(URLType, default="http://127.0.0.1:1188/translate", nullable=False)
+    max_characters = Column(Integer, default=5000)
+    interval = Column(Integer, default=5)
     language_code_map = {
         "English": "EN",
         "Chinese Simplified": "ZH",
@@ -36,16 +35,17 @@ class DeepLXTranslator(TranslatorEngine):
         "Turkish": "TR",
     }
 
-    class Meta:
-        verbose_name = "DeepLX"
-        verbose_name_plural = "DeepLX"
+    __mapper_args__ = {
+        'polymorphic_identity': 'DeepLX'
+    }
 
     def validate(self) -> bool:
         try:
             resp = self.translate("Hello World", "Chinese Simplified", validate=True)
             return resp.get("text") != ""
-        except Exception:
-            return False
+        except Exception as e:
+            logging.error("DeepLX validate ->%s", e)
+        return False
 
     def translate(self, text: str, target_language: str, validate:bool=False, **kwargs) -> dict:
         logging.info(">>> DeepLX Translate [%s]: %s", target_language, text)
@@ -54,7 +54,7 @@ class DeepLXTranslator(TranslatorEngine):
         try:
             if target_code is None:
                 logging.error(
-                    "DeepLXTranslator->Not support target language:%s", target_language
+                    "DeepLX->Not support target language:%s", target_language
                 )
 
             data = {
@@ -68,11 +68,11 @@ class DeepLXTranslator(TranslatorEngine):
                 url=self.deeplx_api, headers=headers, data=post_data, timeout=10
             )
             if resp.status_code == 429:
-                raise ("DeepLXTranslator-> IP has been blocked by DeepL temporarily")
+                raise Exception("DeepLX-> IP has been blocked by DeepL temporarily")
             translated_text = resp.json()["data"]
         except Exception as e:
-            logging.error("DeepLXTranslator->%s: %s", e, text)
+            logging.error("DeepLX->%s", e)
         finally:
             if not validate:
                 sleep(self.interval)
-            return {"text": translated_text, "characters": len(text)}
+        return {"text": translated_text, "characters": len(text)}

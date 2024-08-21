@@ -1,8 +1,7 @@
-from .base import OpenAIInterface
+from src.models.core import OpenAIInterface
 
-
-class OpenAITranslator(OpenAIInterface):
+class OpenAI(OpenAIInterface):
     # https://platform.openai.com/docs/api-reference/chat
-    class Meta:
-        verbose_name = "OpenAI"
-        verbose_name_plural = "OpenAI"
+    __mapper_args__ = {
+        'polymorphic_identity': 'OpenAI'
+    }

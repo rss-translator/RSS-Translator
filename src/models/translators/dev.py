@@ -1,19 +1,19 @@
-from .base import TranslatorEngine
 import logging
-from django.db import models
 from time import sleep
-from django.utils.translation import gettext_lazy as _
+
+from sqlalchemy import Column, Integer, String
+from src.models.core import Engine
 
 
-class TestTranslator(TranslatorEngine):
-    translated_text = models.TextField(default="@@Translated Text@@")
-    max_characters = models.IntegerField(default=50000)
-    interval = models.IntegerField(_("Request Interval(s)"), default=3)
-    is_ai = models.BooleanField(default=True, editable=False)
+class Test(Engine):
+    translated_text = Column(String, default="@@Translated Text@@",nullable=False)
+    max_characters = Column(Integer, default=5000)
+    interval = Column(Integer, default=3)
+    is_ai = True
 
-    class Meta:
-        verbose_name = "Test"
-        verbose_name_plural = "Test"
+    __mapper_args__ = {
+        'polymorphic_identity': 'Test'
+    }
 
     def validate(self) -> bool:
         return True

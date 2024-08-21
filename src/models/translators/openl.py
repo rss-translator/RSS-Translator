@@ -1,21 +1,19 @@
-import uuid
 import logging
 import json
 import httpx
-from .base import TranslatorEngine
-from django.utils.translation import gettext_lazy as _
-from django.db import models
-from encrypted_model_fields.fields import EncryptedCharField
+
+from sqlalchemy import Column, Integer, String
+from sqlalchemy_utils import URLType
+from sqlalchemy.orm import mapped_column
+from src.models.core import Engine
 
 
-class OpenlTranslator(TranslatorEngine):
+class Openl(Engine):
     # https://docs.openl.club/
-    api_key = EncryptedCharField(max_length=255)
-    url = models.URLField(
-        max_length=255, default="https://api.openl.club"
-    )
-    service_name = models.CharField(_("Translate Service Name"), max_length=50, default="deepl",help_text=_('Please get it from https://docs.openl.club/#/API/format?id=%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1%e4%bb%a3%e7%a0%81%e5%90%8d'))
-    max_characters = models.IntegerField(default=5000)
+    api_key = mapped_column(String(255),nullable=False,use_existing_column=True)  
+    base_url = mapped_column(URLType,nullable=False,use_existing_column=True, default="https://api.openl.club")
+    service_name = Column(String(100), nullable=False)
+    max_characters = Column(Integer, default=5000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh",
@@ -29,9 +27,9 @@ class OpenlTranslator(TranslatorEngine):
         "Portuguese": "pt",
     }
 
-    class Meta:
-        verbose_name = "Openl"
-        verbose_name_plural = "Openl"
+    __mapper_args__ = {
+        'polymorphic_identity': 'Openl'
+    }
 
     def validate(self) -> bool:
         try:
@@ -45,8 +43,9 @@ class OpenlTranslator(TranslatorEngine):
             results = resp.json()
             return results.get("status") is True
         except Exception as e:
-            logging.error("OpenlTranslator->%s", e)
-            return False
+            logging.error("Openl->%s", e)
+
+        return False
 
     def translate(self, text: str, target_language: str, **kwargs) -> dict:
         logging.info(">>> Openl Translate [%s]: %s", target_language, text)
@@ -55,7 +54,7 @@ class OpenlTranslator(TranslatorEngine):
         try:
             if target_code is None:
                 logging.error(
-                    "OpenlTranslator->Not support target language:%s", target_language
+                    "Openl->Not support target language:%s", target_language
                 )
 
             resp = httpx.post(
@@ -68,6 +67,6 @@ class OpenlTranslator(TranslatorEngine):
             results = resp.json()
             translated_text = results.get("result") if results.get("status") is True else ""
         except Exception as e:
-            logging.error("OpenlTranslator->%s: %s", e, text)
-        finally:
-            return {"text": translated_text, "characters": len(text)}
+            logging.error("Openl->%s: %s", e, text)
+    
+        return {"text": translated_text, "characters": len(text)}
