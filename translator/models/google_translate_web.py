@@ -41,6 +41,7 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         import translators as ts
+        self.ts = ts
 
     def validate(self) -> bool:
         results = self.translate("hi", "Chinese Simplified", validate=True)
@@ -67,7 +68,7 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
             # resp = httpx.get(self.base_url, params=params, timeout=10, proxy=self.proxy)
             # resp.raise_for_status()
             # resp_json = resp.json()
-            results = ts.translate_text(text, to_language=target_language, translator="google", reset_host_url=self.base_url, proxies=self.proxy)
+            results = self.ts.translate_text(text, to_language=target_language, translator="google", reset_host_url=self.base_url, proxies=self.proxy)
             if results:
                 translated_text = results
         except Exception as e:
