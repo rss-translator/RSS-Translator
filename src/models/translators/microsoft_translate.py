@@ -2,19 +2,17 @@ import httpx
 import logging
 import uuid
 
-from sqlalchemy import Column, String, Text
+from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import mapped_column
-from sqlalchemy_utils import URLType
 from src.models.core import Engine
 
 
 class MicrosoftTranslator(Engine):
     # https://learn.microsoft.com/en-us/azure/ai-services/translator/language-support
     api_key = mapped_column(String(255),nullable=False,use_existing_column=True)  
-    location = Column(String(100),nullable=False)
-    endpoint = Column(String(200),nullable=False, default="https://api.cognitive.microsofttranslator.com"
-    )
-    max_characters = Column(Integer, default=5000)
+    location = Column(String(100),nullable=False, default='eastus')
+    endpoint = Column(String(200),nullable=False, default="https://api.cognitive.microsofttranslator.com")
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh-Hans",

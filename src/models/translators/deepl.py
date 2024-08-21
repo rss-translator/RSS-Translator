@@ -1,16 +1,17 @@
 import logging
 from sqlalchemy import Column, Integer, String
 from sqlalchemy_utils import URLType
+from sqlalchemy.orm import mapped_column
 from src.models.core import Engine
 
 import deepl
 
 class DeepL(Engine):
     # https://github.com/DeepLcom/deepl-python
-    api_key = Column(String(255))
-    max_characters = Column(Integer, default=5000)
+    api_key = mapped_column(String(255), nullable=False, use_existing_column=True)
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
     server_url = Column(URLType, nullable=True)
-    proxy = Column(URLType, nullable=True)
+    proxy = mapped_column(URLType, nullable=True, use_existing_column=True)
     language_code_map = {
         "English": "EN-US",
         "Chinese Simplified": "ZH",

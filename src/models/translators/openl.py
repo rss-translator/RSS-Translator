@@ -13,7 +13,7 @@ class Openl(Engine):
     api_key = mapped_column(String(255),nullable=False,use_existing_column=True)  
     base_url = mapped_column(URLType,nullable=False,use_existing_column=True, default="https://api.openl.club")
     service_name = Column(String(100), nullable=False)
-    max_characters = Column(Integer, default=5000)
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
     language_code_map = {
         "English": "en",
         "Chinese Simplified": "zh",

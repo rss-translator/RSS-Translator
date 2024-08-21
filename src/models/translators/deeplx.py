@@ -5,14 +5,16 @@ from time import sleep
 
 from sqlalchemy import Column, Integer
 from sqlalchemy_utils import URLType
+from sqlalchemy.orm import mapped_column
+
 from src.models.core import Engine
 
 
 class DeepLX(Engine):
     # https://github.com/OwO-Network/DeepLX
     deeplx_api = Column(URLType, default="http://127.0.0.1:1188/translate", nullable=False)
-    max_characters = Column(Integer, default=5000)
-    interval = Column(Integer, default=5)
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
+    interval = mapped_column(Integer, nullable=False, use_existing_column=True, default=5)
     language_code_map = {
         "English": "EN",
         "Chinese Simplified": "ZH",

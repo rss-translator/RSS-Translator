@@ -1,15 +1,16 @@
 import logging
 from langdetect import detect
 from time import sleep
-from sqlalchemy import Column, Integer
+from sqlalchemy import Integer
 from sqlalchemy_utils import URLType
+from sqlalchemy.orm import mapped_column
 from src.models.core import Engine
 
 
 class FreeTranslators(Engine):
-    proxy = Column(URLType, nullable=True)
-    max_characters = Column(Integer, default=5000)
-    interval = Column(Integer, default=5)
+    proxy = mapped_column(URLType, nullable=True, use_existing_column=True)
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
+    interval = mapped_column(Integer, nullable=False, use_existing_column=True, default=5)
     
     __mapper_args__ = {
         'polymorphic_identity': "Free Translators"

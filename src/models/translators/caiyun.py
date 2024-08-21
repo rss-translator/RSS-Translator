@@ -4,13 +4,14 @@ import httpx
 import logging
 from sqlalchemy import Column, Integer, String
 from sqlalchemy_utils import URLType
+from sqlalchemy.orm import mapped_column
 from src.models.core import Engine
 
 class CaiYun(Engine):
-    
-    token = Column(String(255))
-    base_url = Column(URLType, default="http://api.interpreter.caiyunapi.com/v1/translator")
-    max_characters = Column(Integer, default=5000)
+
+    api_key = mapped_column(String(255), nullable=False, use_existing_column=True)
+    base_url = mapped_column(URLType, nullable=False, use_existing_column=True, default="http://api.interpreter.caiyunapi.com/v1/translator")
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
 
     __mapper_args__ = {
         'polymorphic_identity': 'CaiYun'
@@ -49,11 +50,11 @@ class CaiYun(Engine):
 
             headers = {
                 "content-type": "application/json",
-                "x-authorization": f"token {self.token}",
+                "x-authorization": f"token {self.api_key}",
             }
 
             resp = httpx.post(
-                url=self.url, headers=headers, data=json.dumps(payload), timeout=10
+                url=self.base_url, headers=headers, data=json.dumps(payload), timeout=10
             )
             resp.raise_for_status()
             translated_text = resp.json()["target"]

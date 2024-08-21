@@ -5,8 +5,8 @@ from src.models.translators.caiyun import CaiYun
 @pytest.fixture
 def caiyun_translator():
     return CaiYun(
-        token="test_token",
-        url="http://test.api.caiyunapp.com/v1/translator",
+        api_key="test_token",
+        base_url="http://test.api.caiyunapp.com/v1/translator",
         max_characters=5000
     )
 

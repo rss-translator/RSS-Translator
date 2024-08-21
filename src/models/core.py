@@ -12,6 +12,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from typing import Optional, Dict
 
 from openai import OpenAI
+from src.config import settings
 
 
 Base = declarative_base()
@@ -23,7 +24,7 @@ class Engine(Base):
     name = Column(String(100), unique=True)
     valid = Column(Boolean, nullable=True)
     is_ai = Column(Boolean, default=False)
-    type = Column(String(50))
+    type = Column(String(50), nullable=False)
     
     __mapper_args__ = {
             'polymorphic_on': type,
@@ -55,17 +56,17 @@ class Engine(Base):
         )
 
 class OpenAIInterface(Engine): 
-    api_key = Column(String(255))  
+    api_key = Column(String(255), nullable=False)  
     base_url = Column(URLType, default="https://api.openai.com/v1", nullable=False)
     model = Column(String(100), default="gpt-3.5-turbo",nullable=False)
-    translate_prompt = Column(Text)
-    content_translate_prompt = Column(Text)
-    temperature = Column(Float, default=0.2)
-    top_p = Column(Float, default=0.2)
-    frequency_penalty = Column(Float, default=0)
-    presence_penalty = Column(Float, default=0)
-    max_tokens = Column(Integer, default=2000)
-    summary_prompt = Column(Text)
+    translate_prompt = Column(Text, nullable=False, default=settings.default_title_translate_prompt)
+    content_translate_prompt = Column(Text, nullable=False, default=settings.default_content_translate_prompt)
+    temperature = Column(Float, default=0.2, nullable=False)
+    top_p = Column(Float, default=0.2, nullable=False)
+    frequency_penalty = Column(Float, default=0, nullable=False)
+    presence_penalty = Column(Float, default=0, nullable=False)
+    max_tokens = Column(Integer, default=2000, nullable=False)
+    summary_prompt = Column(Text, nullable=False, default=settings.default_summary_prompt)
     is_ai = True
     
     __mapper_args__ = {

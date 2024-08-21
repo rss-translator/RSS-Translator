@@ -6,9 +6,8 @@ from sqlalchemy.orm import mapped_column
 from src.models.core import OpenAIInterface
 
 class Claude(OpenAIInterface):
-    model = mapped_column(String(100), default="claude-3-haiku-20240307", nullable=False, use_existing_column=True)
     base_url = mapped_column(URLType, default="https://api.anthropic.com", nullable=False, use_existing_column=True)
-    proxy = Column(URLType, nullable=True)
+    proxy = mapped_column(URLType, nullable=True, use_existing_column=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'Claude'

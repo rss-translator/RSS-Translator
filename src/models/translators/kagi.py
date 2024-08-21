@@ -14,8 +14,8 @@ class Kagi(Engine):
     base_url = mapped_column(URLType, nullable=False, default="https://kagi.com/api/v0", use_existing_column=True, help_text="We'll use fastgpt for the translation and summarise for the summary")
     summarization_engine = Column(String(20),nullable=False, default="cecil",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summarization-engines")
     summary_type = Column(String(20),nullable=False, default="summary",help_text="Please check https://help.kagi.com/kagi/api/summarizer.html#summary-types")
-    translate_prompt = mapped_column(Text,use_existing_column=True)
-    content_translate_prompt = mapped_column(Text,use_existing_column=True)
+    translate_prompt = mapped_column(Text,nullable=False,use_existing_column=True)
+    content_translate_prompt = mapped_column(Text,nullable=False,use_existing_column=True)
     language_code_map = {
             "English": "EN",
             "Chinese Simplified": "ZH",

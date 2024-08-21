@@ -1,17 +1,18 @@
 import logging
 from time import sleep
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Integer
 from sqlalchemy_utils import URLType
+from sqlalchemy.orm import mapped_column
 from src.models.core import Engine
 
 from PyDeepLX import PyDeepLX
 
 class DeepLWeb(Engine):
     # https://github.com/OwO-Network/PyDeepLX
-    max_characters = Column(Integer, default=5000)
-    interval = Column(Integer, default=5)
-    proxy = Column(URLType, nullable=True)
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
+    interval = mapped_column(Integer, nullable=False, use_existing_column=True, default=5)
+    proxy = mapped_column(URLType, nullable=True, use_existing_column=True)
     language_code_map = {
         "English": "EN",
         "Chinese Simplified": "ZH",

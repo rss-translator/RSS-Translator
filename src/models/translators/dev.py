@@ -2,13 +2,14 @@ import logging
 from time import sleep
 
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import mapped_column
 from src.models.core import Engine
 
 
 class Test(Engine):
     translated_text = Column(String, default="@@Translated Text@@",nullable=False)
-    max_characters = Column(Integer, default=5000)
-    interval = Column(Integer, default=3)
+    max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
+    interval = mapped_column(Integer, nullable=False, use_existing_column=True, default=5)
     is_ai = True
 
     __mapper_args__ = {

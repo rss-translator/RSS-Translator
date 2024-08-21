@@ -2,13 +2,17 @@ from time import sleep
 import logging
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
-from sqlalchemy import Column, Integer
+from sqlalchemy import Integer
+from sqlalchemy.orm import mapped_column
+from sqlalchemy_utils import URLType
+
 from src.models.core import OpenAIInterface
 
 
-class GeminiTranslator(OpenAIInterface):
+class Gemini(OpenAIInterface):
     # https://ai.google.dev/tutorials/python_quickstart
-    interval = Column(Integer, default=3)
+    interval = mapped_column(Integer, nullable=False, use_existing_column=True, default=5)
+    proxy = mapped_column(URLType, nullable=True, use_existing_column=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'Google Gemini'
@@ -28,7 +32,7 @@ class GeminiTranslator(OpenAIInterface):
                 res = self.client.generate_content("hi")
                 return res.candidates[0].finish_reason == 1
             except Exception as e:
-                logging.error("GeminiTranslator validate ->%s", e)
+                logging.error("Gemini validate ->%s", e)
             return False
 
     def translate(
@@ -71,11 +75,11 @@ class GeminiTranslator(OpenAIInterface):
             else:
                 translated_text = ""
                 logging.info(
-                    "GeminiTranslator finish_reason->%s: %s", finish_reason.name, text
+                    "Gemini finish_reason->%s: %s", finish_reason.name, text
                 )
             tokens = self.client.count_tokens(prompt).total_tokens
         except Exception as e:
-            logging.error("GeminiTranslator->%s: %s", e, text)
+            logging.error("Gemini->%s: %s", e, text)
         finally:
             sleep(self.interval)
 
