@@ -3,8 +3,6 @@ from .base import TranslatorEngine
 import logging
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-import translators as ts
-
 
 class GoogleTranslateWebTranslator(TranslatorEngine):
     base_url = models.URLField(
@@ -39,6 +37,10 @@ class GoogleTranslateWebTranslator(TranslatorEngine):
     class Meta:
         verbose_name = "Google Translate(Web)"
         verbose_name_plural = "Google Translate(Web)"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        import translators as ts
 
     def validate(self) -> bool:
         results = self.translate("hi", "Chinese Simplified", validate=True)
