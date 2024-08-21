@@ -2,9 +2,7 @@ from .base import TranslatorEngine
 import logging
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from easytranslator import EasyTranslator
 from langdetect import detect
-
 
 class FreeTranslators(TranslatorEngine):
     translators = models.TextField(null=True, blank=True, default="")  # list[dict]
@@ -24,6 +22,7 @@ class FreeTranslators(TranslatorEngine):
     def _init(self):
         # if not self.translators:
         #     self.translators = []
+        from easytranslator import EasyTranslator
         return EasyTranslator(translators=[])
 
     def validate(self) -> bool:
