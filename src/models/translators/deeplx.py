@@ -55,7 +55,7 @@ class DeepLX(Engine):
         translated_text = ""
         try:
             if target_code is None:
-                logging.error(
+                raise Exception(
                     "DeepLX->Not support target language:%s", target_language
                 )
 
@@ -76,5 +76,5 @@ class DeepLX(Engine):
             logging.error("DeepLX->%s", e)
         finally:
             if not validate:
-                sleep(self.interval)
+                sleep(self.interval or 0)
         return {"text": translated_text, "characters": len(text)}

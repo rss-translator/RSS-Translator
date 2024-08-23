@@ -32,13 +32,13 @@ class FreeTranslators(Engine):
             logging.warning("Cannot detect source language:%s", text)
             
         results = self.client.translate(
-            text=text, dest_lang=target_language, src_lang=source_language, proxies=self.proxies
+            text=text, dest_lang=target_language, src_lang=source_language, proxies=self.proxy
         )
         
         translated_text = (
             results.get("translated_text") if results.get("status") == "success" else ""
         )
-        sleep(self.interval)
+        sleep(self.interval or 0)
         return {"text": translated_text, "characters": len(text)}
 
     def translate_batch(self, text_list: list, target_language: str, **kwargs) -> dict:

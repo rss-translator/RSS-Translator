@@ -53,7 +53,7 @@ class DeepLWeb(Engine):
         translated_text = ""
         try:
             if target_code is None:
-                logging.error(
+                raise Exception(
                     "DeepLWeb->Not support target language:%s",
                     target_language,
                 )
@@ -65,5 +65,5 @@ class DeepLWeb(Engine):
             logging.error("DeepLWeb->%s: %s", e, text)
         finally:
             if not validate:
-                sleep(self.interval)
+                sleep(self.interval or 0)
         return {"text": translated_text, "characters": len(text)}

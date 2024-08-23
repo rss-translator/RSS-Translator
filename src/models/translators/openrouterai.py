@@ -8,5 +8,5 @@ class OpenRouterAI(OpenAIInterface):
     # help_text="More models can be found at https://openrouter.ai/docs#models"
     
     __mapper_args__ = {
-        'polymorphic_identity': 'Groq'
+        'polymorphic_identity': 'OpenRouter AI'
     }

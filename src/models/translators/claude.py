@@ -44,7 +44,7 @@ class Claude(OpenAIInterface):
         tokens = self.client.count_tokens(text)
         translated_text = ""
         system_prompt = (
-            system_prompt or self.translate_prompt
+            system_prompt or self.title_translate_prompt
             if text_type == "title"
             else self.content_translate_prompt
         )

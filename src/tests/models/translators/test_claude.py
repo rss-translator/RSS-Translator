@@ -8,7 +8,7 @@ def claude_instance():
         api_key="test_api_key",
         model="claude-3-haiku-20240307",
         base_url="https://api.anthropic.com",
-        translate_prompt="翻译成{target_language}",
+        title_translate_prompt="翻译成{target_language}",
         content_translate_prompt="翻译内容为{target_language}",
         temperature=0.7,
         top_p=0.7,

@@ -54,7 +54,7 @@ class MicrosoftTranslator(Engine):
         translated_text = ""
         try:
             if target_code is None:
-                logging.error(
+                raise Exception(
                     "MicrosoftTranslator->Not support target language:%s",
                     target_language,
                 )

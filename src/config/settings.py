@@ -247,6 +247,4 @@ LOGGING = {
 
 default_title_translate_prompt = "You are a professional, authentic translation engine. Translate only the text into {target_language}, return only the translations, do not explain the original text."
 default_content_translate_prompt = "You are a professional, authentic translation engine. Translate only the text into {target_language}, return only the translations, do not explain the original text."
-default_summary_prompt = (
-    "Summarize the following text in {target_language} and return markdown format."
-)
+default_summary_prompt = "Summarize the following text in {target_language} and return markdown format."

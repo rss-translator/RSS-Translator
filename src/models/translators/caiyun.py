@@ -37,7 +37,7 @@ class CaiYun(Engine):
         translated_text = ""
         try:
             if target_code is None:
-                raise(
+                raise Exception(
                     "CaiYun->Not support target language:%s", target_language
                 )
 

@@ -58,7 +58,7 @@ class DeepL(Engine):
         translated_text = ""
         try:
             if target_code is None:
-                logging.error(
+                raise Exception(
                     "DeepL->Not support target language:%s", target_language
                 )
             resp = self.client.translate_text(

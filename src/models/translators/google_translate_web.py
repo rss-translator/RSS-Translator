@@ -64,6 +64,6 @@ class GoogleTranslateWeb(Engine):
             logging.error("GoogleTranslateWeb->%s: %s", e, text)
         finally:
             if not validate:
-                sleep(self.interval)
+                sleep(self.interval or 0)
 
         return {"text": translated_text, "characters": len(text)}

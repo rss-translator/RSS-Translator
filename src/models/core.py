@@ -56,10 +56,10 @@ class Engine(Base):
         )
 
 class OpenAIInterface(Engine): 
-    api_key = Column(String(255), nullable=False)  
+    api_key = Column(String(255), nullable=False)
     base_url = Column(URLType, default="https://api.openai.com/v1", nullable=False)
-    model = Column(String(100), default="gpt-3.5-turbo",nullable=False)
-    translate_prompt = Column(Text, nullable=False, default=settings.default_title_translate_prompt)
+    model = Column(String(100), default="Model Name",nullable=False)
+    title_translate_prompt = Column(Text, nullable=False, default=settings.default_title_translate_prompt)
     content_translate_prompt = Column(Text, nullable=False, default=settings.default_content_translate_prompt)
     temperature = Column(Float, default=0.2, nullable=False)
     top_p = Column(Float, default=0.2, nullable=False)
@@ -111,7 +111,7 @@ class OpenAIInterface(Engine):
         tokens = 0
         translated_text = ""
         system_prompt = (
-            system_prompt or self.translate_prompt
+            system_prompt or self.title_translate_prompt
             if text_type == "title"
             else self.content_translate_prompt
         )

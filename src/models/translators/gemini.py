@@ -19,7 +19,7 @@ class Gemini(OpenAIInterface):
     }
     
     @property
-    def client(self, system_prompt: str = None):
+    def client(self):
         genai.configure(api_key=self.api_key)
         return genai.GenerativeModel(
             model_name=self.model,
@@ -49,17 +49,22 @@ class Gemini(OpenAIInterface):
         tokens = 0
         translated_text = ""
         system_prompt = (
-            system_prompt or self.translate_prompt
+            system_prompt or self.title_translate_prompt
             if text_type == "title"
             else self.content_translate_prompt
         )
-        prompt = f"{system_prompt.replace('{target_language}', target_language)}\n{user_prompt}\n{text}"
+
         try:
+            prompt = system_prompt.replace("{target_language}", target_language)
+            if user_prompt:
+                prompt += f"\n{user_prompt}"
+
+            prompt += f"\n{text}"
+
             generation_config = genai.types.GenerationConfig(
                 candidate_count=1,
                 temperature=self.temperature,
                 top_p=self.top_p,
-                top_k=self.top_k,
                 max_output_tokens=self.max_tokens,
             )
             safety_settings = {
@@ -81,7 +86,7 @@ class Gemini(OpenAIInterface):
         except Exception as e:
             logging.error("Gemini->%s: %s", e, text)
         finally:
-            sleep(self.interval)
+            sleep(self.interval or 0)
 
         return {"text": translated_text, "tokens": tokens}
 

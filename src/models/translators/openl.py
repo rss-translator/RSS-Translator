@@ -12,7 +12,7 @@ class Openl(Engine):
     # https://docs.openl.club/
     api_key = mapped_column(String(255),nullable=False,use_existing_column=True)  
     base_url = mapped_column(URLType,nullable=False,use_existing_column=True, default="https://api.openl.club")
-    service_name = Column(String(100), nullable=False)
+    service_name = Column(String(100), nullable=False, default="deepl")
     max_characters = mapped_column(Integer, nullable=False, use_existing_column=True, default=5000)
     language_code_map = {
         "English": "en",
@@ -53,7 +53,7 @@ class Openl(Engine):
         translated_text = ""
         try:
             if target_code is None:
-                logging.error(
+                raise Exception(
                     "Openl->Not support target language:%s", target_language
                 )
 

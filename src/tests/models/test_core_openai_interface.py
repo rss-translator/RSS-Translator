@@ -8,7 +8,7 @@ def openai_interface():
         api_key="test_api_key",
         base_url="https://api.openai.com/v1",
         model="gpt-3.5-turbo",
-        translate_prompt="Translate to {target_language}",
+        title_translate_prompt="Translate to {target_language}",
         content_translate_prompt="Translate content to {target_language}",
         temperature=0.2,
         top_p=0.2,

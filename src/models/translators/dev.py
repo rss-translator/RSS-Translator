@@ -21,7 +21,7 @@ class Test(Engine):
 
     def translate(self, text: str, target_language: str, **kwargs) -> dict:
         logging.info(">>> Test Translate [%s]: %s", target_language, text)
-        sleep(self.interval)
+        sleep(self.interval or 0)
         return {"text": self.translated_text, "tokens": 0, "characters": len(text)}
 
     def summarize(self, text: str, target_language: str) -> dict:
