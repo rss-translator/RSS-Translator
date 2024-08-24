@@ -22,7 +22,6 @@ class Openl(Engine):
         "French": "fr",
         "Russian": "ru",
         "Italian": "it",
-        "Spanish": "es",
         "Polish": "pl",
         "Portuguese": "pt",
     }
@@ -34,7 +33,7 @@ class Openl(Engine):
     def validate(self) -> bool:
         try:
             resp = httpx.post(
-                url=self.url + "/user/info",
+                url=self.base_url + "/user/info",
                 headers={"content-type": "application/json"},
                 data=json.dumps({"apikey": self.api_key}),
                 timeout=10,
@@ -58,7 +57,7 @@ class Openl(Engine):
                 )
 
             resp = httpx.post(
-                url=self.url + f"/services/{self.service_name}/translate",
+                url=self.base_url + f"/services/{self.service_name}/translate",
                 headers={"content-type": "application/json"},
                 data=json.dumps({"apikey": self.api_key, "text": text, "target_lang": target_code}),
                 timeout=10,

@@ -47,7 +47,7 @@ class Kagi(Engine):
         try:
             headers = {"content-type": "application/json",'Authorization': f'Bot {self.api_key}'}
             resp = httpx.post(
-                url=self.url + "/fastgpt",
+                url=self.base_url + "/fastgpt",
                 headers=headers,
                 data=json.dumps({"query": "Hi"}),
                 timeout=10,
@@ -84,7 +84,7 @@ class Kagi(Engine):
 
             headers = {"content-type": "application/json",'Authorization': f'Bot {self.api_key}'}
             resp = httpx.post(
-                url=self.url + "/fastgpt",
+                url=self.base_url + "/fastgpt",
                 headers=headers,
                 data=json.dumps({"query": f"{system_prompt}\n{text}"}),
                 timeout=10,
@@ -113,7 +113,7 @@ class Kagi(Engine):
                 )
             headers = {"content-type": "application/json",'Authorization': f'Bot {self.api_key}'}
             resp = httpx.post(
-                url=self.url + "/summarize",
+                url=self.base_url + "/summarize",
                 headers=headers,
                 data=json.dumps({"text": text,"summary_type": self.summary_type, "engine":self.summarization_engine, "target_language":target_code}),
                 timeout=10,
