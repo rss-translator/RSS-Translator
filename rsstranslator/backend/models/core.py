@@ -3,13 +3,9 @@ import uuid
 import re
 import logging
 import cityhash
-from datetime import datetime
 from sqlalchemy import Index, Column, Integer, String, Boolean, Text, DateTime, Float, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, declarative_base, Session
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy_utils import URLType, ChoiceType
-from sqlalchemy.dialects.postgresql import UUID
-from typing import Optional, Dict
+from sqlalchemy_utils import URLType
 
 from openai import OpenAI
 from rsstranslator.backend import settings
