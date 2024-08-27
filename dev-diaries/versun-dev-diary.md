@@ -1,3 +1,12 @@
+# 2024-08-27
+这2天一直在弄模型代码，原来的SQLAlchemy+Pydantic模式，模型要分别定义实在是太麻烦了，所以尝试重新用SQLModel重写模型，但各种问题一堆，主要是单表继承它不支持，，好烦
+
+想了想，还是用SQLAlchemy+Pydantic模式，先用SQLAlchemy建一个Engine表，定义所有服务都有的字段，比如name，然后加一个extra_info的json字段，通过Pydantic来定义不同的服务模型，添加到extra_info中
+下午试了下，上面的方法还是不行，extra_info字段没想象中的那么好处理
+
+换一个方法吧，每个服务单独一个模型，openai类的定义一个方法基类，然后模型继承这个基类的方法，Feed模型中2个字段记录翻译模型名和id
+算了，还是最开始的SQLAlchemy+Pydantic模式吧，
+
 # 2024-08-25
 整理了下整体文件架构，清理了暂时没用的文件
 

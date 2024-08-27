@@ -33,16 +33,16 @@ class Engine(Base):
 
     def min_size(self) -> int:
         if hasattr(self, "max_characters"):
-            return self.max_characters * 0.7
+            return int(self.max_characters * 0.7)
         if hasattr(self, "max_tokens"):
-            return self.max_tokens * 0.7
+            return int(self.max_tokens * 0.7)
         return 0
 
     def max_size(self) -> int:
         if hasattr(self, "max_characters"):
-            return self.max_characters * 0.9
+            return int(self.max_characters * 0.9)
         if hasattr(self, "max_tokens"):
-            return self.max_tokens * 0.9
+            return int(self.max_tokens * 0.9)
         return 0
 
     def validate(self) -> bool:
@@ -51,7 +51,7 @@ class Engine(Base):
         )
 
 class OpenAIInterface(Engine): 
-    api_key = Column(String(255), nullable=False)
+    api_key = Column(String(255), nullable=True)
     base_url = Column(URLType, default="https://api.openai.com/v1", nullable=False)
     model = Column(String(100), default="Model Name",nullable=False)
     title_translate_prompt = Column(Text, nullable=False, default=settings.default_title_translate_prompt)
@@ -91,7 +91,7 @@ class OpenAIInterface(Engine):
                 return True
             except Exception as e:
                 logging.error("OpenAIInterface validate ->%s", e)
-                return False
+        return False
 
     def translate(
         self,
@@ -166,14 +166,16 @@ class O_Feed(Base):
     max_posts = Column(Integer, default=20)
     quality = Column(Boolean, default=False)
     fetch_article = Column(Boolean, default=False)
-    translator_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
-    summary_engine_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
+    
     summary_detail = Column(Float, default=0.0)
     additional_prompt = Column(Text, nullable=True)
     category = Column(String(50), nullable=True)
     
+    translator_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
     translator = relationship("Engine", foreign_keys=[translator_id])
+    summary_engine_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
     summary_engine = relationship("Engine", foreign_keys=[summary_engine_id])
+    
     t_feeds = relationship("T_Feed", back_populates="o_feed")
     
     def __init__(self, *args, **kwargs):
