@@ -78,3 +78,51 @@ def test_summarize(mock_openai, openai_interface):
     assert result == {"text": "摘要内容", "tokens": 30}
     mock_client.with_options.assert_called_once_with(max_retries=3)
     mock_client.with_options.return_value.chat.completions.create.assert_called_once()
+
+def test_openai_interface_database_operations():
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from rsstranslator.backend.models.core import Base, OpenAIInterface
+
+    # 创建内存数据库
+    engine = create_engine('sqlite:///:memory:')
+    Session = sessionmaker(bind=engine)
+    Base.metadata.create_all(engine)
+    
+    # 创建会话
+    session = Session()
+
+    # 测试写入操作
+    new_interface = OpenAIInterface(
+        name="测试OpenAI接口",
+        api_key="test_api_key",
+        model="gpt-3.5-turbo",
+        valid=True
+    )
+    session.add(new_interface)
+    session.commit()
+
+    # 测试读取操作
+    queried_interface = session.query(OpenAIInterface).filter_by(name="测试OpenAI接口").first()
+    assert queried_interface is not None
+    assert queried_interface.name == "测试OpenAI接口"
+    assert queried_interface.api_key == "test_api_key"
+    assert queried_interface.model == "gpt-3.5-turbo"
+    assert queried_interface.valid is True
+    assert queried_interface.is_ai is True
+
+    # 测试更新操作
+    queried_interface.model = "gpt-4"
+    session.commit()
+    updated_interface = session.query(OpenAIInterface).filter_by(name="测试OpenAI接口").first()
+    assert updated_interface.model == "gpt-4"
+
+    # 测试删除操作
+    session.delete(queried_interface)
+    session.commit()
+    deleted_interface = session.query(OpenAIInterface).filter_by(name="测试OpenAI接口").first()
+    assert deleted_interface is None
+
+    # 关闭会话
+    session.close()
+
