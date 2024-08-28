@@ -16,6 +16,7 @@ def db_session():
 @pytest.fixture
 def azure_translator(db_session):
     translator = AzureAI(
+        name="test_translator",
         api_key="test_api_key",
         base_url="https://test.openai.azure.com/",
         version="2024-02-15-preview",
