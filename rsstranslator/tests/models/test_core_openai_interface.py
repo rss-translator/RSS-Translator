@@ -97,7 +97,7 @@ def test_openai_interface_database_operations():
         name="测试OpenAI接口",
         api_key="test_api_key",
         model="gpt-3.5-turbo",
-        valid=True
+        is_available=True
     )
     session.add(new_interface)
     session.commit()
@@ -108,7 +108,7 @@ def test_openai_interface_database_operations():
     assert queried_interface.name == "测试OpenAI接口"
     assert queried_interface.api_key == "test_api_key"
     assert queried_interface.model == "gpt-3.5-turbo"
-    assert queried_interface.valid is True
+    assert queried_interface.is_available is True
     assert queried_interface.is_ai is True
 
     # 测试更新操作

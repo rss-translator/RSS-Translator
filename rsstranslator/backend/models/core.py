@@ -3,30 +3,55 @@ import uuid
 import re
 import logging
 import cityhash
-from sqlalchemy import Index, Column, Integer, String, Boolean, Text, DateTime, Float, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship, declarative_base, Session
+from datetime import datetime
+from sqlalchemy import (
+    Index,
+    Integer,
+    String,
+    Boolean,
+    Text,
+    DateTime,
+    Float,
+    ForeignKey,
+    UniqueConstraint,
+    select
+)
+from sqlalchemy.orm import relationship, DeclarativeBase, Session, Mapped, mapped_column
 from sqlalchemy_utils import URLType
 
 from openai import OpenAI
 from rsstranslator.backend import settings
+from typing import Optional, List
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
+
 
 class Engine(Base):
-    __tablename__ = 'engine'
+    __tablename__ = "engine"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), unique=True)
-    valid = Column(Boolean, nullable=True)
-    is_ai = Column(Boolean, default=False)
-    type = Column(String(50), nullable=False)
-    
-    __mapper_args__ = {
-            'polymorphic_on': type,
-            'polymorphic_identity': 'Engine'
-        }
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    is_available: Mapped[bool] = mapped_column(nullable=True)
+    is_ai: Mapped[bool] = mapped_column(nullable=False, default=False)
+    translated_feeds: Mapped[List["O_Feed"]] = relationship(
+        back_populates="translator", foreign_keys="[O_Feed.translator_id]"
+    )
+    summarized_feeds: Mapped[List["O_Feed"]] = relationship(
+        back_populates="summary_engine", foreign_keys="[O_Feed.summary_engine_id]"
+    )
+    caches: Mapped[List["Cache"]] = relationship(
+        back_populates="engine"
+    )
 
-    def translate(self, text: str, target_language: str, source_language:str="auto", **kwargs) -> dict:
+    type: Mapped[str] = mapped_column(nullable=False)
+
+    __mapper_args__ = {"polymorphic_on": type, "polymorphic_identity": "Engine"}
+
+    def translate(
+        self, text: str, target_language: str, source_language: str = "auto", **kwargs
+    ) -> dict:
         raise NotImplementedError(
             "subclasses of Engine must provide a translate() method"
         )
@@ -50,23 +75,30 @@ class Engine(Base):
             "subclasses of Engine must provide a validate() method"
         )
 
-class OpenAIInterface(Engine): 
-    api_key = Column(String(255), nullable=True)
-    base_url = Column(URLType, default="https://api.openai.com/v1", nullable=False)
-    model = Column(String(100), default="Model Name",nullable=False)
-    title_translate_prompt = Column(Text, nullable=False, default=settings.default_title_translate_prompt)
-    content_translate_prompt = Column(Text, nullable=False, default=settings.default_content_translate_prompt)
-    temperature = Column(Float, default=0.2, nullable=False)
-    top_p = Column(Float, default=0.2, nullable=False)
-    frequency_penalty = Column(Float, default=0, nullable=False)
-    presence_penalty = Column(Float, default=0, nullable=False)
-    max_tokens = Column(Integer, default=2000, nullable=False)
-    summary_prompt = Column(Text, nullable=False, default=settings.default_summary_prompt)
+
+class OpenAIInterface(Engine):
+    api_key: Mapped[str] = mapped_column(String(255), default="API KEY")
+    base_url: Mapped[URLType] = mapped_column(
+        URLType, default="https://api.openai.com/v1"
+    )
+    model: Mapped[str] = mapped_column(String(100), default="Model Name")
+    title_translate_prompt: Mapped[str] = mapped_column(
+        Text, default=settings.default_title_translate_prompt
+    )
+    content_translate_prompt: Mapped[str] = mapped_column(
+        Text, default=settings.default_content_translate_prompt
+    )
+    temperature: Mapped[float] = mapped_column(default=0.2)
+    top_p: Mapped[float] = mapped_column(default=0.2)
+    frequency_penalty: Mapped[float] = mapped_column(default=0)
+    presence_penalty: Mapped[float] = mapped_column(default=0)
+    max_tokens: Mapped[int] = mapped_column(default=2000)
+    summary_prompt: Mapped[str] = mapped_column(
+        Text, default=settings.default_summary_prompt
+    )
     is_ai = True
-    
-    __mapper_args__ = {
-        'polymorphic_identity': 'OpenAIInterface'
-    }
+
+    __mapper_args__ = {"polymorphic_identity": "OpenAIInterface"}
 
     @property
     def client(self):
@@ -100,7 +132,7 @@ class OpenAIInterface(Engine):
         system_prompt: str = None,
         user_prompt: str = None,
         text_type: str = "title",
-        **kwargs
+        **kwargs,
     ) -> dict:
         logging.info(">>> Translate [%s]: %s", target_language, text)
         tokens = 0
@@ -118,7 +150,7 @@ class OpenAIInterface(Engine):
             res = self.client.with_options(max_retries=3).chat.completions.create(
                 extra_headers={
                     "HTTP-Referer": "https://www.rsstranslator.com",
-                    "X-Title": "RSS Translator"
+                    "X-Title": "RSS Translator",
                 },
                 model=self.model,
                 messages=[
@@ -131,10 +163,14 @@ class OpenAIInterface(Engine):
                 presence_penalty=self.presence_penalty,
                 max_tokens=self.max_tokens,
             )
-            #if res.choices[0].finish_reason.lower() == "stop" or res.choices[0].message.content:
+            # if res.choices[0].finish_reason.lower() == "stop" or res.choices[0].message.content:
             if res.choices and res.choices[0].message.content:
                 translated_text = res.choices[0].message.content
-                logging.info("OpenAITranslator->%s: %s", res.choices[0].finish_reason, translated_text)
+                logging.info(
+                    "OpenAITranslator->%s: %s",
+                    res.choices[0].finish_reason,
+                    translated_text,
+                )
             # else:
             #     translated_text = ''
             #     logging.warning("Translator->%s: %s", res.choices[0].finish_reason, text)
@@ -149,97 +185,125 @@ class OpenAIInterface(Engine):
         return self.translate(text, target_language, system_prompt=self.summary_prompt)
 
 
+class Category(Base):
+    __tablename__ = "category"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=False)
+    feeds: Mapped[List["O_Feed"]] = relationship(back_populates="category")
+
+
 class O_Feed(Base):
-    __tablename__ = 'o_feed'
-    
-    id = Column(Integer, primary_key=True)
-    sid = Column(String(255), unique=True, nullable=False)
-    name = Column(String(100), nullable=True)
-    feed_url = Column(URLType, unique=True, nullable=False)
-    last_updated = Column(DateTime, nullable=True)
-    last_pull = Column(DateTime, nullable=True)
-    translation_display = Column(Integer, default=0)
-    etag = Column(String(50), default="")
-    size = Column(Integer, default=0)
-    valid = Column(Boolean, nullable=True)
-    update_frequency = Column(Integer, default=30)
-    max_posts = Column(Integer, default=20)
-    quality = Column(Boolean, default=False)
-    fetch_article = Column(Boolean, default=False)
-    
-    summary_detail = Column(Float, default=0.0)
-    additional_prompt = Column(Text, nullable=True)
-    category = Column(String(50), nullable=True)
-    
-    translator_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
-    translator = relationship("Engine", foreign_keys=[translator_id])
-    summary_engine_id = Column(Integer, ForeignKey('engine.id'), nullable=True)
-    summary_engine = relationship("Engine", foreign_keys=[summary_engine_id])
-    
-    t_feeds = relationship("T_Feed", back_populates="o_feed")
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.sid:
-            self.sid = uuid.uuid5(uuid.NAMESPACE_URL, f"{self.feed_url}:{os.getenv('SECRET_KEY')}").hex
+    __tablename__ = "o_feed"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # sid: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=True)
+    feed_url: Mapped[str] = mapped_column(unique=True, nullable=False)
+    last_updated: Mapped[datetime] = mapped_column(nullable=True)
+    last_pull: Mapped[datetime] = mapped_column(nullable=True)
+    translation_display: Mapped[int] = mapped_column(Integer, default=0)
+    etag: Mapped[str] = mapped_column(String(50), default="")
+    size: Mapped[int] = mapped_column(default=0)
+    valid: Mapped[bool] = mapped_column(nullable=True)
+    update_frequency: Mapped[int] = mapped_column(default=30)
+    max_posts: Mapped[int] = mapped_column(default=20)
+    quality: Mapped[bool] = mapped_column(default=False)
+    fetch_article: Mapped[bool] = mapped_column(default=False)
+
+    summary_detail: Mapped[float] = mapped_column(default=0.0)
+    additional_prompt: Mapped[str] = mapped_column(Text, nullable=True)
+    category_id: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=True)
+    category: Mapped["Category"] = relationship(back_populates="feeds")
+
+    translator_id: Mapped[int] = mapped_column(ForeignKey("engine.id"), nullable=True)
+    translator: Mapped["Engine"] = relationship(
+        back_populates="translated_feeds", foreign_keys=translator_id
+    )
+
+    summary_engine_id: Mapped[int] = mapped_column(
+        ForeignKey("engine.id"), nullable=True
+    )
+    summary_engine: Mapped["Engine"] = relationship(
+        back_populates="summarized_feeds", foreign_keys=summary_engine_id
+    )
+
+    t_feeds: Mapped[List["T_Feed"]] = relationship(back_populates="o_feed")
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     if not self.sid:
+    #         self.sid = uuid.uuid5(uuid.NAMESPACE_URL, f"{self.feed_url}:{os.getenv('SECRET_KEY')}").hex
 
     def get_translation_display(self):
         choices = {
             0: "Only Translation",
             1: "Translation | Original",
-            2: "Original | Translation"
+            2: "Original | Translation",
         }
         return choices.get(self.translation_display)
 
+
 class T_Feed(Base):
-    __tablename__ = 't_feed'
-    
-    id = Column(Integer, primary_key=True)
-    sid = Column(String(255), unique=True, nullable=False)
-    language = Column(String(50), nullable=False)
-    o_feed_id = Column(Integer, ForeignKey('o_feed.id'), nullable=False)
-    status = Column(Boolean, nullable=True)
-    translate_title = Column(Boolean, default=False)
-    translate_content = Column(Boolean, default=False)
-    summary = Column(Boolean, default=False)
-    total_tokens = Column(Integer, default=0)
-    total_characters = Column(Integer, default=0)
-    modified = Column(DateTime, nullable=True)
-    size = Column(Integer, default=0)
-    
-    o_feed = relationship("O_Feed", back_populates="t_feeds")
-    
-    __table_args__ = (
-        UniqueConstraint('o_feed_id', 'language', name='unique_o_feed_lang'),
-    )
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.sid:
-            self.sid = f"{self.o_feed.sid}_{re.sub('[^a-z]', '_', self.language.lower())}"
+    __tablename__ = "t_feed"
 
-class Translated_Content(Base):
-    __tablename__ = 'translated_content'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    # sid = mapped_column(String(255), unique=True, nullable=False)
+    language: Mapped[str] = mapped_column(String(50), nullable=False)
+    o_feed_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("o_feed.id"), nullable=False
+    )
+    status: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    translate_title: Mapped[bool] = mapped_column(Boolean, default=False)
+    translate_content: Mapped[bool] = mapped_column(Boolean, default=False)
+    summary: Mapped[bool] = mapped_column(Boolean, default=False)
+    total_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    total_characters: Mapped[int] = mapped_column(Integer, default=0)
+    modified: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    size: Mapped[int] = mapped_column(Integer, default=0)
+
+    o_feed_id: Mapped[int] = mapped_column(ForeignKey("o_feed.id"), nullable=True)
+    o_feed: Mapped["O_Feed"] = relationship("O_Feed", back_populates="t_feeds")
+
     __table_args__ = (
-        Index('idx_hash', 'hash'),
-        Index('idx_translated_language', 'translated_language'),
+        UniqueConstraint("o_feed_id", "language", name="unique_o_feed_lang"),
     )
 
-    hash = Column(String(50), primary_key=True)
-    original_content = Column(Text)
-    translated_language = Column(String(50))
-    translated_content = Column(Text)
-    tokens = Column(Integer, default=0)
-    characters = Column(Integer, default=0)
-    
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     if not self.sid:
+    #         self.sid = f"{self.o_feed.sid}_{re.sub('[^a-z]', '_', self.language.lower())}"
+
+
+class Cache(Base):
+    __tablename__ = "cache"
+
+    type: Mapped[str] = mapped_column(nullable=False)
+    __mapper_args__ = {"polymorphic_on": type, "polymorphic_identity": "Cache"}
+
+    hash: Mapped[str] = mapped_column(String(50), primary_key=True)
+    original_content: Mapped[str] = mapped_column(Text)
+    target_language: Mapped[str] = mapped_column(String(50))
+    target_content: Mapped[str] = mapped_column(Text)
+    tokens: Mapped[int] = mapped_column(Integer, default=0)
+    characters: Mapped[int] = mapped_column(Integer, default=0)
+
+    engine_id: Mapped[int] = mapped_column(ForeignKey("engine.id"))
+    engine = relationship("Engine", back_populates="caches")
+
+    @staticmethod
+    def generate_hash(text: str, language: str) -> str:
+        return str(cityhash.CityHash128(f"{text}{language}"))
+
     @classmethod
-    def is_translated(cls, text:str, target_language:str, session: Session):
-        text_hash = str(cityhash.CityHash128(f"{text}{target_language}"))
-        content = session.query(cls).filter_by(hash=text_hash).first()
+    def is_translated(cls, text: str, target_language: str, session: Session):
+        text_hash = cls.generate_hash(text, target_language)
+        content = session.execute(
+            select(cls).filter_by(hash=text_hash)
+        ).scalar_one_or_none()
         # logging.info("Using cached translations:%s", text)
         if content:
             return {
-                "text": content.translated_content,
+                "text": content.target_content,
                 "tokens": content.tokens,
                 "characters": content.characters,
             }
@@ -249,4 +313,10 @@ class Translated_Content(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.hash:
-            self.hash = str(cityhash.CityHash128(f"{self.original_content}{self.translated_language}"))
+            self.hash = self.generate_hash(self.original_content, self.target_language)
+
+class TranslationCache(Cache):
+    __mapper_args__ = {"polymorphic_identity": "Translation Cache"}
+
+class SummaryCache(Cache):
+    __mapper_args__ = {"polymorphic_identity": "Summary Cache"}
