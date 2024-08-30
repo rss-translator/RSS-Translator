@@ -8,9 +8,40 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import condition
 from .models import T_Feed, O_Feed
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from opyml import OPML
+from django.utils.translation import gettext_lazy as _
 
 from utils.feed_action import merge_all_atom, check_file_path
 
+def import_opml(request):
+    if request.method == 'POST':
+        opml_file = request.FILES.get('opml_file')
+        if opml_file and isinstance(opml_file, InMemoryUploadedFile):
+            try:
+                opml_content = opml_file.read().decode('utf-8')
+                opml = OPML.from_xml(opml_content)
+                
+                for outline in opml.body.outlines:
+                    category = outline.text
+                    #category, _ = Category.objects.get_or_create(name=category_name)
+                    
+                    for feed in outline.outlines:
+                        O_Feed.objects.create(
+                            name=feed.title or feed.text,
+                            feed_url=feed.xml_url,
+                            category=category
+                        )
+                
+                messages.success(request, _("OPML file imported successfully."))
+            except Exception as e:
+                messages.error(request, _("Error importing OPML file: {}").format(str(e)))
+        else:
+            messages.error(request, _("Please upload a valid OPML file."))
+    
+    return redirect('admin:core_o_feed_changelist')
 
 def get_modified(request, feed_sid):
     try:

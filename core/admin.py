@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django.urls import path, reverse
 
 from .models import O_Feed, T_Feed
 from .custom_admin_site import core_admin_site
@@ -19,6 +20,7 @@ from .actions import (
 )
 from .tasks import update_original_feed, update_translated_feed
 from utils.modelAdmin_utils import valid_icon
+from .views import import_opml
 
 
 class O_FeedAdmin(admin.ModelAdmin):
@@ -39,6 +41,21 @@ class O_FeedAdmin(admin.ModelAdmin):
     list_filter = ["valid", "category"]
     actions = [o_feed_force_update, o_feed_export_as_opml, o_feed_batch_modify]
     list_per_page = 20
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('import_opml/', self.admin_site.admin_view(import_opml), name='core_o_feed_import_opml'),
+        ]
+        return custom_urls + urls
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['import_opml_button'] = format_html(
+            '<a class="button" href="{}">导入OPML</a>',
+            reverse('admin:core_o_feed_import_opml')
+        )
+        return super().changelist_view(request, extra_context=extra_context)
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
