@@ -1,5 +1,5 @@
 reflex>=0.5.5
-pydantic
+reader
 sqlalchemy_utils
 opyml
 tiktoken
