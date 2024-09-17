@@ -41,6 +41,7 @@
 #*.log
 #.python-version
 #Pipfile.lock
+.vscode/
 *$py.class
 *.cover
 *.csv

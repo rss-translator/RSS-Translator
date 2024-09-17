@@ -1,4 +1,4 @@
-reflex>=0.5.5
+fastapi
 reader
 sqlalchemy_utils
 opyml
