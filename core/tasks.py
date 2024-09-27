@@ -266,10 +266,19 @@ def translate_feed(
                 )  # check cache db
                 translated_text = ""
                 if not cached:
-                    results = translate_engine.translate(
-                        title, target_language=target_language, source_language=source_language, text_type="title"
-                    )
-                    translated_text = results.get("text", title)
+                    max_retries = 3
+                    for attempt in range(max_retries):
+                        results = translate_engine.translate(
+                            title, target_language=target_language, source_language=source_language, text_type="title"
+                        )
+                        translated_text = results.get("text", "")
+                        if translated_text:
+                            break
+                        logging.warning(f"Empty translation for title, retrying (attempt {attempt + 1}/{max_retries})")
+                    
+                    if not translated_text:
+                        translated_text = title  # Fallback to original title if all retries fail
+                    
                     total_tokens += results.get("tokens", 0)
                     translated_characters += len(title)
                     if title and translated_text:
@@ -307,8 +316,6 @@ def translate_feed(
 
             # Translate content
             if translate_engine and translate_content:
-                # logging.info("Start Translate Content")
-                # original_description = entry.get('summary', None)  # summary, description
                 original_content = entry.get("content")
                 content = (
                     original_content[0].get("value")
@@ -317,11 +324,20 @@ def translate_feed(
                 )
 
                 if content:
-                    translated_summary, tokens, characters, need_cache = (
-                        content_translate(
-                            content, target_language, translate_engine, quality, source_language=source_language
+                    max_retries = 3
+                    for attempt in range(max_retries):
+                        translated_summary, tokens, characters, need_cache = (
+                            content_translate(
+                                content, target_language, translate_engine, quality, source_language=source_language
+                            )
                         )
-                    )
+                        if translated_summary:
+                            break
+                        logging.warning(f"Empty translation for content, retrying (attempt {attempt + 1}/{max_retries})")
+                    
+                    if not translated_summary:
+                        translated_summary = content  # Fallback to original content if all retries fail
+                    
                     total_tokens += tokens
                     translated_characters += characters
 
@@ -343,8 +359,6 @@ def translate_feed(
                 if summary_engine == None:
                     logging.warning("No Summarize engine")
                     continue
-                # logging.info("Start Summarize")
-                # original_description = entry.get('summary')  # summary, description
                 original_content = entry.get("content")
                 content = (
                     original_content[0].get("value")
@@ -353,13 +367,22 @@ def translate_feed(
                 )
 
                 if content:
-                    summary_text, tokens, need_cache = content_summarize(
-                        content,
-                        target_language=target_language,
-                        detail=summary_detail,
-                        engine=summary_engine,
-                        minimum_chunk_size=summary_engine.max_size(),
-                    )
+                    max_retries = 3
+                    for attempt in range(max_retries):
+                        summary_text, tokens, need_cache = content_summarize(
+                            content,
+                            target_language=target_language,
+                            detail=summary_detail,
+                            engine=summary_engine,
+                            minimum_chunk_size=summary_engine.max_size(),
+                        )
+                        if summary_text:
+                            break
+                        logging.warning(f"Empty summary, retrying (attempt {attempt + 1}/{max_retries})")
+                    
+                    if not summary_text:
+                        summary_text = content  # Fallback to original content if all retries fail
+                    
                     total_tokens += tokens
                     need_cache_objs.update(need_cache)
                     html_summary = f"<br />🤖:{mistune.html(summary_text)}<br />---------------<br />"
