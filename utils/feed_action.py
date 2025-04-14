@@ -20,7 +20,8 @@ from fake_useragent import UserAgent
 
 
 def get_first_non_none(feed, *keys):
-    return next((feed.get(key) for key in keys if feed.get(key) is not None), None)
+    return next((feed.get(key) for key in keys if feed.get(key) is not None),
+                None)
 
 
 def fetch_feed(url: str, etag: str = "") -> Dict:
@@ -33,12 +34,26 @@ def fetch_feed(url: str, etag: str = "") -> Dict:
         "If-None-Match": etag,
         #'If-Modified-Since': modified,
         "User-Agent": ua.random.strip(),
+        "Accept":
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "max-age=0"
     }
 
     client = httpx.Client()
 
     try:
-        response = client.get(url, headers=headers, timeout=30, follow_redirects=True)
+        response = client.get(url,
+                              headers=headers,
+                              timeout=30,
+                              follow_redirects=True)
 
         if response.status_code == 200:
             feed = feedparser.parse(response.text)
@@ -75,18 +90,12 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
     try:
         source_feed = feed_dict["feed"]
         pubdate = source_feed.get("published_parsed")
-        pubdate = (
-            datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
-            if pubdate
-            else None
-        )
+        pubdate = (datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
+                   if pubdate else None)
 
         updated = source_feed.get("updated_parsed")
-        updated = (
-            datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
-            if updated
-            else None
-        )
+        updated = (datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
+                   if updated else None)
 
         title = get_first_non_none(source_feed, "title", "subtitle", "info")
         subtitle = get_first_non_none(source_feed, "subtitle")
@@ -114,27 +123,20 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 
         for entry in feed_dict["entries"]:
             pubdate = entry.get("published_parsed")
-            pubdate = (
-                datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
-                if pubdate
-                else None
-            )
+            pubdate = (datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
+                       if pubdate else None)
 
             updated = entry.get("updated_parsed")
-            updated = (
-                datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
-                if updated
-                else None
-            )
+            updated = (datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
+                       if updated else None)
 
             title = entry.get("title")
             link = get_first_non_none(entry, "link")
             unique_id = entry.get("id", link)
 
             author_name = get_first_non_none(entry, "author", "publisher")
-            content = (
-                entry.get("content")[0].get("value") if entry.get("content") else None
-            )
+            content = (entry.get("content")[0].get("value")
+                       if entry.get("content") else None)
             summary = entry.get("summary")
 
             fe = fg.add_entry(order="append")
@@ -176,13 +178,13 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 
     root = etree.fromstring(atom_string)
     tree = etree.ElementTree(root)
-    pi = etree.ProcessingInstruction(
-        "xml-stylesheet", 'type="text/xsl" href="/static/rss.xsl"'
-    )
+    pi = etree.ProcessingInstruction("xml-stylesheet",
+                                     'type="text/xsl" href="/static/rss.xsl"')
     root.addprevious(pi)
-    atom_string_with_pi = etree.tostring(
-        tree, pretty_print=True, xml_declaration=True, encoding="utf-8"
-    ).decode()
+    atom_string_with_pi = etree.tostring(tree,
+                                         pretty_print=True,
+                                         xml_declaration=True,
+                                         encoding="utf-8").decode()
 
     return atom_string_with_pi
 
@@ -194,6 +196,7 @@ ENTRY_UPDATED = f"{{{ATOM_NS}}}updated"
 
 
 class FeedMerger:
+
     def __init__(self, feed_name, feed_files):
         self.feed_name = feed_name
         self.feed_files = feed_files
@@ -217,19 +220,16 @@ class FeedMerger:
     def _write_feed_header(self):
         with open(self.output_file, "wb") as f:
             f.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
-            f.write(b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
+            f.write(
+                b'<?xml-stylesheet type="text/xsl" href="/static/rss.xsl"?>\n')
             f.write(f'<feed xmlns="{ATOM_NS}">\n'.encode("utf-8"))
             f.write(
-                f"<title>Translated Feeds for {self.feed_name} | RSS Translator</title>\n".encode(
-                    "utf-8"
-                )
-            )
+                f"<title>Translated Feeds for {self.feed_name} | RSS Translator</title>\n"
+                .encode("utf-8"))
             f.write(b'<link href="https://rsstranslator.com"/>\n')
             f.write(
-                f"<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n".encode(
-                    "utf-8"
-                )
-            )
+                f"<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n"
+                .encode("utf-8"))
 
     def _process_feed_file(self, feed_file):
         try:
@@ -240,8 +240,7 @@ class FeedMerger:
             self.processed_entries.update(
                 entry.find(ENTRY_ID).text
                 for entry in feed_root.iterfind(f"{{{ATOM_NS}}}entry")
-                if self._should_process_entry(entry, feed_title, feed_url)
-            )
+                if self._should_process_entry(entry, feed_title, feed_url))
 
         except Exception as e:
             logging.error(f"FeedMerger::_process_feed_file: {feed_file}: {e}")
@@ -252,7 +251,8 @@ class FeedMerger:
             if id_elem is None or id_elem.text in self.processed_entries:
                 return False
 
-            published_elem = entry.find(ENTRY_PUBLISHED) or entry.find(ENTRY_UPDATED)
+            published_elem = entry.find(ENTRY_PUBLISHED) or entry.find(
+                ENTRY_UPDATED)
             if published_elem is None:
                 return False
 
@@ -304,8 +304,9 @@ class FeedMerger:
     def _write_feed_footer(self):
         with open(os.path.normpath(self.output_file), "ab") as f:
             f.write(b"</feed>")
-    
-def check_file_path(base_path:str, filename:str) -> str:
+
+
+def check_file_path(base_path: str, filename: str) -> str:
     fullpath = os.path.normpath(os.path.join(base_path, filename))
     if not fullpath.startswith(base_path):
         raise Exception("not allowed")
@@ -398,7 +399,6 @@ def merge_all_atom(feed_files: list, filename: str):
 
         f.write(b"</feed>")
 """
-
 ''' old generate_atom_feed function, use django feedgenerator
 def generate_atom_feed_old(feed_url:str, feed_dict: dict):
     """
