@@ -50,18 +50,8 @@
 <table>
   <tr>
     <td style="padding:10px;">
-      <a href="https://www.jetbrains.com/pycharm/">
-        <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm_icon.svg" alt="PyCharm logo." style="width:100px; height:100px;">
-      </a>
-    </td>
-    <td style="padding:10px;">
       <a href="https://www.railway.app">
         <img src="https://railway.app/brand/logo-light.png" alt="Railway" style="width:100px; height:100px;">
-      </a>
-    </td>
-    <td style="padding:10px;">
-      <a href="https://www.gitpod.io">
-        <img src="https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/docs/docs/assets/gitpod.svg" alt="Gitpod" style="width:100px; height:100px;">
       </a>
     </td>
   </tr>
