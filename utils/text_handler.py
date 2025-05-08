@@ -144,6 +144,10 @@ def should_skip(element):
     if element.find_parents(skip_tags):
         return True
 
+    # check if the element class is katex for MathMl
+    if element.find_parent("span", class_="katex"):
+        return True
+
     text = element.get_text(strip=True)
     if not text:
         return True
