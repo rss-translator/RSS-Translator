@@ -4,6 +4,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=0
       - PYTHONDONTWRITEBYTECODE=1
+      - PORT=8000
       - DEBUG=0
       - DEMO=0
       - USER_MANAGEMENT=0
