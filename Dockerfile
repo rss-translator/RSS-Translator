@@ -11,6 +11,7 @@ FROM python:3.11-slim AS builder
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 0
 ENV DockerHOME=/home/rsstranslator
+ENV PORT=8000
 RUN mkdir -p $DockerHOME/data
 WORKDIR $DockerHOME
 COPY . $DockerHOME
@@ -22,5 +23,5 @@ RUN pip install -r requirements/dev.txt --no-cache-dir -U && \
     find $DockerHOME -type d -name "__pycache__" -exec rm -r {} + && \
     rm -rf $DockerHOME/.cache/pip
 HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=20s CMD pgrep -f "python manage.py run_huey" || exit 1
-EXPOSE 8000
-CMD python manage.py init_server && python manage.py run_huey -f & uvicorn config.asgi:application --host 0.0.0.0
+EXPOSE ${PORT}
+CMD python manage.py init_server && python manage.py run_huey -f & uvicorn config.asgi:application --host 0.0.0.0 --port ${PORT}
