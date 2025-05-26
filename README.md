@@ -65,7 +65,24 @@
 ## 开发贡献
 [请查看Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
 
+## 使用 uv 启动项目
+
+### 1. 安装依赖
+
+建议使用 uv 工具（https://github.com/astral-sh/uv）：
+
+```bash
+uv sync
+```
+
+### 2. 启动开发服务器
+
+```bash
+uv run dev
+```
+
 ## Star历史图
 
 [![Star History Chart](https://api.star-history.com/svg?repos=rss-translator/RSS-Translator&type=Date)](https://star-history.com/#rss-translator/RSS-Translator&Date)
+
 

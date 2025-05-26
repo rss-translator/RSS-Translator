@@ -1,8 +1,0 @@
-modules = ["python-3.12", "web", "bash"]
-run = "python manage.py init_server && python manage.py run_huey -f & uvicorn config.asgi:application --host 0.0.0.0"
-
-[nix]
-channel = "stable-24_05"
-
-[deployment]
-run = ["sh", "-c", "python manage.py init_server && python manage.py run_huey -f & uvicorn config.asgi:application --host 0.0.0.0"]

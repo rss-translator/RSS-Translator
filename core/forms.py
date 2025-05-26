@@ -38,13 +38,12 @@ class O_FeedForm(forms.ModelForm):
 
     class Meta:
         model = O_Feed
+        exclude = ['translator', 'summary_engine']
         fields = [
             "feed_url",
             "update_frequency",
             "max_posts",
-            "translator",
             "translation_display",
-            "summary_engine",
             "summary_detail",
             "additional_prompt",
             "fetch_article",
