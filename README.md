@@ -57,15 +57,8 @@
   </tr>
 </table>
 
-
-
 非常感谢以下用户的支持:
-
-<p align="center">
-  <a href="https://github.com/versun/sponsors/">
-    <img src='https://raw.githubusercontent.com/versun/sponsors/main/sponsors.svg'/>
-  </a>
-</p>
+![sponsors](https://supporters.versun.me/sponsors.svg)
 
 如有余力，请考虑成为赞助者：[爱发电](https://afdian.com/a/versun) | [Github Sponsor](https://github.com/sponsors/versun)
 > 说明： 赞助头像每天早上和下午的5:30分刷新(UTC时区)。
