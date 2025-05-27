@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import signal
+import time
 from pathlib import Path
 from .init import init_server
 
@@ -202,6 +203,7 @@ def main():
         try:
             # 等待任一进程结束
             while True:
+                time.sleep(1)
                 if huey_process.poll() is not None:
                     print("❌ Huey进程意外退出")
                     break
