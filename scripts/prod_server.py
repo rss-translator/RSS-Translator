@@ -200,22 +200,6 @@ def main():
         
         print("🌟 所有服务已启动，按 Ctrl+C 停止")
         
-        try:
-            # 等待任一进程结束
-            while True:
-                time.sleep(1)
-                if huey_process.poll() is not None:
-                    print("❌ Huey进程意外退出")
-                    break
-                if server_process.poll() is not None:
-                    print("❌ 服务器进程意外退出")
-                    break
-        except KeyboardInterrupt:
-            print("\n🛑 正在停止所有服务...")
-        finally:
-            server_cleanup()
-            huey_cleanup()
-        
     except Exception as e:
         print(f"❌ 发生错误: {e}")
         sys.exit(1)
