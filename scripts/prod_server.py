@@ -51,7 +51,7 @@ def start_huey_worker():
 def start_production_server():
     """启动生产服务器"""
     print("🌐 准备Django生产服务器...")
-    workers = os.environ.get("UVICORN_WORKERS", "4")
+    workers = os.environ.get("WORKERS", "1")
     host = os.environ.get("HOST", "0.0.0.0")
     port = os.environ.get("PORT", "8000")
     # 检查可用的ASGI/WSGI服务器
@@ -101,7 +101,7 @@ def start_production_server():
                 "--keep-alive", "5",
                 "--max-requests", "1000",
                 "--max-requests-jitter", "100",
-                "--preload",  # 预加载应用以提高性能
+                #"--preload",  # 预加载应用以提高性能
                 "config.asgi:application"  
             ]
         except (subprocess.CalledProcessError, FileNotFoundError):
