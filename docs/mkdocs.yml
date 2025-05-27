@@ -67,7 +67,6 @@ plugins:
               主页: Home
               截图: Screenshots
               安装: Install
-              脚本自动安装: Installation Script
               一键部署: One Click
               Docker安装: Docker
               升级: Upgrade
@@ -100,7 +99,6 @@ nav:
   - 安装:
       - Docker安装: install/docker.md
       - 一键部署: install/one-click.md
-      - 脚本自动安装: install/install-script.md
   - 升级: upgrade.md
   - 开启SSL: ssl.md
   - 使用说明: guide.md
