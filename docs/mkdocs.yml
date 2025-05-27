@@ -6,11 +6,11 @@ site_description: >-
   Translate RSS feeds to your language
 
 # Repository
-repo_name: rss-translator/RSS-Translator
+repo_name: versun/RSS-Translator
 repo_url: https://github.com/versun/RSS-Translator
 
 # Copyright
-copyright: Copyright &copy; 2023 - 2024 RSS Translator
+copyright: Copyright &copy; 2023 - 2024 Versun
 
 theme:
   name: terminal # https://github.com/ntno/mkdocs-terminal
@@ -84,7 +84,7 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/rss-translator/RSS-Translator
+      link: https://github.com/versun/RSS-Translator
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/r/rsstranslator/rsstranslator
     - icon: fontawesome/brands/telegram
@@ -106,8 +106,8 @@ nav:
   - 使用说明: guide.md
   - 翻译服务: translator.md
   - 常见问题: faq.md
-  - 开发进度: https://github.com/orgs/rss-translator/projects/2/views/1
+  - 开发进度: https://github.com/users/versun/projects/8
   - 赞助: https://rsstranslator.com/#_2
-  - Github: https://github.com/rss-translator/RSS-Translator
+  - Github: https://github.com/versun/RSS-Translator
   - Telegram: https://t.me/rsstranslator
-  - Releases: https://github.com/rss-translator/RSS-Translator/releases
+  - Releases: https://github.com/versun/RSS-Translator/releases
