@@ -4,7 +4,7 @@
 </div>
 <br/>
 
-| [English](https://rsstranslator.com/en) | [Demo](https://rsstranslator.com/demo/) | [Telegram交流群](https://t.me/rsstranslator) | [开发进度](https://github.com/orgs/rss-translator/projects/2/views/1) | [收支表](https://versun.notion.site/RSS-10a92896fa998028a162c57bfb0ac3dc)
+| [English](https://github.com/versun/RSS-Translator/blob/main/README_EN.md) | [Demo](https://rsstranslator.com/demo/) | [Telegram交流群](https://t.me/rsstranslator) | [开发进度](https://github.com/users/versun/projects/8) | [收支表](https://versun.notion.site/RSS-10a92896fa998028a162c57bfb0ac3dc)
 
 ---
 
@@ -63,23 +63,48 @@
 如有余力，请考虑成为赞助者：[爱发电](https://afdian.com/a/versun) | [Github Sponsor](https://github.com/sponsors/versun)
 > 说明： 赞助头像每天早上和下午的5:30分刷新(UTC时区)。
 ## 开发贡献
-[请查看Wiki](https://github.com/rss-translator/RSS-Translator/wiki)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/versun/RSS-Translator)
 
-## 使用 uv 启动项目
+欢迎任何形式的贡献！如果你想为 RSS-Translator 做出贡献，请按照以下步骤操作：
 
-### 1. 安装依赖
+1. **Fork 本仓库**  
 
-建议使用 uv 工具（https://github.com/astral-sh/uv）：
+   点击右上角的 Fork 按钮，将项目复制到你的 GitHub 账户下。
 
-```bash
-uv sync
-```
+2. **克隆到本地**  
+   ```bash
+   git clone https://github.com/你的用户名/RSS-Translator.git
+   cd RSS-Translator
+   ```
 
-### 2. 启动开发服务器
+3. **创建新分支**
 
-```bash
-uv run dev
-```
+    建议为每个功能或修复创建独立分支：
+    ```
+    git checkout -b feature/你的功能名
+    ```
+
+4. **安装依赖并启动开发环境**
+
+    推荐使用 uv 工具：
+    ```
+    uv run init # 将会自动安装依赖包并完成初始化
+    uv run dev # 将会安装开发依赖包并启动开发服务
+    ```
+5. **发起 Pull Request**
+
+    在 GitHub 上提交 PR，描述你的更改内容和动机。
+
+
+**贡献建议**
+
+  提交前请确保代码通过格式检查和基本测试。
+  建议在 PR 中详细说明更改内容和动机。
+  欢迎提交文档、测试、功能或 Bug 修复等各类贡献。
+  如有疑问或建议，欢迎在 [Telegram 群组](https://t.me/rsstranslator)中交流。
+
+  感谢你的参与和支持！
+
 
 ## Star历史图
 
