@@ -194,6 +194,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # https://pypi.org/project/django-encrypted-model-fields/
 FIELD_ENCRYPTION_KEY = "RWdGiEq3LgOf3Tyt3ALlEnxUkIlL4wS2dCDBe_sLWWo="
 
+DEFAULT_TARGET_LANGUAGE = os.environ.get(
+    "DEFAULT_TARGET_LANGUAGE", "Chinese Simplified"
+)
 TRANSLATION_LANGUAGES = [
     ("English", "English"),
     ("Chinese Simplified", "Chinese Simplified"),

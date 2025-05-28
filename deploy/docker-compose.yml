@@ -2,6 +2,7 @@ services:
   rsstranslator:
     image: rsstranslator/rsstranslator
     environment:
+      - DEFAULT_TARGET_LANGUAGE=Chinese Simplified
       - PYTHONUNBUFFERED=0
       - PYTHONDONTWRITEBYTECODE=1
       - PORT=8000
