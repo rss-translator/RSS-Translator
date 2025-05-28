@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                         verbose_name="URL Slug(Optional)",
                     ),
                 ),
-                ("feed_url", models.URLField(unique=True, verbose_name="Feed URL")),
+                ("feed_url", models.URLField(verbose_name="Feed URL")),
                 (
                     "translation_display",
                     models.IntegerField(

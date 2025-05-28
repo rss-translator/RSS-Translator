@@ -218,8 +218,7 @@ class Feed(models.Model):
         ),
     )
     feed_url = models.URLField(
-        _("Feed URL"),
-        unique=True,
+        _("Feed URL")
     )
 
     TRANSLATION_DISPLAY_CHOICES = [

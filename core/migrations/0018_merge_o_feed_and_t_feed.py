@@ -16,10 +16,14 @@ def merge_feeds_data(apps, schema_editor):
     # 1. 处理有T_Feed的O_Feed记录
     for t_feed in T_Feed.objects.all():
         o_feed = t_feed.o_feed
-        
+        sid = uuid.uuid5(
+            uuid.NAMESPACE_URL, 
+            f"{o_feed.feed_url}:{t_feed.language}:{settings.SECRET_KEY}"
+        ).hex
         # 创建新的Feed记录
-        feed = Feed(
+        Feed.objects.create(
             # 基本信息从O_Feed复制
+            sid=sid,
             feed_url=o_feed.feed_url,
             translation_display=o_feed.translation_display,
             etag=o_feed.etag,
@@ -57,58 +61,8 @@ def merge_feeds_data(apps, schema_editor):
             # URL slug
             slug=t_feed.sid if t_feed.sid else None,
         )
-        
-        # 生成sid（会在save方法中自动生成，但这里手动设置以确保一致性）
-        feed.sid = uuid.uuid5(
-            uuid.NAMESPACE_URL, 
-            f"{feed.feed_url}:{feed.target_language}:{settings.SECRET_KEY}"
-        ).hex
-        
-        feed.save()
-    
-    # 2. 处理没有T_Feed的O_Feed记录
-    # 获取已经处理过的O_Feed的ID
-    processed_o_feed_ids = set(T_Feed.objects.values_list('o_feed_id', flat=True))
-    
-    # 找出没有T_Feed的O_Feed记录
-    orphan_o_feeds = O_Feed.objects.exclude(id__in=processed_o_feed_ids)
-    
-    for o_feed in orphan_o_feeds:
-        # 为每个孤立的O_Feed创建一个使用默认语言的Feed记录
-        feed = Feed(
-            feed_url=o_feed.feed_url,
-            translation_display=o_feed.translation_display,
-            etag=o_feed.etag,
-            fetch=o_feed.valid,
-            update_frequency=o_feed.update_frequency,
-            max_posts=o_feed.max_posts,
-            quality=o_feed.quality,
-            fetch_article=o_feed.fetch_article,
-            summary_detail=o_feed.summary_detail,
-            additional_prompt=o_feed.additional_prompt,
-            category=o_feed.category,
-            translator_content_type=o_feed.content_type,
-            translator_object_id=o_feed.object_id,
-            summary_content_type=o_feed.content_type_summary,
-            summary_object_id=o_feed.object_id_summary,
+
             
-            # 使用默认值的字段
-            target_language=settings.DEFAULT_TARGET_LANGUAGE,  # 使用默认目标语言
-            translation_status=None,  # 未翻译状态
-            translate_title=False,
-            translate_content=False,
-            summary=False,
-            total_tokens=0,
-            total_characters=0,
-            last_translate=None,
-            last_fetch=o_feed.last_pull,
-            size=o_feed.size,  # 只有原始feed的大小
-            slug=None,  # 没有自定义slug
-        )
-        
-        feed.save()
-
-
 class Migration(migrations.Migration):
     
     dependencies = [
