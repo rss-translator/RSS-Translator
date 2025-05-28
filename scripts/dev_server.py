@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import signal
 from pathlib import Path
 from .init import init_server
 
@@ -68,23 +67,9 @@ def prepare_django():
 def start_huey_worker():
     """启动Huey后台任务处理器"""
     print("🚀 启动Huey任务处理器...")
-    process = subprocess.Popen([
+    return subprocess.Popen([
         "uv", "run", "python", "manage.py", "run_huey", "-f"
     ])
-
-    
-    def cleanup():
-        """清理函数"""
-        if process.poll() is None:
-            print("\n🛑 正在停止Huey任务处理器...")
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-    
-    return process, cleanup
 
 
 def start_development_server():
@@ -124,14 +109,8 @@ def main():
         prepare_django()
         
         # 4. 启动Huey任务处理器
-        huey_process, cleanup_func = start_huey_worker()
-        
-        try:
-            # 5. 启动开发服务器
-            start_development_server()
-        finally:
-            cleanup_func()
-        
+        start_huey_worker()
+        start_development_server()
     except Exception as e:
         print(f"❌ 发生错误: {e}")
         sys.exit(1)

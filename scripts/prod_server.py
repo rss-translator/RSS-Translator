@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import signal
 import time
 from pathlib import Path
 from .init import init_server
@@ -33,20 +32,7 @@ def start_huey_worker():
     process = subprocess.Popen([
         "uv", "run", "python", "manage.py", "run_huey", "-f"
     ])
-
-    
-    def cleanup():
-        """清理函数"""
-        if process.poll() is None:
-            print("\n🛑 正在停止Huey任务处理器...")
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-    
-    return process, cleanup
+    return process
 
 
 def start_production_server():
@@ -157,20 +143,8 @@ def start_production_server():
         ]
     
     print(f"🚀 启动生产服务器 (http://{host}:{port})...")
-    process = subprocess.Popen(cmd)
     
-    # 清理函数
-    def cleanup():
-        if process.poll() is None:
-            print("\n🛑 正在停止生产服务器...")
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-    
-    return process, cleanup
+    return subprocess.Popen(cmd)
 
 
 
@@ -194,27 +168,13 @@ def main():
         init_server()
         
         # 3. 启动Huey任务处理器
-        huey_process, huey_cleanup = start_huey_worker()
+        huey_process = start_huey_worker()
         
-        server_process, server_cleanup = start_production_server()
+        server_process = start_production_server()
         
         print("🌟 所有服务已启动，按 Ctrl+C 停止")
         
-        try:
-            # 等待任一进程结束
-            while True:
-                time.sleep(5)
-                if huey_process.poll() is not None:
-                    print("❌ Huey进程意外退出")
-                    break
-                if server_process.poll() is not None:
-                    print("❌ 服务器进程意外退出")
-                    break
-        except KeyboardInterrupt:
-            print("\n🛑 正在停止所有服务...")
-        finally:
-            server_cleanup()
-            huey_cleanup()
+        server_process.wait()
         
     except Exception as e:
         print(f"❌ 发生错误: {e}")
