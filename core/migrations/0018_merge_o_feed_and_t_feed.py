@@ -2,6 +2,8 @@
 from django.db import migrations
 import uuid
 from django.conf import settings
+from utils.back_db import backup_db
+
 
 
 def merge_feeds_data(apps, schema_editor):
@@ -66,10 +68,12 @@ def merge_feeds_data(apps, schema_editor):
 class Migration(migrations.Migration):
     
     dependencies = [
-        ('core', '0017_alter_o_feed_content_type_tagulous_feed_category_and_more'),  # 替换为实际的依赖
+        ('core', '0017_alter_o_feed_content_type_tagulous_feed_category_and_more'),
     ]
+
     
     operations = [
+        migrations.RunPython(backup_db),
         migrations.RunPython(
             merge_feeds_data,
             migrations.RunPython.noop,
