@@ -129,13 +129,15 @@ HUEY = {
     "huey_class": "huey.SqliteHuey",
     "filename": DATA_FOLDER / "tasks.sqlite3",
     "consumer": {
-        "workers": int(os.environ.get("HUEY_WORKERS", 10)),
+        "workers": int(os.environ.get("HUEY_WORKERS", 3)),
         "worker_type": "greenlet",
     },
     "immediate": False,
     "results": False,
     "store_none": False,
     "utc": True,
+    'cache_mb': 64,  # 限制SQLite缓存大小
+    'fsync': False,  # 提高性能，但降低持久性
 }
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
