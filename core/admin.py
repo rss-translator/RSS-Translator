@@ -6,46 +6,61 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse
 
-from .models import O_Feed, T_Feed
+from .models import Feed
 from .custom_admin_site import core_admin_site
-from .forms import O_FeedForm
-from .inlines import T_FeedInline
+from .forms import FeedForm
+#from .inlines import T_FeedInline
 from .actions import (
-    o_feed_export_as_opml,
-    t_feed_export_as_opml,
-    o_feed_force_update,
-    t_feed_force_update,
-    o_feed_batch_modify,
-    t_feed_batch_modify,
+    feed_export_as_opml,
+    #t_feed_export_as_opml,
+    feed_force_update,
+    #t_feed_force_update,
+    feed_batch_modify,
+    #t_feed_batch_modify,
 )
 from .tasks import update_original_feed, update_translated_feed
 from utils.modelAdmin_utils import valid_icon
 from .views import import_opml
 
 
-class O_FeedAdmin(admin.ModelAdmin):
-    form = O_FeedForm
-    inlines = [T_FeedInline]
+class FeedAdmin(admin.ModelAdmin):
+    form = FeedForm
+    #inlines = [T_FeedInline]
     list_display = [
-        "name",
+
         "is_valid",
         "show_feed_url",
         "translated_language",
         "translator",
         "size_in_kb",
         "update_frequency",
-        "last_pull",
+        "last_fetch",
         "category",
+        "translate_title",
+        "translate_content",
+        "summary",
+        "total_tokens",
+        "total_characters",
+        "status_icon",
+        "slug",
     ]
-    search_fields = ["name", "feed_url", "category__name"]
-    list_filter = ["valid", "category"]
-    actions = [o_feed_force_update, o_feed_export_as_opml, o_feed_batch_modify]
+    search_fields = ["name", "feed_url", "category__name","translation_status", "translate_title", "translate_content"]
+    list_filter = ["fetch_status", "category"]
+    readonly_fields = [
+        "translation_status",
+        "translated_language",
+        "total_tokens",
+        "total_characters",
+        "size",
+        "last_fetch",
+    ]
+    actions = [feed_force_update, feed_export_as_opml, feed_batch_modify]
     list_per_page = 20
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('import_opml/', self.admin_site.admin_view(import_opml), name='core_o_feed_import_opml'),
+            path('import_opml/', self.admin_site.admin_view(import_opml), name='core_feed_import_opml'),
         ]
         return custom_urls + urls
 
@@ -53,14 +68,14 @@ class O_FeedAdmin(admin.ModelAdmin):
         extra_context = extra_context or {}
         extra_context['import_opml_button'] = format_html(
             '<a class="button" href="{}">导入OPML</a>',
-            reverse('admin:core_o_feed_import_opml')
+            reverse('admin:core_feed_import_opml')
         )
         return super().changelist_view(request, extra_context=extra_context)
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         for instance in instances:
-            if instance.o_feed.pk:  # 不保存o_feed为空的T_Feed实例
+            if instance.feed.pk:  # 不保存feed为空的T_Feed实例
                 instance.status = None
                 instance.save()
                 #revoke_tasks_by_arg(instance.sid)
@@ -72,14 +87,14 @@ class O_FeedAdmin(admin.ModelAdmin):
         formset.save_m2m()
 
     def save_model(self, request, obj, form, change):
-        logging.info("Call O_Feed save_model: %s", obj)
+        logging.info("Call Feed save_model: %s", obj)
         feed_url_changed = "feed_url" in form.changed_data
         # feed_name_changed = 'name' in form.changed_data
         frequency_changed = "update_frequency" in form.changed_data
         translation_display_changed = "translation_display" in form.changed_data
         # translator_changed = 'content_type' in form.changed_data or 'object_id' in form.changed_data
         if feed_url_changed or translation_display_changed:
-            obj.valid = None
+            obj.fetch_status = None
             obj.name = obj.name or "Loading"
             obj.save()
             update_original_feed.schedule(
@@ -112,10 +127,14 @@ class O_FeedAdmin(admin.ModelAdmin):
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
 
-    @admin.display(description=_("Valid"), ordering="valid")
+    @admin.display(description=_("Fetch Status"), ordering="fetch_status")
     def is_valid(self, obj):
-        return valid_icon(obj.valid)
+        return valid_icon(obj.fetch_status)
 
+    @admin.display(description=_("Status"), ordering="translation_status")
+    def status_icon(self, obj):
+        return valid_icon(obj.translation_status)
+    
     @admin.display(description=_("Feed URL"))
     def show_feed_url(self, obj):
         if obj.feed_url:
@@ -136,67 +155,67 @@ class O_FeedAdmin(admin.ModelAdmin):
         return ""
 
 
-class T_FeedAdmin(admin.ModelAdmin):
-    list_display = [
-        "id",
-        "feed_url",
-        "o_feed",
-        "status_icon",
-        "language",
-        "translate_title",
-        "translate_content",
-        "summary",
-        "total_tokens",
-        "total_characters",
-        "size_in_kb",
-        "modified",
-    ]
-    list_filter = ["status", "translate_title", "translate_content", "o_feed__category"]
-    search_fields = ["sid", "o_feed__category__name", "o_feed__feed_url"]
-    readonly_fields = [
-        "status",
-        "language",
-        "sid",
-        "o_feed",
-        "total_tokens",
-        "total_characters",
-        "size",
-        "modified",
-    ]
-    actions = [t_feed_force_update, t_feed_export_as_opml, t_feed_batch_modify]
-    list_per_page = 20
-    # def get_search_results(self, request, queryset, search_term):
-    #     queryset, use_distinct = super().get_search_results(request, queryset, search_term)
-    #     queryset |= self.model.objects.filter(o_feed__feed_url__icontains=search_term)
-    #     return queryset, use_distinct
+# class T_FeedAdmin(admin.ModelAdmin):
+#     list_display = [
+#         "id",
+#         "feed_url",
+#         "feed",
+#         "status_icon",
+#         "language",
+#         "translate_title",
+#         "translate_content",
+#         "summary",
+#         "total_tokens",
+#         "total_characters",
+#         "size_in_kb",
+#         "modified",
+#     ]
+#     list_filter = ["status", "translate_title", "translate_content", "feed__category"]
+#     search_fields = ["sid", "feed__category__name", "feed__feed_url"]
+#     readonly_fields = [
+#         "status",
+#         "language",
+#         "sid",
+#         "feed",
+#         "total_tokens",
+#         "total_characters",
+#         "size",
+#         "modified",
+#     ]
+#     actions = [t_feed_force_update, t_feed_export_as_opml, t_feed_batch_modify]
+#     list_per_page = 20
+#     # def get_search_results(self, request, queryset, search_term):
+#     #     queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+#     #     queryset |= self.model.objects.filter(feed__feed_url__icontains=search_term)
+#     #     return queryset, use_distinct
 
-    # def get_queryset(self, request):
-    #     return super().get_queryset(request).prefetch_related('o_feed__category')
+#     # def get_queryset(self, request):
+#     #     return super().get_queryset(request).prefetch_related('feed__category')
 
-    def size_in_kb(self, obj):
-        return int(obj.size / 1024)
+#     def size_in_kb(self, obj):
+#         return int(obj.size / 1024)
 
-    size_in_kb.short_description = _("Size(KB)")
+#     size_in_kb.short_description = _("Size(KB)")
 
-    def feed_url(self, obj):
-        if obj.sid:
-            return format_html("<a href='/rss/{0}' target='_blank'>{0}  </a>", obj.sid)
-        return ""
+#     def feed_url(self, obj):
+#         if obj.sid:
+#             return format_html("<a href='/rss/{0}' target='_blank'>{0}  </a>", obj.sid)
+#         return ""
 
-    feed_url.short_description = _("Translated Feed URL")
+#     feed_url.short_description = _("Translated Feed URL")
 
-    def has_add_permission(self, request):
-        return False
+#     def has_add_permission(self, request):
+#         return False
 
-    def status_icon(self, obj):
-        return valid_icon(obj.status)
+#     def status_icon(self, obj):
+#         return valid_icon(obj.status)
 
-    status_icon.short_description = _("Status")
-    status_icon.admin_order_field = "status"
+#     status_icon.short_description = _("Status")
+#     status_icon.admin_order_field = "status"
 
 
-core_admin_site.register(O_Feed, O_FeedAdmin)
-core_admin_site.register(T_Feed, T_FeedAdmin)
+core_admin_site.register(Feed, FeedAdmin)
+# core_admin_site.register(T_Feed, T_FeedAdmin)
 
 if settings.USER_MANAGEMENT:
     core_admin_site.register(User)

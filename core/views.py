@@ -7,7 +7,7 @@ from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import condition
-from .models import T_Feed, O_Feed
+from .models import Feed
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -29,7 +29,7 @@ def import_opml(request):
                     #category, _ = Category.objects.get_or_create(name=category_name)
                     
                     for feed in outline.outlines:
-                        O_Feed.objects.create(
+                        Feed.objects.create(
                             name=feed.title or feed.text,
                             feed_url=feed.xml_url,
                             category=category
@@ -41,12 +41,12 @@ def import_opml(request):
         else:
             messages.error(request, _("Please upload a valid OPML file."))
     
-    return redirect('admin:core_o_feed_changelist')
+    return redirect('admin:core_feed_changelist')
 
 def get_modified(request, feed_sid):
     try:
-        modified = T_Feed.objects.get(sid=feed_sid).modified
-    except T_Feed.DoesNotExist:
+        modified = Feed.objects.get(sid=feed_sid).last_translate
+    except Feed.DoesNotExist:
         logging.warning(
             "Translated feed not found, Maybe still in progress, Please confirm it's exist: %s",
             feed_sid,
@@ -57,8 +57,8 @@ def get_modified(request, feed_sid):
 
 def get_etag(request, feed_sid):
     try:
-        modified = T_Feed.objects.get(sid=feed_sid).modified
-    except T_Feed.DoesNotExist:
+        modified = Feed.objects.get(sid=feed_sid).etag
+    except Feed.DoesNotExist:
         logging.warning(
             "Translated feed not found, Maybe still in progress, Please confirm it's exist: %s",
             feed_sid,
@@ -146,8 +146,8 @@ def all(request, name):
     if name != "t":
         return HttpResponse(status=404)
     try:
-        # get all data from t_feed
-        feeds = T_Feed.objects.all()
+        # get all data from Feed
+        feeds = Feed.objects.all()
         # get all feed file path from feeds.sid
         feed_file_paths = get_feed_file_paths(feeds)
         merge_all_atom(feed_file_paths, "all_t")
@@ -170,14 +170,14 @@ def all(request, name):
 
 @cache_page(60 * 15)  # Cache this view for 15 minutes
 def category(request, category: str):
-    all_category = O_Feed.category.tag_model.objects.all()
+    all_category = Feed.category.tag_model.objects.all()
 
     if category not in all_category:
         return HttpResponse(status=404)
 
     try:
-        # # get all data from t_feed
-        feeds = T_Feed.objects.filter(o_feed__category__name=category)
+        # # get all data from Feed
+        feeds = Feed.objects.filter(feed__category__name=category)
         # # get all feed file path from feeds.sid
         # feed_file_paths = [os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed.sid}.xml') for feed in feeds]
         feed_file_paths = get_feed_file_paths(feeds)

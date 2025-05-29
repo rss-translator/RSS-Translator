@@ -15,56 +15,94 @@ def merge_feeds_data(apps, schema_editor):
     T_Feed = apps.get_model('core', 'T_Feed')
     Feed = apps.get_model('core', 'Feed')
     
-    # 1. 处理有T_Feed的O_Feed记录
-    for t_feed in T_Feed.objects.all():
-        o_feed = t_feed.o_feed
-        sid = uuid.uuid5(
-            uuid.NAMESPACE_URL, 
-            f"{o_feed.feed_url}:{t_feed.language}:{settings.SECRET_KEY}"
-        ).hex
-        # 创建新的Feed记录
-        Feed.objects.create(
-            # 基本信息从O_Feed复制
-            sid=sid,
-            feed_url=o_feed.feed_url,
-            translation_display=o_feed.translation_display,
-            etag=o_feed.etag,
-            fetch=o_feed.valid,  # O_Feed.valid -> Feed.fetch
-            update_frequency=o_feed.update_frequency,
-            max_posts=o_feed.max_posts,
-            quality=o_feed.quality,
-            fetch_article=o_feed.fetch_article,
-            summary_detail=o_feed.summary_detail,
-            additional_prompt=o_feed.additional_prompt,
-            category=o_feed.category,
-            
-            # 翻译器和摘要引擎的GenericForeignKey
-            translator_content_type=o_feed.content_type,
-            translator_object_id=o_feed.object_id,
-            summary_content_type=o_feed.content_type_summary,
-            summary_object_id=o_feed.object_id_summary,
-            
-            # 语言和翻译相关信息从T_Feed复制
-            target_language=t_feed.language,
-            translation_status=t_feed.status,
-            translate_title=t_feed.translate_title,
-            translate_content=t_feed.translate_content,
-            summary=t_feed.summary,
-            total_tokens=t_feed.total_tokens,
-            total_characters=t_feed.total_characters,
-            
-            # 时间戳
-            last_translate=t_feed.modified,
-            last_fetch=o_feed.last_pull,
-            
-            # 大小信息
-            size=o_feed.size + t_feed.size,
-            
-            # URL slug
-            slug=t_feed.sid if t_feed.sid else None,
-        )
+    for o_feed in O_Feed.objects.all():    
+        t_feeds = T_Feed.objects.filter(o_feed=o_feed)
+        if t_feeds.exists():
+            for t_feed in t_feeds:
+                # 创建新的Feed记录
+                Feed.objects.create(
+                    # 基本信息从O_Feed复制
+                    name = o_feed.name,
+                    feed_url=o_feed.feed_url,
+                    translation_display=o_feed.translation_display,
+                    etag=o_feed.etag,
+                    fetch_status=o_feed.valid,  # O_Feed.valid -> Feed.fetch
+                    update_frequency=o_feed.update_frequency,
+                    max_posts=o_feed.max_posts,
+                    quality=o_feed.quality,
+                    fetch_article=o_feed.fetch_article,
+                    summary_detail=o_feed.summary_detail,
+                    additional_prompt=o_feed.additional_prompt,
+                    category=o_feed.category,
+                    
+                    # 翻译器和摘要引擎的GenericForeignKey
+                    translator_content_type=o_feed.content_type,
+                    translator_object_id=o_feed.object_id,
+                    summary_content_type=o_feed.content_type_summary,
+                    summary_object_id=o_feed.object_id_summary,
+                    
+                    # 语言和翻译相关信息从T_Feed复制
+                    target_language=t_feed.language,
+                    translation_status=t_feed.status,
+                    translate_title=t_feed.translate_title,
+                    translate_content=t_feed.translate_content,
+                    summary=t_feed.summary,
+                    total_tokens=t_feed.total_tokens,
+                    total_characters=t_feed.total_characters,
+                    
+                    # 时间戳
+                    last_translate=t_feed.modified,
+                    last_fetch=o_feed.last_pull,
+                    
+                    # 大小信息
+                    size=o_feed.size + t_feed.size,
+                    
+                    # URL slug
+                    slug=t_feed.sid if t_feed.sid else None,
+                )
 
-            
+        else:
+            Feed.objects.create(
+                # 基本信息从O_Feed复制
+                name = o_feed.name,
+                feed_url=o_feed.feed_url,
+                translation_display=o_feed.translation_display,
+                etag=o_feed.etag,
+                fetch_status=o_feed.valid,  # O_Feed.valid -> Feed.fetch
+                update_frequency=o_feed.update_frequency,
+                max_posts=o_feed.max_posts,
+                quality=o_feed.quality,
+                fetch_article=o_feed.fetch_article,
+                summary_detail=o_feed.summary_detail,
+                additional_prompt=o_feed.additional_prompt,
+                category=o_feed.category,
+                
+                # 翻译器和摘要引擎的GenericForeignKey
+                translator_content_type=o_feed.content_type,
+                translator_object_id=o_feed.object_id,
+                summary_content_type=o_feed.content_type_summary,
+                summary_object_id=o_feed.object_id_summary,
+                
+                # 语言和翻译相关信息为空
+                target_language=settings.DEFAULT_TARGET_LANGUAGE,
+                translation_status=None,
+                translate_title=False,
+                translate_content=False,
+                summary=False,
+                total_tokens=0,  
+                total_characters=0, 
+                
+                # 时间戳
+                last_translate=None,  
+                last_fetch=o_feed.last_pull, 
+                
+                # 大小信息
+                size=o_feed.size,
+                
+                # URL slug
+                slug=None,  # 没有T_Feed时，slug为None
+            )
+
 class Migration(migrations.Migration):
     
     dependencies = [

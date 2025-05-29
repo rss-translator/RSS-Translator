@@ -1,10 +1,10 @@
 from django import forms
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
-from .models import O_Feed, T_Feed
+from .models import Feed
 from utils.modelAdmin_utils import get_translator_and_summary_choices
 
-class O_FeedForm(forms.ModelForm):
+class FeedForm(forms.ModelForm):
     # 自定义字段，使用ChoiceField生成下拉菜单
     translator = forms.ChoiceField(
         choices=(),
@@ -20,7 +20,7 @@ class O_FeedForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super(O_FeedForm, self).__init__(*args, **kwargs)
+        super(FeedForm, self).__init__(*args, **kwargs)
         self.fields["translator"].choices, self.fields["summary_engine"].choices = (
             get_translator_and_summary_choices()
         )
@@ -37,9 +37,10 @@ class O_FeedForm(forms.ModelForm):
             self.fields["summary_engine"].initial = f"{instance.content_type_summary.id}:{instance.object_id_summary}"
 
     class Meta:
-        model = O_Feed
+        model = Feed
         exclude = ['translator', 'summary_engine']
         fields = [
+            "slug",
             "feed_url",
             "update_frequency",
             "max_posts",
@@ -48,8 +49,8 @@ class O_FeedForm(forms.ModelForm):
             "additional_prompt",
             "fetch_article",
             "quality",
-            "name",
             "category",
+            "target_language",
         ]
 
     def _process_translator(self, instance):
@@ -73,7 +74,7 @@ class O_FeedForm(forms.ModelForm):
     # 重写save方法，以处理自定义字段的数据
     @transaction.atomic
     def save(self, commit=True):
-        instance = super(O_FeedForm, self).save(commit=False)
+        instance = super(FeedForm, self).save(commit=False)
 
         self._process_translator(instance)
         self._process_summary_engine(instance)
@@ -83,14 +84,14 @@ class O_FeedForm(forms.ModelForm):
         
         return instance
 
-class T_FeedForm(forms.ModelForm):
-    class Meta:
-        model = T_Feed
-        fields = ["language", "translate_title", "sid"]
+# class T_FeedForm(forms.ModelForm):
+#     class Meta:
+#         model = T_Feed
+#         fields = ["language", "translate_title", "sid"]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["sid"].required = False
-        if self.instance.pk:
-            self.fields["language"].disabled = True
-            self.fields["sid"].disabled = True
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields["sid"].required = False
+#         if self.instance.pk:
+#             self.fields["language"].disabled = True
+#             self.fields["sid"].disabled = True

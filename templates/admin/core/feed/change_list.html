@@ -12,7 +12,7 @@
     <div id="import-opml-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <h2>{% trans "Import OPML" %}</h2>
-            <form method="post" action="{% url 'admin:core_o_feed_import_opml' %}" enctype="multipart/form-data">
+            <form method="post" action="{% url 'admin:core_feed_import_opml' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="file" name="opml_file" accept=".opml,.xml">
                 <input type="submit" value="{% trans 'Import' %}">
@@ -23,7 +23,7 @@
     {{ block.super }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var importButton = document.querySelector('a[href="{% url 'admin:core_o_feed_import_opml' %}"]');
+            var importButton = document.querySelector('a[href="{% url 'admin:core_feed_import_opml' %}"]');
             var modal = document.getElementById('import-opml-modal');
             
             importButton.addEventListener('click', function(e) {

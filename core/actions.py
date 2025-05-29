@@ -13,12 +13,12 @@ from django.utils.translation import gettext_lazy as _
 
 from utils.modelAdmin_utils import get_translator_and_summary_choices
 from .custom_admin_site import core_admin_site
-from .models import O_Feed
+from .models import Feed
 from .tasks import update_original_feed, update_translated_feed
 
 
 @admin.display(description=_("Export selected feeds as OPML"))
-def o_feed_export_as_opml(modeladmin, request, queryset):
+def feed_export_as_opml(modeladmin, request, queryset):
     try:
         opml_obj = OPML()
         opml_obj.head = Head(
@@ -54,7 +54,7 @@ def o_feed_export_as_opml(modeladmin, request, queryset):
         )
         return response
     except Exception as e:
-        logging.error("o_feed_export_as_opml: %s", str(e))
+        logging.error("feed_export_as_opml: %s", str(e))
         return HttpResponse("An error occurred", status=500)
 
 
@@ -70,8 +70,8 @@ def t_feed_export_as_opml(modeladmin, request, queryset):
 
         categories = {}
         for item in queryset:
-            category = item.o_feed.category.name if item.o_feed.category else "default"
-            text = item.o_feed.name or "No Name"
+            category = item.feed.category.name if item.feed.category else "default"
+            text = item.feed.name or "No Name"
             xml_url = request.build_absolute_uri(
                 reverse("core:rss", kwargs={"feed_sid": item.sid})
             )
@@ -84,7 +84,7 @@ def t_feed_export_as_opml(modeladmin, request, queryset):
                 text=text,
                 type="rss",
                 xml_url=xml_url,
-                html_url=item.o_feed.feed_url,
+                html_url=item.feed.feed_url,
             )
             categories[category].outlines.append(item_outline)
         for category_outline in categories.values():
@@ -101,14 +101,14 @@ def t_feed_export_as_opml(modeladmin, request, queryset):
 
 
 @admin.display(description=_("Force update"))
-def o_feed_force_update(modeladmin, request, queryset):
-    logging.info("Call o_feed_force_update: %s", queryset)
+def feed_force_update(modeladmin, request, queryset):
+    logging.info("Call feed_force_update: %s", queryset)
     with transaction.atomic():
         for instance in queryset:
             instance.etag = ""
             instance.valid = None
             instance.save()
-            #logging.info("Call revoke_tasks_by_arg in o_feed_force_update")
+            #logging.info("Call revoke_tasks_by_arg in feed_force_update")
             #revoke_tasks_by_arg(instance.sid)
             update_original_feed.schedule(
                 args=(instance.sid,True), delay=1,
@@ -123,7 +123,7 @@ def t_feed_force_update(modeladmin, request, queryset):
             instance.modified = None
             instance.status = None
             instance.save()
-            #logging.info("Call revoke_tasks_by_arg in o_feed_force_update")
+            #logging.info("Call revoke_tasks_by_arg in feed_force_update")
             #revoke_tasks_by_arg(instance.sid) #will check in update_translated_feed task
             update_translated_feed.schedule(
                 args=(instance.sid,True), delay=1
@@ -131,9 +131,9 @@ def t_feed_force_update(modeladmin, request, queryset):
 
 
 @admin.display(description=_("Batch modification"))
-def o_feed_batch_modify(modeladmin, request, queryset):
+def feed_batch_modify(modeladmin, request, queryset):
     if "apply" in request.POST:
-        logging.info("Apply o_feed_batch_modify")
+        logging.info("Apply feed_batch_modify")
         post_data = request.POST
         fields = {
             "update_frequency": "update_frequency_value",
@@ -176,7 +176,7 @@ def o_feed_batch_modify(modeladmin, request, queryset):
                         )
                         update_fields["object_id_summary"] = object_id_summary
                     case "category":
-                        tag_model = O_Feed.category.tag_model
+                        tag_model = Feed.category.tag_model
                         category_o, _ = tag_model.objects.get_or_create(name=value)
                         update_fields["category"] = category_o
 
@@ -192,7 +192,7 @@ def o_feed_batch_modify(modeladmin, request, queryset):
         #     for obj in queryset:
         #         obj.tags = [*tags_value]
         #         obj.save()
-        # O_Feed.objects.bulk_update(queryset, ['tags'])??
+        # Feed.objects.bulk_update(queryset, ['tags'])??
 
         # self.message_user(request, f"Successfully modified {queryset.count()} items.")
         # return HttpResponseRedirect(request.get_full_path())
@@ -206,7 +206,7 @@ def o_feed_batch_modify(modeladmin, request, queryset):
     )
     return render(
         request,
-        "admin/o_feed_batch_modify.html",
+        "admin/feed_batch_modify.html",
         context={
             **core_admin_site.each_context(request),
             "items": queryset,

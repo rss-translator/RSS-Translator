@@ -73,7 +73,9 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("sid", models.SlugField(editable=False, max_length=255, unique=True)),
+                ("name", models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Name"
+                )),
                 (
                     "slug",
                     models.SlugField(
@@ -100,9 +102,9 @@ class Migration(migrations.Migration):
                 ),
                 ("etag", models.CharField(default="", editable=False, max_length=255)),
                 (
-                    "fetch",
+                    "fetch_status",
                     models.BooleanField(
-                        editable=False, null=True, verbose_name="Valid"
+                        editable=False, null=True, verbose_name="Fetch Status"
                     ),
                 ),
                 (

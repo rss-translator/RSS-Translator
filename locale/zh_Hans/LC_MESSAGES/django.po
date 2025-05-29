@@ -34,7 +34,7 @@ msgid "Engine"
 msgstr "引擎"
 
 #: core/admin.py:48 core/admin.py:232 core/admin.py:371
-#: templates/admin/o_feed_batch_modify.html:23
+#: templates/admin/feed_batch_modify.html:23
 msgid "Translator"
 msgstr "翻译器"
 
@@ -58,7 +58,7 @@ msgstr "选择一个有效的翻译器"
 msgid "Select a valid AI engine"
 msgstr "选择一个有效的AI引擎"
 
-#: core/admin.py:238 templates/admin/o_feed_batch_modify.html:41
+#: core/admin.py:238 templates/admin/feed_batch_modify.html:41
 msgid "Summary Engine"
 msgstr "摘要器"
 
@@ -102,19 +102,19 @@ msgstr "最后获取(UTC)"
 msgid "Last time the feed was pulled"
 msgstr "最后获取原始源的时间"
 
-#: core/models.py:42 templates/admin/o_feed_batch_modify.html:36
+#: core/models.py:42 templates/admin/feed_batch_modify.html:36
 msgid "Only Translation"
 msgstr "仅译文"
 
-#: core/models.py:43 templates/admin/o_feed_batch_modify.html:37
+#: core/models.py:43 templates/admin/feed_batch_modify.html:37
 msgid "Translation | Original"
 msgstr "译文 | 原文"
 
-#: core/models.py:44 templates/admin/o_feed_batch_modify.html:38
+#: core/models.py:44 templates/admin/feed_batch_modify.html:38
 msgid "Original | Translation"
 msgstr "原文 | 译文"
 
-#: core/models.py:47 templates/admin/o_feed_batch_modify.html:32
+#: core/models.py:47 templates/admin/feed_batch_modify.html:32
 msgid "Translation Display"
 msgstr "译文显示"
 
@@ -122,7 +122,7 @@ msgstr "译文显示"
 msgid "Size"
 msgstr "文件大小"
 
-#: core/models.py:66 templates/admin/o_feed_batch_modify.html:13
+#: core/models.py:66 templates/admin/feed_batch_modify.html:13
 msgid "Update Frequency"
 msgstr "更新频率(分钟)"
 
@@ -130,7 +130,7 @@ msgstr "更新频率(分钟)"
 msgid "Minutes"
 msgstr "分钟"
 
-#: core/models.py:71 templates/admin/o_feed_batch_modify.html:18
+#: core/models.py:71 templates/admin/feed_batch_modify.html:18
 msgid "Max Posts"
 msgstr "最大条目"
 
@@ -138,7 +138,7 @@ msgstr "最大条目"
 msgid "Max number of posts to be translated"
 msgstr "要翻译的最大帖子数"
 
-#: core/models.py:76 templates/admin/o_feed_batch_modify.html:67
+#: core/models.py:76 templates/admin/feed_batch_modify.html:67
 msgid "Best Quality"
 msgstr "最佳质量"
 
@@ -148,7 +148,7 @@ msgid ""
 "translation quality."
 msgstr "获取最佳翻译质量，将会丢失超链接、加粗、斜体等格式"
 
-#: core/models.py:83 templates/admin/o_feed_batch_modify.html:62
+#: core/models.py:83 templates/admin/feed_batch_modify.html:62
 msgid "Fetch Original Article"
 msgstr "获取全文"
 
@@ -156,7 +156,7 @@ msgstr "获取全文"
 msgid "Fetch original article from the website."
 msgstr "从原网站获取全文"
 
-#: core/models.py:101 templates/admin/o_feed_batch_modify.html:51
+#: core/models.py:101 templates/admin/feed_batch_modify.html:51
 msgid "Summary Detail"
 msgstr "摘要细粒度"
 
@@ -166,7 +166,7 @@ msgid ""
 "(cost more tokens)"
 msgstr "较长文章摘要的详细程度。0：正常，1：最详细(花费更多token)"
 
-#: core/models.py:112 templates/admin/o_feed_batch_modify.html:56
+#: core/models.py:112 templates/admin/feed_batch_modify.html:56
 msgid "Addtional Prompt"
 msgstr "额外的提示词"
 
@@ -241,50 +241,50 @@ msgstr "翻译源"
 msgid "Translated Feeds"
 msgstr "翻译源"
 
-#: templates/admin/o_feed_batch_modify.html:14
-#: templates/admin/o_feed_batch_modify.html:19
-#: templates/admin/o_feed_batch_modify.html:24
-#: templates/admin/o_feed_batch_modify.html:33
-#: templates/admin/o_feed_batch_modify.html:42
-#: templates/admin/o_feed_batch_modify.html:52
-#: templates/admin/o_feed_batch_modify.html:57
-#: templates/admin/o_feed_batch_modify.html:63
-#: templates/admin/o_feed_batch_modify.html:68
-#: templates/admin/o_feed_batch_modify.html:73
+#: templates/admin/feed_batch_modify.html:14
+#: templates/admin/feed_batch_modify.html:19
+#: templates/admin/feed_batch_modify.html:24
+#: templates/admin/feed_batch_modify.html:33
+#: templates/admin/feed_batch_modify.html:42
+#: templates/admin/feed_batch_modify.html:52
+#: templates/admin/feed_batch_modify.html:57
+#: templates/admin/feed_batch_modify.html:63
+#: templates/admin/feed_batch_modify.html:68
+#: templates/admin/feed_batch_modify.html:73
 #: templates/admin/t_feed_batch_modify.html:14
 #: templates/admin/t_feed_batch_modify.html:19
 #: templates/admin/t_feed_batch_modify.html:24
 msgid " Keep Original"
 msgstr " 保持原设置"
 
-#: templates/admin/o_feed_batch_modify.html:15
-#: templates/admin/o_feed_batch_modify.html:20
-#: templates/admin/o_feed_batch_modify.html:25
-#: templates/admin/o_feed_batch_modify.html:34
-#: templates/admin/o_feed_batch_modify.html:43
-#: templates/admin/o_feed_batch_modify.html:53
-#: templates/admin/o_feed_batch_modify.html:58
-#: templates/admin/o_feed_batch_modify.html:74
+#: templates/admin/feed_batch_modify.html:15
+#: templates/admin/feed_batch_modify.html:20
+#: templates/admin/feed_batch_modify.html:25
+#: templates/admin/feed_batch_modify.html:34
+#: templates/admin/feed_batch_modify.html:43
+#: templates/admin/feed_batch_modify.html:53
+#: templates/admin/feed_batch_modify.html:58
+#: templates/admin/feed_batch_modify.html:74
 msgid " Change to "
 msgstr "修改为"
 
-#: templates/admin/o_feed_batch_modify.html:64
-#: templates/admin/o_feed_batch_modify.html:69
+#: templates/admin/feed_batch_modify.html:64
+#: templates/admin/feed_batch_modify.html:69
 #: templates/admin/t_feed_batch_modify.html:15
 #: templates/admin/t_feed_batch_modify.html:20
 #: templates/admin/t_feed_batch_modify.html:25
 msgid " Enable"
 msgstr " 启用"
 
-#: templates/admin/o_feed_batch_modify.html:65
-#: templates/admin/o_feed_batch_modify.html:70
+#: templates/admin/feed_batch_modify.html:65
+#: templates/admin/feed_batch_modify.html:70
 #: templates/admin/t_feed_batch_modify.html:16
 #: templates/admin/t_feed_batch_modify.html:21
 #: templates/admin/t_feed_batch_modify.html:26
 msgid " Disable"
 msgstr " 禁用"
 
-#: templates/admin/o_feed_batch_modify.html:72
+#: templates/admin/feed_batch_modify.html:72
 msgid "category"
 msgstr "类别"
 

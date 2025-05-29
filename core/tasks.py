@@ -13,7 +13,7 @@ from django.db import IntegrityError
 from huey.contrib.djhuey import HUEY as huey
 from huey.contrib.djhuey import on_startup, db_task, on_shutdown
 
-from .models import O_Feed, T_Feed
+from .models import Feed
 from translator.models import TranslatorEngine, Translated_Content
 
 from utils.feed_action import fetch_feed, generate_atom_feed
@@ -38,14 +38,14 @@ def revoke_tasks_by_arg(arg_to_match):
 # @periodic_task(crontab( minute='*/1'))
 @on_startup()
 def schedule_update():
-    feeds = O_Feed.objects.all()
+    feeds = Feed.objects.all()
     tasks = huey.scheduled() + huey.pending()
     task_feeds = {task.args[0] for task in tasks if task.args}
 
     for feed in feeds:
-        if feed.sid not in task_feeds:
+        if feed.id not in task_feeds:
             update_original_feed.schedule(
-                args=(feed.sid,), delay=feed.update_frequency * 60
+                args=(feed.id,), delay=feed.update_frequency * 60
             )
 
 @on_shutdown()
@@ -54,20 +54,20 @@ def cleanup_tasks():
 
 
 @db_task(retries=3)
-def update_original_feed(sid: str, force:bool = False):
-    if sid in unique_tasks: # 如果判断force的话，是没法停止正在执行的task
-        logging.warning("(skip)This task update_original_feed is executing: %s",sid)
+def update_original_feed(id: str, force:bool = False):
+    if id in unique_tasks: # 如果判断force的话，是没法停止正在执行的task
+        logging.warning("(skip)This task update_original_feed is executing: %s",id)
         return
     else:
-        unique_tasks.add(sid)
+        unique_tasks.add(id)
 
     try:
-        # obj = O_Feed.objects.get(sid=sid)
-        obj = O_Feed.objects.prefetch_related("t_feed_set").get(sid=sid)
-    except O_Feed.DoesNotExist:
+        # obj = Feed.objects.get(id=id)
+        obj = Feed.objects.prefetch_related("t_feed_set").get(id=id)
+    except Feed.DoesNotExist:
         return False
 
-    revoke_tasks_by_arg(sid)
+    revoke_tasks_by_arg(id)
     logging.info("Call task update_original_feed: %s", obj.feed_url)
     
     feed_dir_path = Path(settings.DATA_FOLDER) / "feeds"
@@ -75,9 +75,9 @@ def update_original_feed(sid: str, force:bool = False):
     if not os.path.exists(feed_dir_path):
         os.makedirs(feed_dir_path)
 
-    original_feed_file_path = feed_dir_path / f"{obj.sid}.xml"
+    original_feed_file_path = feed_dir_path / f"{obj.id}.xml"
     try:
-        obj.valid = False
+        obj.fetch_status = False
         fetch_feed_results = fetch_feed(url=obj.feed_url, etag=obj.etag)
         error = fetch_feed_results["error"]
         update = fetch_feed_results.get("update")
@@ -95,7 +95,7 @@ def update_original_feed(sid: str, force:bool = False):
                 obj.name = feed.feed.get("title") or feed.feed.get("subtitle")
             obj.size = os.path.getsize(original_feed_file_path)
             update_time = feed.feed.get("updated_parsed")
-            obj.last_updated = (
+            obj.last_fetch = (
                 datetime.fromtimestamp(mktime(update_time), tz=timezone.utc)
                 if update_time
                 else None
@@ -103,51 +103,51 @@ def update_original_feed(sid: str, force:bool = False):
             # obj.last_pull = datetime.now(timezone.utc)
             obj.etag = feed.get("etag", "")
 
-        obj.valid = True
-        # update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
+        obj.fetch_status = True
+        # update_original_feed.schedule(args=(obj.id,), delay=obj.update_frequency * 60)
     except Exception as e:
         logging.exception("task update_original_feed %s: %s", obj.feed_url, str(e))
     finally:
         obj.last_pull = datetime.now(timezone.utc)
-        update_original_feed.schedule(args=(obj.sid,), delay=obj.update_frequency * 60)
+        update_original_feed.schedule(args=(obj.id,), delay=obj.update_frequency * 60)
         obj.save()
-        unique_tasks.remove(sid)
+        unique_tasks.remove(id)
 
     # Update T_Feeds
-    t_feeds = obj.t_feed_set.all()
-    if obj.valid and t_feeds.exists():
-        for t_feed in t_feeds:
-            t_feed.status = None
-            t_feed.save()
-            update_translated_feed.schedule(args=(t_feed.sid,), delay=1)
+    # t_feeds = obj.t_feed_set.all()
+    # if obj.fetch_status and t_feeds.exists():
+    #     for t_feed in t_feeds:
+    #         t_feed.status = None
+    #         t_feed.save()
+    #         update_translated_feed.schedule(args=(t_feed.id,), delay=1)
 
 
 @db_task(retries=3)
-def update_translated_feed(sid: str, force:bool = False):
-    if sid in unique_tasks: # 如果判断force的话，是没法停止正在执行的task
-        logging.warning("(skip)The task update_translated_feed is executing: %s",sid)
+def update_translated_feed(id: str, force:bool = False):
+    if id in unique_tasks: # 如果判断force的话，是没法停止正在执行的task
+        logging.warning("(skip)The task update_translated_feed is executing: %s",id)
         return
     else:
-        unique_tasks.add(sid)
+        unique_tasks.add(id)
 
     try:
-        # obj = T_Feed.objects.get(sid=sid)
-        obj = T_Feed.objects.select_related("o_feed").get(sid=sid)
+        # obj = T_Feed.objects.get(id=id)
+        obj = T_Feed.objects.select_related("feed").get(id=id)
     except T_Feed.DoesNotExist:
-        logging.error(f"T_Feed Not Found: {sid}")
+        logging.error(f"T_Feed Not Found: {id}")
         return False
 
     try:
-        revoke_tasks_by_arg(sid)
-        logging.info("Call task update_translated_feed: %s", obj.o_feed.feed_url)
+        revoke_tasks_by_arg(id)
+        logging.info("Call task update_translated_feed: %s", obj.feed.feed_url)
 
-        if obj.o_feed.pk is None:
+        if obj.feed.pk is None:
             raise Exception("Unable translate feed, because Original Feed is None")
 
-        if not force and obj.modified == obj.o_feed.last_pull:
+        if not force and obj.modified == obj.feed.last_pull:
             logging.info(
                 "Translated Feed is up to date, Skip translation: %s",
-                obj.o_feed.feed_url,
+                obj.feed.feed_url,
             )
             obj.status = True
             obj.save()
@@ -157,31 +157,31 @@ def update_translated_feed(sid: str, force:bool = False):
         if not os.path.exists(feed_dir_path):
             os.makedirs(feed_dir_path)
 
-        original_feed_file_path = f"{feed_dir_path}/{obj.o_feed.sid}.xml"
+        original_feed_file_path = f"{feed_dir_path}/{obj.feed.id}.xml"
         if not os.path.exists(original_feed_file_path):
-            update_original_feed.call_local(obj.o_feed.sid)
+            update_original_feed.call_local(obj.feed.id)
             return False
 
-        translated_feed_file_path = f"{feed_dir_path}/{obj.sid}"
+        translated_feed_file_path = f"{feed_dir_path}/{obj.id}"
 
         original_feed = feedparser.parse(original_feed_file_path)
 
         if original_feed.entries:
-            o_feed = obj.o_feed
-            logging.info("Start translate feed: [%s]%s", obj.language, o_feed.feed_url)
+            feed = obj.feed
+            logging.info("Start translate feed: [%s]%s", obj.language, feed.feed_url)
             results = translate_feed(
                 feed=original_feed,
                 target_language=obj.language,
-                translate_engine=o_feed.translator,
+                translate_engine=feed.translator,
                 translate_title=obj.translate_title,
                 translate_content=obj.translate_content,
                 summary=obj.summary,
-                summary_engine=o_feed.summary_engine,
-                summary_detail=o_feed.summary_detail,
-                max_posts=o_feed.max_posts,
-                translation_display=o_feed.translation_display,
-                quality=o_feed.quality,
-                fetch_article=o_feed.fetch_article,
+                summary_engine=feed.summary_engine,
+                summary_detail=feed.summary_detail,
+                max_posts=feed.max_posts,
+                translation_display=feed.translation_display,
+                quality=feed.quality,
+                fetch_article=feed.fetch_article,
             )
 
             if not results:
@@ -191,7 +191,7 @@ def update_translated_feed(sid: str, force:bool = False):
                 total_tokens = results.get("tokens")
                 translated_characters = results.get("characters")
             xml_str = generate_atom_feed(
-                o_feed.feed_url, feed
+                feed.feed_url, feed
             )  # feed is a feedparser object
 
             if xml_str is None:
@@ -215,20 +215,20 @@ def update_translated_feed(sid: str, force:bool = False):
             else:
                 obj.total_characters += translated_characters
 
-            obj.modified = obj.o_feed.last_pull
+            obj.modified = obj.feed.last_pull
             obj.size = os.path.getsize(f"{translated_feed_file_path}.xml")
             obj.status = True
     except Exception as e:
         logging.error(
             "task update_translated_feed (%s)%s: %s",
             obj.language,
-            obj.o_feed.feed_url,
+            obj.feed.feed_url,
             str(e),
         )
         obj.status = False
     finally:
         obj.save()
-        unique_tasks.remove(sid)
+        unique_tasks.remove(id)
 
 
 def translate_feed(
