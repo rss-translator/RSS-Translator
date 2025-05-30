@@ -74,4 +74,4 @@ add the /json path after /rss:
 | TRANSLATE CONTENT | TRANSLATE CONTENT | TRANSLATE CONTENT, unchecked by default | | SID | SID | SID | SID, unchecked by default
 | SID | SID | Custom translation source subscription address, default is a randomly generated address. Only support to change the address when you add it for the first time, you can't change it after you add it. For example, if sid is set to "hacker_news", the subscription address will be "http://127.0.0.1:8000/rss/hacker_news"| | Last Updated | Last Updated | Last Updated
 | Last Updated | Last Updated(UTC) | Date and time when the source was last updated (UTC time zone) | Last Pulled | Last Pulled | Last Updated(UTC)
-| Last Pull(UTC) | Last Updated(UTC) | Last Updated(UTC) | Last Updated(UTC) | Last Updated(UTC)
+| Last Fetch(UTC) | Last Updated(UTC) | Last Updated(UTC) | Last Updated(UTC) | Last Updated(UTC)

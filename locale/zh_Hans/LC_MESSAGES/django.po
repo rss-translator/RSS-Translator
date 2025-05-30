@@ -213,7 +213,7 @@ msgid "Last time the feed was translated"
 msgstr "最后翻译的时间"
 
 #: core/models.py:323
-msgid "Last Pull(UTC)"
+msgid "Last Fetch(UTC)"
 msgstr "最后获取(UTC)"
 
 #: core/models.py:328

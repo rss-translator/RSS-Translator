@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 editable=False,
                 help_text="Last time the feed was pulled",
                 null=True,
-                verbose_name="Last Pull(UTC)",
+                verbose_name="Last Fetch(UTC)",
             ),
         ),
         migrations.AddField(

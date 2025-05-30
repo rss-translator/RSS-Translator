@@ -31,7 +31,7 @@ from tagulous.models import SingleTagField
 #         help_text=_("Last updated from the original feed"),
 #     )
 #     last_pull = models.DateTimeField(
-#         _("Last Pull(UTC)"),
+#         _("Last Fetch(UTC)"),
 #         default=None,
 #         blank=True,
 #         null=True,
@@ -315,7 +315,7 @@ class Feed(models.Model):
     )
     
     last_fetch = models.DateTimeField(
-        _("Last Pull(UTC)"),
+        _("Last Fetch(UTC)"),
         default=None,
         blank=True,
         null=True,

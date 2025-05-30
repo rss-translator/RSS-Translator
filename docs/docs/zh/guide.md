@@ -74,4 +74,4 @@
 | 翻译内容 | TRANSLATE CONTENT | 翻译内容，默认不勾选 |
 | SID | SID | 自定义翻译源订阅地址，默认为随机生成的地址。仅支持首次添加时修改，添加后无法修改。比如sid设置为"hacker_news"，则订阅地址为"http://127.0.0.1:8000/rss/hacker_news"|
 | 最后更新 | Last Updated(UTC) | 源最后更新的日期时间(UTC时区) |
-| 最后拉去 | Last Pull(UTC) | 翻译器最后更新的日期时间(UTC时区) |
+| 最后拉去 | Last Fetch(UTC) | 翻译器最后更新的日期时间(UTC时区) |
