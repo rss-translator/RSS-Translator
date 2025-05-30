@@ -9,14 +9,10 @@ from django.urls import path, reverse
 from .models import Feed
 from .custom_admin_site import core_admin_site
 from .forms import FeedForm
-#from .inlines import T_FeedInline
 from .actions import (
     feed_export_as_opml,
-    #t_feed_export_as_opml,
     feed_force_update,
-    #t_feed_force_update,
     feed_batch_modify,
-    #t_feed_batch_modify,
 )
 from .tasks import update_original_feed, update_translated_feed
 from utils.modelAdmin_utils import valid_icon
@@ -25,27 +21,22 @@ from .views import import_opml
 
 class FeedAdmin(admin.ModelAdmin):
     form = FeedForm
-    #inlines = [T_FeedInline]
     list_display = [
         "name",
-        "fetch_status_icon",
-        "status_icon",
-        "show_feed_url",
-        "slug",
+        "original_feed",
+        "translated_feed",
         "translator",
-        "translate_title",
-        "translate_content",
-        "summary",
+        "target_language",
+        "translation_options",
         "update_frequency",
+        "last_fetch",
         "total_tokens",
         "total_characters",
-        "target_language",
         "category",
-        "size_in_kb",
-        "last_fetch",
+        "size_in_kb"
     ]
     search_fields = ["name", "feed_url", "category__name"]
-    list_filter = ["fetch_status", "category"]
+    list_filter = ["fetch_status", "translation_status","category","translate_title","translate_content","summary"]
     readonly_fields = [
         "fetch_status",
         "translation_status",
@@ -127,14 +118,6 @@ class FeedAdmin(admin.ModelAdmin):
     @admin.display(description=_("Size(KB)"), ordering="size")
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
-
-    @admin.display(description=_("Fetch Status"), ordering="fetch_status")
-    def fetch_status_icon(self, obj):
-        return valid_icon(obj.fetch_status)
-
-    @admin.display(description=_("Translation Status"), ordering="translation_status")
-    def status_icon(self, obj):
-        return valid_icon(obj.translation_status)
     
     @admin.display(description=_("Feed URL"))
     def show_feed_url(self, obj):
@@ -147,14 +130,45 @@ class FeedAdmin(admin.ModelAdmin):
                 url[:30],
             )
         return ""
+    
+    @admin.display(description=_("Translated Feed"))
+    def translated_feed(self, obj): # 显示3个元素：translated_status、feed_url、json_url
+        return format_html(
+            "<span>{0}</span> | <a href='{1}' target='_blank'>{2}</a> | <a href='{3}' target='_blank'>{4}</a>",
+            valid_icon(obj.translation_status), # 0
+            f"/rss/{obj.slug}", # 1
+            "rss", # 2
+            f"/json/{obj.slug}", # 3
+            "json", # 4
+            
+        )
 
-    def proxy_feed_url(self, obj):
-        if obj.id:
-            return format_html(
-                "<a href='/rss/{0}' target='_blank'>Proxy URL</a>", obj.id
-            )
-        return ""
+    @admin.display(description=_("Original Feed"))
+    def original_feed(self, obj): # 显示4个元素：fetch状态、原url、代理feed、代理json
+        return format_html(
+            "<span>{0}</span> | <a href='{1}' target='_blank'>{2}</a> | <a href='{3}' target='_blank'>{4}</a>",
+            valid_icon(obj.fetch_status), # 0
+            obj.feed_url, # 1
+            "url", # 2
+            f"/proxy/{obj.id}", # 3
+            "proxy", # 4
+        )
+    
+    @admin.display(description=_("Options"))
+    def translation_options(self, obj):
+        translate_title = "🟢" if obj.translate_title else "⚪"
+        translate_content = "🟢" if obj.translate_content else "⚪"
+        summary_check = "🟢" if obj.summary else "⚪"
+        title = _("Title")
+        content = _("Content")
+        summary = _("Summary")
 
+        return format_html(
+            "<span>{0}{1}</span><br><span>{2}{3}</span><br><span>{4}{5}</span>",
+            translate_title,title,
+            translate_content,content,
+            summary_check,summary,
+        )
 
 # class T_FeedAdmin(admin.ModelAdmin):
 #     list_display = [
