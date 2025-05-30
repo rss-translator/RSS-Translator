@@ -23,7 +23,7 @@ class FeedAdmin(admin.ModelAdmin):
     form = FeedForm
     list_display = [
         "name",
-        "original_feed",
+        "fetch_feed",
         "translated_feed",
         "translator",
         "target_language",
@@ -143,14 +143,14 @@ class FeedAdmin(admin.ModelAdmin):
             
         )
 
-    @admin.display(description=_("Original Feed"))
-    def original_feed(self, obj): # 显示4个元素：fetch状态、原url、代理feed、代理json
+    @admin.display(description=_("Fetch Feed"))
+    def fetch_feed(self, obj): # 显示4个元素：fetch状态、原url、代理feed、代理json
         return format_html(
             "<span>{0}</span> | <a href='{1}' target='_blank'>{2}</a> | <a href='{3}' target='_blank'>{4}</a>",
             valid_icon(obj.fetch_status), # 0
             obj.feed_url, # 1
             "url", # 2
-            f"/proxy/{obj.id}", # 3
+            f"/proxy/{obj.slug}", # 3
             "proxy", # 4
         )
     
@@ -170,67 +170,8 @@ class FeedAdmin(admin.ModelAdmin):
             summary_check,summary,
         )
 
-# class T_FeedAdmin(admin.ModelAdmin):
-#     list_display = [
-#         "id",
-#         "feed_url",
-#         "feed",
-#         "status_icon",
-#         "language",
-#         "translate_title",
-#         "translate_content",
-#         "summary",
-#         "total_tokens",
-#         "total_characters",
-#         "size_in_kb",
-#         "modified",
-#     ]
-#     list_filter = ["status", "translate_title", "translate_content", "feed__category"]
-#     search_fields = ["id", "feed__category__name", "feed__feed_url"]
-#     readonly_fields = [
-#         "status",
-#         "language",
-#         "id",
-#         "feed",
-#         "total_tokens",
-#         "total_characters",
-#         "size",
-#         "modified",
-#     ]
-#     actions = [t_feed_force_update, t_feed_export_as_opml, t_feed_batch_modify]
-#     list_per_page = 20
-#     # def get_search_results(self, request, queryset, search_term):
-#     #     queryset, use_distinct = super().get_search_results(request, queryset, search_term)
-#     #     queryset |= self.model.objects.filter(feed__feed_url__icontains=search_term)
-#     #     return queryset, use_distinct
-
-#     # def get_queryset(self, request):
-#     #     return super().get_queryset(request).prefetch_related('feed__category')
-
-#     def size_in_kb(self, obj):
-#         return int(obj.size / 1024)
-
-#     size_in_kb.short_description = _("Size(KB)")
-
-#     def feed_url(self, obj):
-#         if obj.id:
-#             return format_html("<a href='/rss/{0}' target='_blank'>{0}  </a>", obj.id)
-#         return ""
-
-#     feed_url.short_description = _("Translated Feed URL")
-
-#     def has_add_permission(self, request):
-#         return False
-
-#     def status_icon(self, obj):
-#         return valid_icon(obj.status)
-
-#     status_icon.short_description = _("Status")
-#     status_icon.admin_order_field = "status"
-
 
 core_admin_site.register(Feed, FeedAdmin)
-# core_admin_site.register(T_Feed, T_FeedAdmin)
 
 if settings.USER_MANAGEMENT:
     core_admin_site.register(User)
