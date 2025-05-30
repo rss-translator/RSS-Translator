@@ -64,20 +64,6 @@ class FeedAdmin(admin.ModelAdmin):
         )
         return super().changelist_view(request, extra_context=extra_context)
 
-    def save_formset(self, request, form, formset, change):
-        instances = formset.save(commit=False)
-        for instance in instances:
-            if instance.feed.pk:  # 不保存feed为空的T_Feed实例
-                instance.status = None
-                instance.save()
-                #revoke_tasks_by_arg(instance.id)
-                update_translated_feed.schedule(args=(instance.id,True), delay=1)
-
-        for instance in formset.deleted_objects:
-            #revoke_tasks_by_arg(instance.id)
-            instance.delete()
-        formset.save_m2m()
-
     def save_model(self, request, obj, form, change):
         logging.info("Call Feed save_model: %s", obj)
         feed_url_changed = "feed_url" in form.changed_data
@@ -106,30 +92,9 @@ class FeedAdmin(admin.ModelAdmin):
     def translator(self, obj):
         return obj.translator
 
-    # @admin.display(description=_("Translated Language"))
-    # def translated_language(self, obj):
-    #     return ", ".join(t_feed.language for t_feed in obj.t_feed_set.all())
-
-    # def get_queryset(self, request):
-    #     return super().get_queryset(request).prefetch_related('tags')
-    # def tag_list(self, obj):
-    #     return ", ".join(o.name for o in obj.tags.all())
-
     @admin.display(description=_("Size(KB)"), ordering="size")
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
-    
-    @admin.display(description=_("Feed URL"))
-    def show_feed_url(self, obj):
-        if obj.feed_url:
-            url = obj.feed_url
-            return format_html(
-                "<a href='{0}' target='_blank'>{1}...</a>",
-                # "<button type='button' class='btn' data-url='{0}' onclick=''>Update</button>",
-                url,
-                url[:30],
-            )
-        return ""
     
     @admin.display(description=_("Translated Feed"))
     def translated_feed(self, obj): # 显示3个元素：translated_status、feed_url、json_url
@@ -144,7 +109,7 @@ class FeedAdmin(admin.ModelAdmin):
         )
 
     @admin.display(description=_("Fetch Feed"))
-    def fetch_feed(self, obj): # 显示4个元素：fetch状态、原url、代理feed、代理json
+    def fetch_feed(self, obj): # 显示3个元素：fetch状态、原url、代理feed
         return format_html(
             "<span>{0}</span> | <a href='{1}' target='_blank'>{2}</a> | <a href='{3}' target='_blank'>{4}</a>",
             valid_icon(obj.fetch_status), # 0
