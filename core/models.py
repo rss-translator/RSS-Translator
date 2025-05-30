@@ -139,7 +139,7 @@ from tagulous.models import SingleTagField
 
 # class T_Feed(models.Model):
 #     sid = models.SlugField(
-#         _("URL Slug(Optional)"),
+#         _("URL Slug"),
 #         max_length=255,
 #         unique=True,
 #         help_text=_(
@@ -204,7 +204,7 @@ from tagulous.models import SingleTagField
 class Feed(models.Model):
     name = models.CharField( max_length=255, blank=True, null=True, verbose_name=_("Name"))
     slug = models.SlugField(
-        _("URL Slug(Optional)"),
+        _("URL Slug"),
         max_length=255,
         unique=True,
         blank=True,
@@ -215,21 +215,6 @@ class Feed(models.Model):
     )
     feed_url = models.URLField(
         _("Feed URL")
-    )
-
-    TRANSLATION_DISPLAY_CHOICES = [
-        (0, _("Only Translation")),
-        (1, _("Translation | Original")),
-        (2, _("Original | Translation")),
-    ]
-    translation_display = models.IntegerField(
-        _("Translation Display"), default=0, choices=TRANSLATION_DISPLAY_CHOICES
-    )  # 0: Only Translation, 1: Translation || Original, 2: Original || Translation
-
-    etag = models.CharField(
-        max_length=255,
-        default="",
-        editable=False,
     )
 
     fetch_status = models.BooleanField(
@@ -261,11 +246,34 @@ class Feed(models.Model):
         help_text=_("Fetch original article from the website."),
     )
 
+    TRANSLATION_DISPLAY_CHOICES = [
+        (0, _("Only Translation")),
+        (1, _("Translation | Original")),
+        (2, _("Original | Translation")),
+    ]
+    translation_display = models.IntegerField(
+        _("Translation Display"), default=0, choices=TRANSLATION_DISPLAY_CHOICES
+    )  # 0: Only Translation, 1: Translation || Original, 2: Original || Translation
+
+    target_language = models.CharField(
+        _("Language"), choices=settings.TRANSLATION_LANGUAGES, max_length=50, default=settings.DEFAULT_TARGET_LANGUAGE
+    )
+    translate_title = models.BooleanField(_("Translate Title"), default=False)
+    translate_content = models.BooleanField(_("Translate Content"), default=False)
+    summary = models.BooleanField(_("Summary"), default=False)
+
+    translation_status = models.BooleanField(
+        _("Translation Status"),
+        null=True,
+        editable=False,
+    )
+
     translator_content_type = models.ForeignKey(
         ContentType, on_delete=models.SET_NULL, null=True, related_name="translator"
     )
     translator_object_id = models.PositiveIntegerField(null=True)
     translator = GenericForeignKey("translator_content_type", "translator_object_id")
+
 
     summary_content_type = models.ForeignKey(
         ContentType, on_delete=models.SET_NULL, null=True, related_name="summarizer"
@@ -294,19 +302,6 @@ class Feed(models.Model):
     category = SingleTagField(
         force_lowercase=True, blank=True, help_text=_("Enter a category string")
     )
-    target_language = models.CharField(
-        _("Language"), choices=settings.TRANSLATION_LANGUAGES, max_length=50, default=settings.DEFAULT_TARGET_LANGUAGE
-    ) # TODO: default language should be set in settings.py(via environment variable)
-    
-    translation_status = models.BooleanField(
-        _("Translation Status"),
-        null=True,
-        editable=False,
-    )
-
-    translate_title = models.BooleanField(_("Translate Title"), default=False)
-    translate_content = models.BooleanField(_("Translate Content"), default=False)
-    summary = models.BooleanField(_("Summary"), default=False)
 
     total_tokens = models.IntegerField(_("Tokens Cost"), default=0)
     total_characters = models.IntegerField(_("Characters Cost"), default=0)
@@ -327,12 +322,24 @@ class Feed(models.Model):
         editable=False,
         help_text=_("Last time the feed was fetched"),
     )
-
+    etag = models.CharField(
+        max_length=255,
+        default="",
+        editable=False,
+    )
     size = models.IntegerField(
         _("Size"),
         default=0,
         editable=False,
     ) # original feed size + translated feed size
+    
+    log = models.TextField(
+        _("Log"),
+        default="",
+        blank=True,
+        null=True,
+        help_text=_("Log for the feed, useful for debugging"),
+    )
 
 
     def __str__(self):

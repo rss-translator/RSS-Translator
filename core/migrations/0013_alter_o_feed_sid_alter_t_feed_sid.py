@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 help_text="Example: if set to hacker_news, the subscription address will be http://127.0.0.1:8000/rss/hacker_news",
                 max_length=255,
                 unique=True,
-                verbose_name="URL Slug(Optional)",
+                verbose_name="URL Slug",
             ),
         ),
     ]

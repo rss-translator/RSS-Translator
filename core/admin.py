@@ -27,32 +27,33 @@ class FeedAdmin(admin.ModelAdmin):
     form = FeedForm
     #inlines = [T_FeedInline]
     list_display = [
-
-        "is_valid",
+        "name",
+        "fetch_status_icon",
+        "status_icon",
         "show_feed_url",
-        "translated_language",
+        "slug",
         "translator",
-        "size_in_kb",
-        "update_frequency",
-        "last_fetch",
-        "category",
         "translate_title",
         "translate_content",
         "summary",
+        "update_frequency",
         "total_tokens",
         "total_characters",
-        "status_icon",
-        "slug",
+        "target_language",
+        "category",
+        "size_in_kb",
+        "last_fetch",
     ]
-    search_fields = ["name", "feed_url", "category__name","translation_status", "translate_title", "translate_content"]
+    search_fields = ["name", "feed_url", "category__name"]
     list_filter = ["fetch_status", "category"]
     readonly_fields = [
+        "fetch_status",
         "translation_status",
-        "translated_language",
         "total_tokens",
         "total_characters",
-        "size",
+        "size_in_kb",
         "last_fetch",
+        "log",        
     ]
     actions = [feed_force_update, feed_export_as_opml, feed_batch_modify]
     list_per_page = 20
@@ -78,11 +79,11 @@ class FeedAdmin(admin.ModelAdmin):
             if instance.feed.pk:  # 不保存feed为空的T_Feed实例
                 instance.status = None
                 instance.save()
-                #revoke_tasks_by_arg(instance.sid)
-                update_translated_feed.schedule(args=(instance.sid,True), delay=1)
+                #revoke_tasks_by_arg(instance.id)
+                update_translated_feed.schedule(args=(instance.id,True), delay=1)
 
         for instance in formset.deleted_objects:
-            #revoke_tasks_by_arg(instance.sid)
+            #revoke_tasks_by_arg(instance.id)
             instance.delete()
         formset.save_m2m()
 
@@ -98,13 +99,13 @@ class FeedAdmin(admin.ModelAdmin):
             obj.name = obj.name or "Loading"
             obj.save()
             update_original_feed.schedule(
-                args=(obj.sid,True), delay=1
+                args=(obj.id,True), delay=1
             )  # 会执行一次save() # 不放在model的save里是为了排除translator的更新，省流量
         elif frequency_changed:
             obj.save()
-            #revoke_tasks_by_arg(obj.sid)
+            #revoke_tasks_by_arg(obj.id)
             update_original_feed.schedule(
-                args=(obj.sid,), delay=obj.update_frequency * 60
+                args=(obj.id,), delay=obj.update_frequency * 60
             )
         else:
             obj.name = obj.name or "Empty"
@@ -114,9 +115,9 @@ class FeedAdmin(admin.ModelAdmin):
     def translator(self, obj):
         return obj.translator
 
-    @admin.display(description=_("Translated Language"))
-    def translated_language(self, obj):
-        return ", ".join(t_feed.language for t_feed in obj.t_feed_set.all())
+    # @admin.display(description=_("Translated Language"))
+    # def translated_language(self, obj):
+    #     return ", ".join(t_feed.language for t_feed in obj.t_feed_set.all())
 
     # def get_queryset(self, request):
     #     return super().get_queryset(request).prefetch_related('tags')
@@ -128,10 +129,10 @@ class FeedAdmin(admin.ModelAdmin):
         return int(obj.size / 1024)
 
     @admin.display(description=_("Fetch Status"), ordering="fetch_status")
-    def is_valid(self, obj):
+    def fetch_status_icon(self, obj):
         return valid_icon(obj.fetch_status)
 
-    @admin.display(description=_("Status"), ordering="translation_status")
+    @admin.display(description=_("Translation Status"), ordering="translation_status")
     def status_icon(self, obj):
         return valid_icon(obj.translation_status)
     
@@ -148,9 +149,9 @@ class FeedAdmin(admin.ModelAdmin):
         return ""
 
     def proxy_feed_url(self, obj):
-        if obj.sid:
+        if obj.id:
             return format_html(
-                "<a href='/rss/{0}' target='_blank'>Proxy URL</a>", obj.sid
+                "<a href='/rss/{0}' target='_blank'>Proxy URL</a>", obj.id
             )
         return ""
 
@@ -171,11 +172,11 @@ class FeedAdmin(admin.ModelAdmin):
 #         "modified",
 #     ]
 #     list_filter = ["status", "translate_title", "translate_content", "feed__category"]
-#     search_fields = ["sid", "feed__category__name", "feed__feed_url"]
+#     search_fields = ["id", "feed__category__name", "feed__feed_url"]
 #     readonly_fields = [
 #         "status",
 #         "language",
-#         "sid",
+#         "id",
 #         "feed",
 #         "total_tokens",
 #         "total_characters",
@@ -198,8 +199,8 @@ class FeedAdmin(admin.ModelAdmin):
 #     size_in_kb.short_description = _("Size(KB)")
 
 #     def feed_url(self, obj):
-#         if obj.sid:
-#             return format_html("<a href='/rss/{0}' target='_blank'>{0}  </a>", obj.sid)
+#         if obj.id:
+#             return format_html("<a href='/rss/{0}' target='_blank'>{0}  </a>", obj.id)
 #         return ""
 
 #     feed_url.short_description = _("Translated Feed URL")

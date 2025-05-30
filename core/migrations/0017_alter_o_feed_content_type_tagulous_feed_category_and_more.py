@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                         max_length=255,
                         null=True,
                         unique=True,
-                        verbose_name="URL Slug(Optional)",
+                        verbose_name="URL Slug",
                     ),
                 ),
                 ("feed_url", models.URLField(verbose_name="Feed URL")),
@@ -259,6 +259,16 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="translator",
                         to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "log",
+                    models.TextField(
+                        verbose_name="Log",
+                        default="",
+                        blank=True,
+                        null=True,
+                        help_text="Log for the feed, useful for debugging",
                     ),
                 ),
                 (
