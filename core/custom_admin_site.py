@@ -24,11 +24,8 @@ class CoreAdminSite(AdminSite):
 
     def get_app_list(self, request, app_label=None):
         app_list = super().get_app_list(request, app_label)
-        app_list += [
-            {
-                "name": _("Engine"),
-                "app_label": "engine",
-                "models": [
+        feed = app_list[0]
+        engine = {"models": [
                     {
                         "name": _("Translator"),
                         "object_name": "Translator",
@@ -38,8 +35,7 @@ class CoreAdminSite(AdminSite):
                     }
                 ],
             }
-        ]
-
+        feed["models"].extend(engine["models"])
         return app_list
 
 
