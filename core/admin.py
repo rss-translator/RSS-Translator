@@ -44,7 +44,7 @@ class FeedAdmin(admin.ModelAdmin):
         "total_characters",
         "size_in_kb",
         "last_fetch",
-        "log",        
+        "show_log",        
     ]
     actions = [feed_force_update, feed_export_as_opml, feed_batch_modify]
     list_per_page = 20
@@ -151,6 +151,20 @@ class FeedAdmin(admin.ModelAdmin):
             translate_title,title,
             translate_content,content,
             summary_check,summary,
+        )
+    
+    @admin.display(description=_("Log"))
+    def show_log(self, obj):
+        return format_html(
+            """
+            <details>
+                <summary>show</summary>
+                <div>
+                    <p>{0}</p>
+                </div>
+            </details>
+            """,
+            obj.log,
         )
 
 
