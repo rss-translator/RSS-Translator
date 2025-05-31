@@ -48,31 +48,19 @@ For more information, please check [translation service](translator.md).
 
 Thanks to the following companies for providing open source support for this project.
 
-<table style="width:auto;">
+<table>
   <tr>
-    <td style="padding:10px;">
-      <a href="https://www.jetbrains.com/pycharm/">
-        <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm_icon.svg" alt="PyCharm logo." style="width:100px; height:100px;">
-      </a>
-    </td>
     <td style="padding:10px;">
       <a href="https://www.railway.app">
         <img src="https://railway.app/brand/logo-light.png" alt="Railway" style="width:100px; height:100px;">
       </a>
     </td>
-    <td style="padding:10px;">
-      <a href="https://www.gitpod.io">
-        <img src="https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/docs/docs/assets/gitpod.svg" alt="Gitpod" style="width:100px; height:100px;">
-      </a>
-    </td>
   </tr>
 </table>
+
 Thank you for your support!
-<p align="center">
-  <a href="https://github.com/versun/sponsors/">
-    <img src='https://raw.githubusercontent.com/versun/sponsors/main/sponsors.svg'/>
-  </a>
-</p>
+![sponsors](https://supporters.versun.me/sponsors.svg)
+
 
 If it has helped you, please consider sponsoring me: [AFDIAN](https://afdian.com/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
 > Description: Sponsored avatars are refreshed every morning and afternoon at 5:30 a.m. (UTC time zone).

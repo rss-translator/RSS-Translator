@@ -48,21 +48,11 @@
 
 感谢以下公司为本项目提供的开源支持。
 
-<table style="width:auto;">
+<table>
   <tr>
-    <td style="padding:10px;">
-      <a href="https://www.jetbrains.com/pycharm/">
-        <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm_icon.svg" alt="PyCharm logo." style="width:100px; height:100px;">
-      </a>
-    </td>
     <td style="padding:10px;">
       <a href="https://www.railway.app">
         <img src="https://railway.app/brand/logo-light.png" alt="Railway" style="width:100px; height:100px;">
-      </a>
-    </td>
-    <td style="padding:10px;">
-      <a href="https://www.gitpod.io">
-        <img src="https://raw.githubusercontent.com/rss-translator/RSS-Translator/main/docs/docs/assets/gitpod.svg" alt="Gitpod" style="width:100px; height:100px;">
       </a>
     </td>
   </tr>
@@ -70,11 +60,8 @@
 
 
 非常感谢以下用户的支持:
-<p align="center">
-  <a href="https://github.com/versun/sponsors/">
-    <img src='https://raw.githubusercontent.com/versun/sponsors/main/sponsors.svg'/>
-  </a>
-</p>
+![sponsors](https://supporters.versun.me/sponsors.svg)
+
 
 如有余力，请考虑成为赞助者：[爱发电](https://afdian.com/a/versun) | [Open Collective](https://opencollective.com/rsstranslator)
 > 说明： 赞助头像每天早上和下午的5:30分刷新(UTC时区)。
