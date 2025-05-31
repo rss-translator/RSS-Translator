@@ -43,43 +43,42 @@ def import_opml(request):
     
     return redirect('admin:core_feed_changelist')
 
-def get_modified(request, feed_sid):
+def get_modified(request, feed_slug):
     try:
-        modified = Feed.objects.get(sid=feed_sid).last_translate
+        modified = Feed.objects.get(slug=feed_slug).last_translate
     except Feed.DoesNotExist:
         logging.warning(
             "Translated feed not found, Maybe still in progress, Please confirm it's exist: %s",
-            feed_sid,
+            feed_slug,
         )
         modified = None
     return modified
 
 
-def get_etag(request, feed_sid):
+def get_etag(request, feed_slug):
     try:
-        modified = Feed.objects.get(sid=feed_sid).etag
+        modified = Feed.objects.get(slug=feed_slug).etag
     except Feed.DoesNotExist:
         logging.warning(
             "Translated feed not found, Maybe still in progress, Please confirm it's exist: %s",
-            feed_sid,
+            feed_slug,
         )
         modified = None
     return modified.strftime("%Y-%m-%d %H:%M:%S") if modified else None
 
-
 # @cache_page(60 * 15)  # Cache this view for 15 minutes
 @condition(etag_func=get_etag, last_modified_func=get_modified)
-def rss(request, feed_sid):
-    # Sanitize the feed_sid to prevent path traversal attacks
-    feed_sid = smart_str(feed_sid)
+def rss(request, feed_slug, type="t"):
+    # Sanitize the feed_slug to prevent path traversal attacks
+    feed_slug = smart_str(feed_slug)
 
-    #feed_file_path = os.path.join(settings.DATA_FOLDER, "feeds", f"{feed_sid}.xml")
+    #feed_file_path = os.path.join(settings.DATA_FOLDER, "feeds", f"{feed_slug}.xml")
     base_path = os.path.join(settings.DATA_FOLDER, "feeds")
-    feed_file_path = check_file_path(base_path=base_path, filename=f"{feed_sid}.xml")
+    feed_file_path = check_file_path(base_path=base_path, filename=f"{type}_{feed_slug}.xml")
     # Check if the file exists and if not, raise a 404 error
     if not os.path.exists(feed_file_path):
         logging.warning("Requested feed file not found: %s", feed_file_path)
-        # raise Http404(f"The feed with ID {feed_sid} does not exist.")
+        # raise Http404(f"The feed with ID {feed_slug} does not exist.")
         return HttpResponse(
             "Please wait for the translation to complete or check if the original feeds has been verified"
         )
@@ -111,17 +110,17 @@ def rss(request, feed_sid):
 
 
 @condition(etag_func=get_etag, last_modified_func=get_modified)
-def rss_json(request, feed_sid):
-    # Sanitize the feed_sid to prevent path traversal attacks
-    feed_sid = smart_str(feed_sid)
+def rss_json(request, feed_slug):
+    # Sanitize the feed_slug to prevent path traversal attacks
+    feed_slug = smart_str(feed_slug)
     base_path = os.path.join(settings.DATA_FOLDER, "feeds")
-    feed_file_path = check_file_path(base_path, f"{feed_sid}.json")
+    feed_file_path = check_file_path(base_path, f"t_{feed_slug}.json")
     content_type = "application/json; charset=utf-8"
 
     # Check if the file exists and if not, raise a 404 error
     if not os.path.exists(feed_file_path):
         logging.warning("Requested feed file not found: %s", feed_file_path)
-        # raise Http404(f"The feed with ID {feed_sid} does not exist.")
+        # raise Http404(f"The feed with ID {feed_slug} does not exist.")
         return HttpResponse(
             "Please wait for the translation to complete or check if the original feeds has been verified"
         )
@@ -148,8 +147,8 @@ def all(request, name):
     try:
         # get all data from Feed
         feeds = Feed.objects.all()
-        # get all feed file path from feeds.sid
-        feed_file_paths = get_feed_file_paths(feeds)
+        # get all feed file path from feeds.slug
+        feed_file_paths = get_feed_file_paths(feeds, "t")
         merge_all_atom(feed_file_paths, "all_t")
         base_path = os.path.join(settings.DATA_FOLDER, "feeds")
         #merge_file_path = os.path.join(settings.DATA_FOLDER, "feeds", "all_t.xml")
@@ -178,9 +177,9 @@ def category(request, category: str):
     try:
         # # get all data from Feed
         feeds = Feed.objects.filter(feed__category__name=category)
-        # # get all feed file path from feeds.sid
-        # feed_file_paths = [os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed.sid}.xml') for feed in feeds]
-        feed_file_paths = get_feed_file_paths(feeds)
+        # # get all feed file path from feeds.slug
+        # feed_file_paths = [os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed.slug}.xml') for feed in feeds]
+        feed_file_paths = get_feed_file_paths(feeds, "t")
         merge_all_atom(feed_file_paths, category)
         base_path = os.path.join(settings.DATA_FOLDER, "feeds")
         #merge_file_path = os.path.join(settings.DATA_FOLDER, "feeds", f"{category}.xml")
@@ -199,13 +198,13 @@ def category(request, category: str):
         return HttpResponse(status=500)
 
 
-def get_feed_file_paths(feeds: list) -> list:
+def get_feed_file_paths(feeds: list, type: str = "o") -> list:
     feed_file_dir = os.path.abspath(os.path.join(settings.DATA_FOLDER, "feeds"))
     feed_file_paths = []
 
     for feed in feeds:
         file_path = os.path.abspath(
-            os.path.join(feed_file_dir, f"{feed.sid}.xml")
+            os.path.join(feed_file_dir, f"{type}_{feed.slug}.xml")
         )  # 获取绝对路径
         if (
             os.path.commonpath((feed_file_dir, file_path)) != feed_file_dir

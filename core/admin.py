@@ -133,7 +133,7 @@ class FeedAdmin(admin.ModelAdmin):
             status_icon(obj.fetch_status), # 0
             obj.feed_url, # 1
             "url", # 2
-            f"/proxy/{obj.slug}", # 3
+            f"/rss/proxy/{obj.slug}", # 3
             "proxy", # 4
         )
     
