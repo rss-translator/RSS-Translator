@@ -28,7 +28,7 @@ class FeedAdmin(admin.ModelAdmin):
         "translator",
         "target_language",
         "translation_options",
-        "update_frequency",
+        "simple_update_frequency",
         "last_fetch",
         "total_tokens",
         "total_characters",
@@ -88,13 +88,29 @@ class FeedAdmin(admin.ModelAdmin):
             obj.name = obj.name or "Empty"
             obj.save()
 
-    @admin.display(description=_("Translator"))
-    def translator(self, obj):
-        return obj.translator
 
     @admin.display(description=_("Size(KB)"), ordering="size")
     def size_in_kb(self, obj):
         return int(obj.size / 1024)
+    
+    @admin.display(description=_("Update Frequency"), ordering="update_frequency")
+    def simple_update_frequency(self, obj):
+        if obj.update_frequency <= 5:
+            return "5 min"
+        elif obj.update_frequency <= 15:
+            return "15 min"
+        elif obj.update_frequency <= 30:
+            return "30 min"
+        elif obj.update_frequency <= 60:
+            return "hourly"
+        elif obj.update_frequency <= 1440:
+            return "daily"
+        elif obj.update_frequency <= 10080:
+            return "weekly"
+
+    @admin.display(description=_("Translator"))
+    def translator(self, obj):
+        return obj.translator
     
     @admin.display(description=_("Translated Feed"))
     def translated_feed(self, obj): # 显示3个元素：translated_status、feed_url、json_url

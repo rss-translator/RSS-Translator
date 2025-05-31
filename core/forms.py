@@ -2,7 +2,7 @@ from django import forms
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from .models import Feed
-from utils.modelAdmin_utils import get_translator_and_summary_choices
+from utils.modelAdmin_utils import get_translator_and_summary_choices, get_update_frequency_choices
 
 class FeedForm(forms.ModelForm):
     # 自定义字段，使用ChoiceField生成下拉菜单
@@ -18,6 +18,12 @@ class FeedForm(forms.ModelForm):
         help_text=_("Select a valid AI engine"),
         label=_("Summary Engine"),
     )
+    simple_update_frequency = forms.ChoiceField(
+        choices=(),
+        required=False,
+        help_text=_("Select a valid update frequency"),
+        label=_("Update Frequency"),
+    )
 
     class Meta:
         model = Feed
@@ -29,7 +35,7 @@ class FeedForm(forms.ModelForm):
             "target_language",
             "translator_option",  # 自定义字段
             "summary_engine_option",  # 自定义字段
-            "update_frequency",
+            "simple_update_frequency",
             "max_posts",
             "translation_display",
             "fetch_article",
@@ -54,33 +60,15 @@ class FeedForm(forms.ModelForm):
         self.fields["slug"].widget.attrs.update({
             'placeholder': _('Optional, default use the random slug'),
         })
-        # self.fields["log"].widget = forms.Textarea(attrs={
-        #         'readonly': True,
-        #         'rows': 5,  # 设置行数
-        #         'cols': 80,  # 设置列数
-        #         'style': 'resize: none; overflow-y: auto;',
-        #         'class': 'form-control',
-        #     })
+        
+        self.fields["simple_update_frequency"].choices = get_update_frequency_choices()
+        self.fields["simple_update_frequency"].initial = 60
+        
         #如果是已创建的对象，设置默认值
         instance = getattr(self, "instance", None)
         if instance and instance.pk:
             self._set_initial_values(instance)
-            # self.fields["log"].widget = forms.Textarea(attrs={
-            #     'readonly': True,
-            #     'rows': 5,  # 设置行数
-            #     'cols': 80,  # 设置列数
-            #     'style': 'resize: none; overflow-y: auto;',
-            #     'class': 'form-control',
-            # })
-        # else:
-        #     # 如果是新对象，则不显示相关字段
-        #     del self.fields["log"]
-        #     del self.fields["total_tokens"]
-        #     del self.fields["total_characters"]
-        #     del self.fields["size"]
-        #     del self.fields["last_fetch"]
-        #     del self.fields["translation_status"]
-        #     del self.fields["fetch_status"]
+
 
     def _set_initial_values(self, instance):
         if instance.translator_content_type and instance.translator_object_id:
@@ -105,6 +93,12 @@ class FeedForm(forms.ModelForm):
         else:
             instance.summary_content_type_id = None
             instance.summary_object_id = None
+    
+    def _process_update_frequency(self, instance):
+        if self.cleaned_data["simple_update_frequency"]:
+            instance.update_frequency = self.cleaned_data["simple_update_frequency"]
+        else:
+            instance.update_frequency = 60
 
     # 重写save方法，以处理自定义字段的数据
     @transaction.atomic

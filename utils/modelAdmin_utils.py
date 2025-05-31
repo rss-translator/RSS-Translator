@@ -52,6 +52,15 @@ def get_translator_and_summary_choices():
     ]
     return translator_choices, summary_engine_choices
 
+def get_update_frequency_choices():
+    return [
+        (5, "5 min"),
+        (15, "15 min"),
+        (30, "30 min"),
+        (60, _("hourly")),
+        (1440, _("daily")),
+        (10080, _("weekly")),
+    ]
 
 def valid_icon(status):
     match status:

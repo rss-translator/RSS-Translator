@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-31 06:47+0800\n"
+"POT-Creation-Date: 2025-05-31 10:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,40 +29,41 @@ msgstr "强制更新"
 msgid "Batch modification"
 msgstr "批量修改"
 
-#: core/admin.py:105 core/custom_admin_site.py:30 core/forms.py:13
+#: core/admin.py:92
+msgid "Size(KB)"
+msgstr "文件大小(KB)"
+
+#: core/admin.py:96 core/forms.py:25 core/models.py:227
+#: templates/admin/feed_batch_modify.html:13
+msgid "Update Frequency"
+msgstr "更新频率(分钟)"
+
+#: core/admin.py:111 core/custom_admin_site.py:30 core/forms.py:13
 #: templates/admin/feed_batch_modify.html:23
 msgid "Translator"
 msgstr "翻译器"
 
-#: core/admin.py:118
-msgid "Size(KB)"
-msgstr "文件大小(KB)"
-
-#: core/admin.py:122 core/models.py:217
-msgid "Feed URL"
-msgstr "订阅链接"
-
-#: core/admin.py:134
+#: core/admin.py:115
 msgid "Translated Feed"
 msgstr "翻译源"
 
-#: core/admin.py:146
+#: core/admin.py:127
 msgid "Fetch Feed"
 msgstr "获取源"
 
-#: core/admin.py:157
+#: core/admin.py:140
 msgid "Options"
 msgstr "选项"
 
-#: core/admin.py:162
+#: core/admin.py:145
 msgid "Title"
 msgstr "标题"
 
-#: core/admin.py:163
+#: core/admin.py:146
 msgid "Content"
 msgstr "内容"
 
-#: core/admin.py:164 core/models.py:263
+#: core/admin.py:147 core/models.py:263
 #: templates/admin/feed_batch_modify.html:60
 #: templates/admin/t_feed_batch_modify.html:23
 msgid "Summary"
@@ -92,11 +93,17 @@ msgstr "选择一个有效的AI引擎"
 msgid "Summary Engine"
 msgstr "摘要器"
 
-#: core/forms.py:51
+#: core/forms.py:24
+#, fuzzy
+#| msgid "Select a valid AI engine"
+msgid "Select a valid update frequency"
+msgstr "选择一个有效的AI引擎"
+
+#: core/forms.py:57
 msgid "Optonal, default use the feed title"
 msgstr "可选，默认使用源标题"
 
-#: core/forms.py:55
+#: core/forms.py:61
 msgid "Optional, default use the random slug"
 msgstr "可选，默认随机生成"
 
@@ -115,13 +122,13 @@ msgid ""
 msgstr ""
 "比如设置为'hacker_news',则订阅地址为'http://127.0.0.1:8000/rss/hacker_news'"
 
+#: core/models.py:217
+msgid "Feed URL"
+msgstr "订阅链接"
+
 #: core/models.py:221
 msgid "Fetch Status"
 msgstr "订阅状态"
-
-#: core/models.py:227 templates/admin/feed_batch_modify.html:13
-msgid "Update Frequency"
-msgstr "更新频率(分钟)"
 
 #: core/models.py:229
 msgid "Minutes"
@@ -414,6 +421,18 @@ msgid ""
 msgstr ""
 "请从官网中获取: https://docs.openl.club/#/API/format?"
 "id=%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1%e4%bb%a3%e7%a0%81%e5%90%8d"
+
+#: utils/modelAdmin_utils.py:60
+msgid "hourly"
+msgstr "每小时"
+
+#: utils/modelAdmin_utils.py:61
+msgid "daily"
+msgstr "每天"
+
+#: utils/modelAdmin_utils.py:62
+msgid "weekly"
+msgstr "每周"
 
 #~ msgid "Engine"
 #~ msgstr "引擎"
