@@ -6,7 +6,7 @@
 # from .models import T_Feed
 # from .forms import T_FeedForm
 # from utils.modelAdmin_utils import (
-#     valid_icon,
+#     status_icon,
 # )
 
 # class T_FeedInline(admin.TabularInline):
@@ -61,7 +61,7 @@
 #     def obj_status(self, obj):
 #         if not obj.pk:
 #             return ""
-#         return valid_icon(obj.status)
+#         return status_icon(obj.status)
 
 #     def get_formset(self, request, obj=None, **kwargs):
 #         # Store the request for use in feed_url

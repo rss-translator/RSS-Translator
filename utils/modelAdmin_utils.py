@@ -62,7 +62,7 @@ def get_update_frequency_choices():
         (10080, _("weekly")),
     ]
 
-def valid_icon(status):
+def status_icon(status):
     match status:
         case None:
             return format_html(

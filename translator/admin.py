@@ -8,7 +8,7 @@ from .models import *
 
 # from django.utils.translation import gettext_lazy  as _
 
-from utils.modelAdmin_utils import valid_icon
+from utils.modelAdmin_utils import status_icon
 
 
 class BaseTranslatorAdmin(admin.ModelAdmin):
@@ -28,7 +28,7 @@ class BaseTranslatorAdmin(admin.ModelAdmin):
         return redirect("/translator")
 
     def is_valid(self, obj):
-        return valid_icon(obj.valid)
+        return status_icon(obj.valid)
 
     is_valid.short_description = "Valid"
 
