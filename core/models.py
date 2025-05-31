@@ -354,12 +354,12 @@ class Feed(models.Model):
             )
         ]
 
-    # def save(self, *args, **kwargs):
-    #     if not self.sid:
-    #         self.sid = uuid.uuid5(
-    #             uuid.NAMESPACE_URL, f"{self.feed_url}:{self.target_language}:{settings.SECRET_KEY}"
-    #         ).hex
-    #     super(Feed, self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = uuid.uuid5(
+                uuid.NAMESPACE_URL, f"{self.feed_url}:{self.target_language}:{settings.SECRET_KEY}"
+            ).hex
+        super(Feed, self).save(*args, **kwargs)
 
     def get_translation_display(self):
         return dict(self.TRANSLATION_DISPLAY_CHOICES)[self.translation_display]
