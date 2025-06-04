@@ -18,19 +18,17 @@ def update_feeds_by_frequency(simple_update_frequency: str):
     }
     
     try:
-        need_fetch_feeds = Feed.objects.filter(update_frequency=update_frequency[simple_update_frequency])
-        fetched_feeds = handle_feeds_fetch(need_fetch_feeds)
-        Feed.objects.bulk_update(fetched_feeds,fields=[...])
+        need_update_feeds = Feed.objects.filter(update_frequency=update_frequency[simple_update_frequency])
+        handle_feeds_fetch(need_update_feeds)
 
-        # 筛选需要translate_title或translate_content为True的feed
-        need_translate_feeds = fetched_feeds.filter(Q(translate_title=True) | Q(translate_content=True))
-        handle_feeds_translation(need_translate_feeds)
-        Feed.objects.bulk_update(need_translate_feeds,fields=[...])
+        # 筛选需要translate_title为True的feed
+        handle_feeds_translation(need_update_feeds.filter(translate_title=True), target_field="title")
+
+        # 筛选需要translate_content为True的feed
+        handle_feeds_translation(need_update_feeds.filter(translate_content=True), target_field="content")
 
         # 筛选需要summary为True的feed
-        need_summary_feeds = fetched_feeds.filter(summary=True)
-        handle_feeds_summary(need_summary_feeds)
-        Feed.objects.bulk_update(need_summary_feeds,fields=[...])
+        handle_feeds_summary(need_update_feeds.filter(summary=True))
 
         # TODO:export feeds as rss
         # TODO:export feeds as json
@@ -40,10 +38,9 @@ def update_feeds_by_frequency(simple_update_frequency: str):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        # 使用第一个命令行参数作为频率值
-        frequency = sys.argv[1]
+        target_frequency = sys.argv[1]
     else:
-        frequency = "hourly"
+        print("Error: Please specify a valid update frequency ('5 min', '15 min', '30 min', 'hourly', 'daily', 'weekly')")
+        sys.exit(1)
     
-    # 调用函数并传入频率参数
-    update_feeds_by_frequency(simple_update_frequency=frequency)
+    update_feeds_by_frequency(simple_update_frequency=target_frequency)
