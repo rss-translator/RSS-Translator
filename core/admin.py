@@ -33,7 +33,6 @@ class FeedAdmin(admin.ModelAdmin):
         "total_tokens",
         "total_characters",
         "category",
-        "size_in_kb"
     ]
     search_fields = ["name", "feed_url", "category__name"]
     list_filter = ["fetch_status", "translation_status","category","translate_title","translate_content","summary"]
@@ -42,7 +41,6 @@ class FeedAdmin(admin.ModelAdmin):
         "translation_status",
         "total_tokens",
         "total_characters",
-        "size_in_kb",
         "last_fetch",
         "show_log",        
     ]
@@ -78,10 +76,6 @@ class FeedAdmin(admin.ModelAdmin):
             obj.save()
 
 
-    @admin.display(description=_("Size(KB)"), ordering="size")
-    def size_in_kb(self, obj):
-        return int(obj.size / 1024)
-    
     @admin.display(description=_("Update Frequency"), ordering="update_frequency")
     def simple_update_frequency(self, obj):
         if obj.update_frequency <= 5:
