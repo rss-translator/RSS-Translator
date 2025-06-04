@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from utils.modelAdmin_utils import get_translator_and_summary_choices
 from .custom_admin_site import core_admin_site
 from .models import Feed
-from .tasks import update_original_feed, update_translated_feed
+from core.management.commands.update_feeds import update_feeds_immediately
 
 
 @admin.display(description=_("Export selected feeds as OPML"))
@@ -105,29 +105,9 @@ def feed_force_update(modeladmin, request, queryset):
     logging.info("Call feed_force_update: %s", queryset)
     with transaction.atomic():
         for instance in queryset:
-            instance.etag = ""
-            instance.valid = None
+            instance.fetch_status = None
             instance.save()
-            #logging.info("Call revoke_tasks_by_arg in feed_force_update")
-            #revoke_tasks_by_arg(instance.sid)
-            update_original_feed.schedule(
-                args=(instance.sid,True), delay=1,
-            )  # 会执行一次save()
-
-
-@admin.display(description=_("Force update"))
-def t_feed_force_update(modeladmin, request, queryset):
-    logging.info("Call t_feed_force_update: %s", queryset)
-    with transaction.atomic():
-        for instance in queryset:
-            instance.modified = None
-            instance.status = None
-            instance.save()
-            #logging.info("Call revoke_tasks_by_arg in feed_force_update")
-            #revoke_tasks_by_arg(instance.sid) #will check in update_translated_feed task
-            update_translated_feed.schedule(
-                args=(instance.sid,True), delay=1
-            )  # 会执行一次save()
+            update_feeds_immediately([instance])
 
 
 @admin.display(description=_("Batch modification"))
@@ -140,12 +120,15 @@ def feed_batch_modify(modeladmin, request, queryset):
             "max_posts": "max_posts_value",
             "translator": "translator_value",
             "translation_display": "translation_display_value",
-            "summary_engine": "summary_engine_value",
+            "summarizer": "summarizer_value",
             "summary_detail": "summary_detail_value",
             "additional_prompt": "additional_prompt_value",
             "fetch_article": "fetch_article",
             "quality": "quality",
             "category": "category_value",
+            "translate_title": "translate_title",
+            "translate_content": "translate_content",
+            "summary": "summary",
         }
         field_types = {
             "update_frequency": int,
@@ -155,71 +138,10 @@ def feed_batch_modify(modeladmin, request, queryset):
             "additional_prompt": str,
             "fetch_article": literal_eval,
             "quality": literal_eval,
+            "translate_title": literal_eval,
+            "translate_content": literal_eval,
+            "summary": literal_eval,
         }
-        update_fields = {}
-        # tags_value = None
-
-        for field, value_field in fields.items():
-            value = post_data.get(value_field)
-            if post_data.get(field, "Keep") != "Keep" and value:
-                match field:
-                    case "translator":
-                        content_type_id, object_id = map(int, value.split(":"))
-                        update_fields["content_type_id"] = content_type_id
-                        update_fields["object_id"] = object_id
-                    case "summary_engine":
-                        content_type_summary_id, object_id_summary = map(
-                            int, value.split(":")
-                        )
-                        update_fields["content_type_summary_id"] = (
-                            content_type_summary_id
-                        )
-                        update_fields["object_id_summary"] = object_id_summary
-                    case "category":
-                        tag_model = Feed.category.tag_model
-                        category_o, _ = tag_model.objects.get_or_create(name=value)
-                        update_fields["category"] = category_o
-
-                    case _:
-                        update_fields[field] = field_types.get(field, str)(value)
-
-        if update_fields:
-            queryset.update(**update_fields)
-        # for obj in queryset:
-        #     obj.category.update_count()
-
-        # if tags_value is not None:
-        #     for obj in queryset:
-        #         obj.tags = [*tags_value]
-        #         obj.save()
-        # Feed.objects.bulk_update(queryset, ['tags'])??
-
-        # self.message_user(request, f"Successfully modified {queryset.count()} items.")
-        # return HttpResponseRedirect(request.get_full_path())
-        return redirect(request.get_full_path())
-
-    translator_choices, summary_engine_choices = get_translator_and_summary_choices()
-    logging.info(
-        "translator_choices: %s, summary_engine_choices: %s",
-        translator_choices,
-        summary_engine_choices,
-    )
-    return render(
-        request,
-        "admin/feed_batch_modify.html",
-        context={
-            **core_admin_site.each_context(request),
-            "items": queryset,
-            "translator_choices": translator_choices,
-            "summary_engine_choices": summary_engine_choices,
-        },
-    )
-
-
-@admin.display(description=_("Batch modification"))
-def t_feed_batch_modify(modeladmin, request, queryset):
-    if "apply" in request.POST:
-        logging.info("Apply t_feed_batch_modify")
         translate_title = request.POST.get("translate_title", "Keep")
         translate_content = request.POST.get("translate_content", "Keep")
         summary = request.POST.get("summary", "Keep")
@@ -247,11 +169,46 @@ def t_feed_batch_modify(modeladmin, request, queryset):
             case "False":
                 queryset.update(summary=False)
 
-        # self.message_user(request, f"Successfully modified {queryset.count()} items.")
-        # return HttpResponseRedirect(request.get_full_path())
+        update_fields = {}
+        for field, value_field in fields.items():
+            value = post_data.get(value_field)
+            if post_data.get(field, "Keep") != "Keep" and value:
+                match field:
+                    case "translator":
+                        content_type_id, object_id = map(int, value.split(":"))
+                        queryset.update(translator_content_type_id=content_type_id)
+                        queryset.update(translator_object_id=object_id)
+                    case "summarizer":
+                        content_type_summary_id, object_id_summary = map(
+                            int, value.split(":")
+                        )
+                        queryset.update(summarizer_content_type_id=content_type_summary_id)
+                        queryset.update(summarizer_object_id=object_id_summary)
+                    case "category":
+                        tag_model = Feed.category.tag_model
+                        category_o, _ = tag_model.objects.get_or_create(name=value)
+                        queryset.update(category=category_o)
+
+                    case _:
+                        update_fields[field] = field_types.get(field, str)(value)
+
+        if update_fields:
+            queryset.update(**update_fields)
         return redirect(request.get_full_path())
+
+    translator_choices, summary_engine_choices = get_translator_and_summary_choices()
+    logging.info(
+        "translator_choices: %s, summary_engine_choices: %s",
+        translator_choices,
+        summary_engine_choices,
+    )
     return render(
         request,
-        "admin/t_feed_batch_modify.html",
-        context={**core_admin_site.each_context(request), "items": queryset},
+        "admin/feed_batch_modify.html",
+        context={
+            **core_admin_site.each_context(request),
+            "items": queryset,
+            "translator_choices": translator_choices,
+            "summary_engine_choices": summary_engine_choices,
+        },
     )

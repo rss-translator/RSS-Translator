@@ -14,7 +14,7 @@ from .actions import (
     feed_force_update,
     feed_batch_modify,
 )
-from .tasks import update_original_feed, update_translated_feed
+from core.management.commands.update_feeds import update_feeds_immediately
 from utils.modelAdmin_utils import status_icon
 from .views import import_opml
 
@@ -67,23 +67,12 @@ class FeedAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         logging.info("Call Feed save_model: %s", obj)
         feed_url_changed = "feed_url" in form.changed_data
-        # feed_name_changed = 'name' in form.changed_data
-        frequency_changed = "update_frequency" in form.changed_data
         translation_display_changed = "translation_display" in form.changed_data
-        # translator_changed = 'content_type' in form.changed_data or 'object_id' in form.changed_data
         if feed_url_changed or translation_display_changed:
             obj.fetch_status = None
             obj.name = obj.name or "Loading"
             obj.save()
-            update_original_feed.schedule(
-                args=(obj.id,True), delay=1
-            )  # 会执行一次save() # 不放在model的save里是为了排除translator的更新，省流量
-        elif frequency_changed:
-            obj.save()
-            #revoke_tasks_by_arg(obj.id)
-            update_original_feed.schedule(
-                args=(obj.id,), delay=obj.update_frequency * 60
-            )
+            update_feeds_immediately([obj])
         else:
             obj.name = obj.name or "Empty"
             obj.save()

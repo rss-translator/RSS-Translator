@@ -10,7 +10,9 @@ from typing import Optional
 from django.utils import timezone
 from .models import Feed, Entry
 from utils.feed_action import fetch_feed
-from utils.text_handler import text_handler
+from utils import text_handler
+from translator.models import TranslatorEngine
+
 
 def handle_feeds_fetch(feeds: list):
     """
@@ -71,7 +73,7 @@ def handle_feeds_fetch(feeds: list):
                     )
             feed.fetch_status = True
         except Exception as e:
-            logging.exception("Task update_original_feeds %s: %s", feed.feed_url, str(e))
+            logging.exception("Task handle_feeds_fetch %s: %s", feed.feed_url, str(e))
             feed.fetch_status = False
             feed.log += str(e)
 
@@ -89,8 +91,8 @@ def handle_feeds_translation(feeds: list, target_field: str = "title"):
             translate_feed(feed, target_field=target_field)
             feed.translation_status = True
         except Exception as e:
-            logging.error(
-                "task translate_feeds (%s)%s: %s",
+            logging.exception(
+                "Task handle_feeds_translation (%s)%s: %s",
                 feed.language,
                 feed.feed_url,
                 str(e),
@@ -112,8 +114,8 @@ def handle_feeds_summary(feeds: list):
             summarize_feed(feed)
             feed.translation_status = True
         except Exception as e:
-            logging.error(
-                "task handle_feeds_summary (%s)%s: %s",
+            logging.exception(
+                "Task handle_feeds_summary (%s)%s: %s",
                 feed.language,
                 feed.feed_url,
                 str(e),
@@ -164,7 +166,7 @@ def translate_feed(feed: Feed, target_field: str = "title"):
                 feed.total_characters += metrics['characters']
         
         except Exception as e:
-            logging.error(f"Error processing entry {entry.link}: {str(e)}")
+            logging.exception(f"Error processing entry {entry.link}: {str(e)}")
             continue
     
     logging.info(f"Translation completed. Tokens: {total_tokens}, Chars: {translated_characters}")
@@ -316,7 +318,7 @@ def _retry_translation(
         try:
             return func(**kwargs)
         except Exception as e:
-            logging.warning(f"Translation attempt {attempt+1} failed: {str(e)}")
+            logging.exception(f"Translation attempt {attempt+1} failed: {str(e)}")
         time.sleep(0.5 * (2 ** attempt))  # Exponential backoff
     logging.error(f"All {max_retries} attempts failed for translation")
     return {}
@@ -328,5 +330,5 @@ def _fetch_article_content(link: str) -> str:
         article = newspaper.article(link)
         return mistune.html(article.text)
     except Exception as e:
-        logging.warning(f"Article fetch failed: {str(e)}")
+        logging.exception(f"Article fetch failed: {str(e)}")
     return ""
