@@ -54,9 +54,6 @@ def merge_feeds_data(apps, schema_editor):
                     last_translate=t_feed.modified,
                     last_fetch=o_feed.last_pull,
                     
-                    # 大小信息
-                    size=o_feed.size + t_feed.size,
-                    
                     # URL slug
                     slug=t_feed.sid if t_feed.sid else None,
                 )
@@ -95,9 +92,6 @@ def merge_feeds_data(apps, schema_editor):
                 # 时间戳
                 last_translate=None,  
                 last_fetch=o_feed.last_pull, 
-                
-                # 大小信息
-                size=o_feed.size,
                 
                 # URL slug
                 slug=None,  # 没有T_Feed时，slug为None

@@ -240,10 +240,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "size",
-                    models.IntegerField(default=0, editable=False, verbose_name="Size"),
-                ),
-                (
                     "summary_content_type",
                     models.ForeignKey(
                         null=True,
