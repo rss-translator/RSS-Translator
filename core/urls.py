@@ -13,9 +13,9 @@ urlpatterns = [
     path("json/<str:feed_slug>", views.rss_json, name="json"),
     path("json/<str:feed_slug>/", views.rss_json, name="json"),
     path('core/feed/import_opml/', views.import_opml, name='import_opml'),
-    path("proxy/<str:feed_slug>", views.rss, type="o", name="proxy"),
-    path("proxy/<str:feed_slug>/", views.rss, type="o", name="proxy"),
+    path("proxy/<str:feed_slug>", views.rss, kwargs={"type": "o"}, name="proxy"),
+    path("proxy/<str:feed_slug>/", views.rss, kwargs={"type": "o"}, name="proxy"),
     # re_path(r"(?P<feed_slug>[^/]+)/?$", views.rss, type="t", name="rss"),
-    path("<str:feed_slug>/", views.rss, type="t", name="rss"),
-path("<str:feed_slug>", views.rss, type="t", name="rss"),
+    path("<str:feed_slug>/", views.rss, kwargs={"type": "t"}, name="rss"),
+    path("<str:feed_slug>", views.rss, kwargs={"type": "t"}, name="rss"),
 ]
