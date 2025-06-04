@@ -35,7 +35,7 @@ class FeedForm(forms.ModelForm):
             "target_language",
             "translator_option",  # 自定义字段
             "summary_engine_option",  # 自定义字段
-            "simple_update_frequency",
+            "simple_update_frequency", # 自定义字段
             "max_posts",
             "translation_display",
             "fetch_article",
@@ -63,7 +63,7 @@ class FeedForm(forms.ModelForm):
         
         self.fields["simple_update_frequency"].choices = get_update_frequency_choices()
         self.fields["simple_update_frequency"].initial = 60
-        
+
         #如果是已创建的对象，设置默认值
         instance = getattr(self, "instance", None)
         if instance and instance.pk:
