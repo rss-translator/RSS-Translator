@@ -168,6 +168,9 @@ class Feed(models.Model):
             if self.update_frequency <= threshold:
                 self.update_frequency = threshold
                 break
+        
+        if len(self.log.encode('utf-8')) > 2048:
+            self.log = self.log[-2048:]
 
         super(Feed, self).save(*args, **kwargs)
 
