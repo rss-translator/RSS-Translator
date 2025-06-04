@@ -1,122 +1,99 @@
-from django.conf import settings
-from pathlib import Path
-import os
+import logging
+import sys
 from datetime import datetime
 from feedparser import feedparser
 from time import mktime
 from django.utils import timezone
-from django.db.models import Q
 from .models import Feed, Entry
 from .utils import fetch_feed
-from .translate_feed import translate_feed, summarize_feed
-
-
-def update_feeds(simple_update_frequency: str):
-    update_frequency = {
-    "5 min": 5,
-    "15 min": 15,
-    "30 min": 30,
-    "hourly": 60,
-    "daily": 1440,
-    "weekly": 10080,
-    }
-    feed_dir_path = Path(settings.DATA_FOLDER) / "feeds"
-    if not os.path.exists(feed_dir_path):
-        os.makedirs(feed_dir_path)
-    
-    need_fetch_feeds = Feed.objects.filter(update_frequency=update_frequency[simple_update_frequency])
-    fetched_feeds = handle_feeds_fetch(need_fetch_feeds,feed_dir_path)
-    Feed.objects.bulk_update(fetched_feeds,fields=[...])
-
-    # 筛选需要translate_title或translate_content为True的feed
-    need_translate_feeds = fetched_feeds.filter(Q(translate_title=True) | Q(translate_content=True))
-    handle_feeds_translation(need_translate_feeds,feed_dir_path)
-    Feed.objects.bulk_update(need_translate_feeds,fields=[...])
-
-    # 筛选需要summary为True的feed
-    need_summary_feeds = fetched_feeds.filter(summary=True)
-    handle_feeds_summary(need_summary_feeds,feed_dir_path)
-    Feed.objects.bulk_update(need_summary_feeds,fields=[...])
-
-    # TODO:export feeds as rss
-    # TODO:export feeds as json
-    
 
 def handle_feeds_fetch(feeds: list) -> list:
+    """
+    Fetch feeds and update entries.
+    """
     fetched_feeds = []
     for feed in feeds:
         try:
             feed.fetch_status = None
-            fetch_feed_results = fetch_feed(url=feed.feed_url, etag=feed.etag)
-            error = fetch_feed_results["error"]
-            update = fetch_feed_results.get("update")
-            latest_feed: feedparser.FeedParserDict = fetch_feed_results.get("feed")
+            fetch_results = fetch_feed(url=feed.feed_url, etag=feed.etag)
 
-            if error:
-                raise Exception(f"Fetch Feed Failed: {error}")
-            elif not update:
+
+            if fetch_results["error"]:
+                raise Exception(f"Fetch Feed Failed: {fetch_results['error']}")
+            elif not fetch_results["update"]:
                 raise Exception("Feed is up to date, Skip")
-            else:
-                if feed.name in ["Loading", "Empty", None]:
-                    feed.name = latest_feed.feed.get("title") or latest_feed.feed.get("subtitle", "Empty")
-                update_time = latest_feed.feed.get("updated_parsed")
-                feed.last_fetch = (
-                    datetime.fromtimestamp(mktime(update_time), tz=timezone.utc)
-                    if update_time
-                    else datetime.now(timezone.utc)
-                )
-                feed.etag = feed.get("etag", "")
+            
+            latest_feed: feedparser.FeedParserDict = fetch_results.get("feed")
+            # Update feed meta
+            if not feed.name or feed.name in ["Loading", "Empty"]:
+                feed.name = latest_feed.feed.get("title") or latest_feed.feed.get("subtitle", "Empty")
 
-                if hasattr(latest_feed, 'entries') and latest_feed.entries:
-                    for entry_data in latest_feed.entries[:feed.max_posts]:
-                        # 转换发布时间
-                        published = entry_data.get('published_parsed') or entry_data.get('updated_parsed')
-                        published_dt = make_aware(datetime.fromtimestamp(mktime(published))) if published else timezone.now()
-                        
-                        # 创建或更新条目
-                        entry_obj, _ = entry.objects.update_or_create(
-                            feed=feed,
-                            guid=entry_data.get('id', entry_data.get('link')),
-                            defaults={
-                                'link': entry_data.get('link', ''),
-                                'created': published_dt,
-                                'original_title': entry_data.get('title', 'No title'),
-                                'original_content': entry_data.get('content', [{}])[0].get('value', '') if 'content' in entry_data else entry_data.get('summary', ''),
-                                'original_summary': entry_data.get('summary', '')
-                            }
-                        )
-                        feed.entries.add(entry_obj)
+            update_time = latest_feed.feed.get("updated_parsed")
+            feed.last_fetch = (
+                datetime.fromtimestamp(mktime(update_time), tz=timezone.utc)
+                if update_time
+                else datetime.now()
+            )
+            feed.etag = feed.get("etag", "")
+            # Update entries
+            if getattr(latest_feed, 'entries', None):
+                for entry_data in latest_feed.entries[:feed.max_posts]:
+                    # 转换发布时间
+                    published = entry_data.get('published_parsed') or entry_data.get('updated_parsed')
+                    published_dt = make_aware(datetime.fromtimestamp(mktime(published))) if published else timezone.now() # TODO: make_aware
+                    
+                    # 获取内容
+                    content = ""
+                    if 'content' in entry_data:
+                        content = entry_data.content[0].value if entry_data.content else ""
+                    else:
+                        content = entry_data.get('summary', '')
+                    
+                    guid = entry_data.get('id') or entry_data.get('link')
+                    if not guid:
+                        continue  # 跳过无效条目
 
-            fetched_feeds.append(feed)
-
+                    # 创建或更新条目
+                    Entry.objects.update_or_create(
+                        feed=feed,
+                        guid=guid,
+                        defaults={
+                            'link': entry_data.get('link', ''),
+                            'created': published_dt,
+                            'original_title': entry_data.get('title', 'No title'),
+                            'original_content': content,
+                            'original_summary': entry_data.get('summary', '')
+                        }
+                    )
             feed.fetch_status = True
+            fetched_feeds.append(feed)
         except Exception as e:
             logging.exception("Task update_original_feeds %s: %s", feed.feed_url, str(e))
             feed.fetch_status = False
+            feed.log += str(e)
+            fetched_feeds.append(feed)
 
     return fetched_feeds
 
 def handle_feeds_translation(fetched_feeds: list):
     for feed in fetched_feeds:
         try:
-            if feed.entries:
-                feed.translate_status = None
-                logging.info("Start translate feed: [%s]%s", feed.language, feed.feed_url)
-                results = translate_feed(feed)
-                if not results:
-                    raise Exception("Translate Feed Failed")
-                else:
-                    feed = results.get("feed")
-                    total_tokens = results.get("tokens")
-                    translated_characters = results.get("characters")
-                
-                # There can only be one billing method at a time, either token or character count.
-                if total_tokens > 0:
-                    feed.total_tokens += total_tokens
-                else:
-                    feed.total_characters += translated_characters
+            if not feed.entries.exists():
+                continue
+            
+            feed.translation_status = None
+            logging.info("Start translate feed: [%s]%s", feed.language, feed.feed_url)
 
-                feed.status = True
+            results = translate_feed(feed)
+            if not results:
+                raise Exception("Translate Feed Failed")
+            
+            if results.get('tokens', 0) > 0:
+                feed.total_tokens += results['tokens']
+            else:
+                feed.total_characters += results.get('characters', 0)
+                
+            feed.translation_status = True
         except Exception as e:
             logging.error(
                 "task translate_feeds (%s)%s: %s",
@@ -124,23 +101,23 @@ def handle_feeds_translation(fetched_feeds: list):
                 feed.feed_url,
                 str(e),
             )
-            feed.status = False
+            feed.translation_status = False
 
 def handle_feeds_summary(fetched_feeds: list):
     for feed in fetched_feeds:
         try:
-            if feed.entries:
-                feed.translate_status = None
-                logging.info("Start summary feed: [%s]%s", feed.language, feed.feed_url)
-                results = summarize_feed(feed)
-                if not results:
-                    raise Exception("Summary Feed Failed")
-                else:
-                    feed = results.get("feed")
-                    total_tokens = results.get("tokens")
-                    feed.total_tokens += total_tokens
+            if not feed.entries.exists():
+                continue
+            
+            feed.translation_status = None
+            logging.info("Start summary feed: [%s]%s", feed.language, feed.feed_url)
 
-                feed.translate_status = True
+            results = summarize_feed(feed)
+            if not results:
+                raise Exception("Summary Feed Failed")
+            
+            feed.total_tokens += results.get('tokens', 0)
+            feed.translation_status = True
         except Exception as e:
             logging.error(
                 "task handle_feeds_summary (%s)%s: %s",
@@ -148,7 +125,7 @@ def handle_feeds_summary(fetched_feeds: list):
                 feed.feed_url,
                 str(e),
             )
-            feed.translate_status = False
+            feed.translation_status = False
 
 def translate_feed(feed: Feed) -> dict:
     """Translate and summarize feed entries with enhanced error handling and caching"""
@@ -158,44 +135,40 @@ def translate_feed(feed: Feed) -> dict:
     total_tokens = 0
     translated_characters = 0
 
-    try:
-        for entry in feed.entries:
-            try:
-                logging.debug(f"Processing entry {entry}")
-                
-                # Fetch full article content if requested
-                if feed.fetch_article:
-                    entry.original_content = _fetch_article_content(entry.link)
-                
-                # Process title translation
-                if feed.translate_title and feed.translate_engine:
-                    entry, metrics = _translate_title(
-                        entry=entry,
-                        target_language=feed.target_language,
-                        engine=feed.translate_engine,
-                        translation_display=feed.translation_display
-                    )
-                    total_tokens += metrics['tokens']
-                    translated_characters += metrics['characters']
-                
-                # Process content translation
-                if feed.translate_content and entry.original_content and feed.translate_engine:
-                    entry, metrics = _translate_content(
-                        entry=entry,
-                        target_language=feed.target_language,
-                        engine=feed.translate_engine,
-                        translation_display=feed.translation_display,
-                        quality=feed.quality,
-                    )
-                    total_tokens += metrics['tokens']
-                    translated_characters += metrics['characters']
+    for entry in feed.entries:
+        try:
+            logging.debug(f"Processing entry {entry}")
             
-            except Exception as e:
-                logging.error(f"Error processing entry {entry.link}: {str(e)}")
-                continue
-    
-    except Exception as e:
-        logging.exception("Critical error in feed processing")
+            # Fetch full article content if requested
+            if feed.fetch_article:
+                entry.original_content = _fetch_article_content(entry.link)
+            
+            # Process title translation
+            if feed.translate_title and feed.translate_engine:
+                entry, metrics = _translate_title(
+                    entry=entry,
+                    target_language=feed.target_language,
+                    engine=feed.translate_engine,
+                    translation_display=feed.translation_display
+                )
+                total_tokens += metrics['tokens']
+                translated_characters += metrics['characters']
+            
+            # Process content translation
+            if feed.translate_content and entry.original_content and feed.translate_engine:
+                entry, metrics = _translate_content(
+                    entry=entry,
+                    target_language=feed.target_language,
+                    engine=feed.translate_engine,
+                    translation_display=feed.translation_display,
+                    quality=feed.quality,
+                )
+                total_tokens += metrics['tokens']
+                translated_characters += metrics['characters']
+        
+        except Exception as e:
+            logging.error(f"Error processing entry {entry.link}: {str(e)}")
+            continue
     
     logging.info(f"Translation completed. Tokens: {total_tokens}, Chars: {translated_characters}")
     return {
@@ -386,4 +359,11 @@ def _fetch_article_content(link: str) -> str:
 
 
 if __name__ == "__main__":
-    update_feed()
+    if len(sys.argv) > 1:
+        # 使用第一个命令行参数作为频率值
+        frequency = sys.argv[1]
+    else:
+        frequency = "hourly"
+    
+    # 调用函数并传入频率参数
+    update_feeds_by_frequency(simple_update_frequency=frequency)
