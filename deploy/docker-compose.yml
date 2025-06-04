@@ -1,6 +1,6 @@
 services:
   rsstranslator:
-    image: rsstranslator/rsstranslator
+    image: versun/rsstranslator
     environment:
       - DEFAULT_TARGET_LANGUAGE=Chinese Simplified
       - PYTHONUNBUFFERED=0
