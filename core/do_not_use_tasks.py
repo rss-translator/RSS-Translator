@@ -75,7 +75,7 @@ def update_original_feed(id: str, force:bool = False):
     if not os.path.exists(feed_dir_path):
         os.makedirs(feed_dir_path)
 
-    original_feed_file_path = feed_dir_path / f"{obj.id}.xml"
+    original_feed_file_path = feed_dir_path / f"o_{obj.slug}.xml"
     try:
         obj.fetch_status = False
         fetch_feed_results = fetch_feed(url=obj.feed_url, etag=obj.etag)
