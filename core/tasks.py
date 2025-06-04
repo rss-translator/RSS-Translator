@@ -36,7 +36,7 @@ def handle_feeds_fetch(feeds: list):
 
             update_time = latest_feed.feed.get("updated_parsed")
             feed.last_fetch = (
-                datetime.fromtimestamp(mktime(update_time), tz=timezone.utc)
+                datetime.fromtimestamp(mktime(update_time), tz=timezone.get_default_timezone())
                 if update_time
                 else datetime.now()
             )
@@ -46,7 +46,7 @@ def handle_feeds_fetch(feeds: list):
                 for entry_data in latest_feed.entries[:feed.max_posts]:
                     # 转换发布时间
                     published = entry_data.get('published_parsed') or entry_data.get('updated_parsed')
-                    published_dt = make_aware(datetime.fromtimestamp(mktime(published)), timezone.utc) if published else timezone.now()
+                    published_dt = make_aware(datetime.fromtimestamp(mktime(published)), timezone.get_default_timezone()) if published else timezone.now()
                     
                     # 获取内容
                     content = ""
@@ -75,9 +75,9 @@ def handle_feeds_fetch(feeds: list):
         except Exception as e:
             logging.exception("Task handle_feeds_fetch %s: %s", feed.feed_url, str(e))
             feed.fetch_status = False
-            feed.log += str(e)
+            feed.log = f"{datetime.now()} {str(e)}"
 
-    Feed.objects.bulk_update(feeds,fields=[...])
+    Feed.objects.bulk_update(feeds,fields=["fetch_status", "last_fetch", "etag", "log", "name"])
 
 def handle_feeds_translation(feeds: list, target_field: str = "title"):
     for feed in feeds:
@@ -98,9 +98,9 @@ def handle_feeds_translation(feeds: list, target_field: str = "title"):
                 str(e),
             )
             feed.translation_status = False
-            feed.log += str(e)
+            feed.log = f"{datetime.now()} {str(e)}"
         
-    Feed.objects.bulk_update(feeds,fields=[...])
+    Feed.objects.bulk_update(feeds,fields=["translation_status", "log"])
 
 def handle_feeds_summary(feeds: list):
     for feed in feeds:
@@ -121,9 +121,9 @@ def handle_feeds_summary(feeds: list):
                 str(e),
             )
             feed.translation_status = False
-            feed.log += str(e)
+            feed.log = f"{datetime.now()} {str(e)}"
         
-    Feed.objects.bulk_update(feeds,fields=[...])
+    Feed.objects.bulk_update(feeds,fields=["translation_status", "log"])
 
 def translate_feed(feed: Feed, target_field: str = "title"):
     """Translate and summarize feed entries with enhanced error handling and caching"""
