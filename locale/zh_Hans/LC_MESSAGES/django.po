@@ -115,13 +115,6 @@ msgstr "名称"
 msgid "URL Slug"
 msgstr "URL别名"
 
-#: core/models.py:213
-msgid ""
-"Example: if set to hacker_news, the subscription address will be http://"
-"127.0.0.1:8000/rss/hacker_news"
-msgstr ""
-"比如设置为'hacker_news',则订阅地址为'http://127.0.0.1:8000/rss/hacker_news'"
-
 #: core/models.py:217
 msgid "Feed URL"
 msgstr "订阅链接"
@@ -139,8 +132,8 @@ msgid "Max Posts"
 msgstr "最大条目"
 
 #: core/models.py:234
-msgid "Max number of posts to be translated"
-msgstr "要翻译的最大帖子数"
+msgid "Max number of posts to be fetched"
+msgstr "要获取的最大条目数"
 
 #: core/models.py:237 templates/admin/feed_batch_modify.html:81
 msgid "Best Quality"

@@ -80,7 +80,6 @@ class Migration(migrations.Migration):
                     "slug",
                     models.SlugField(
                         blank=True,
-                        help_text="Example: if set to hacker_news, the subscription address will be http://127.0.0.1:8000/rss/hacker_news",
                         max_length=255,
                         null=True,
                         unique=True,
@@ -117,7 +116,7 @@ class Migration(migrations.Migration):
                     "max_posts",
                     models.IntegerField(
                         default=20,
-                        help_text="Max number of posts to be translated",
+                        help_text="Max number of posts to be fetched",
                         verbose_name="Max Posts",
                     ),
                 ),

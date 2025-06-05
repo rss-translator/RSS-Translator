@@ -18,9 +18,6 @@ class Feed(models.Model):
         unique=True,
         blank=True,
         null=True,
-        help_text=_(
-            "Example: if set to hacker_news, the subscription address will be http://127.0.0.1:8000/rss/hacker_news"
-        ),
     )
     feed_url = models.URLField(
         _("Feed URL")
@@ -39,7 +36,7 @@ class Feed(models.Model):
     max_posts = models.IntegerField(
         _("Max Posts"),
         default=os.getenv("default_max_posts", 20),
-        help_text=_("Max number of posts to be translated"),
+        help_text=_("Max number of posts to be fetched"),
     )
     quality = models.BooleanField(
         _("Best Quality"),

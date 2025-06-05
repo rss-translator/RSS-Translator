@@ -1,10 +1,12 @@
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.contrib import admin
 from django.conf import settings
 from django.contrib.auth.models import User, Group
-from django.utils.html import format_html
+from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse
+from django.db import close_old_connections
 
 from .models import Feed
 from .custom_admin_site import core_admin_site
@@ -18,6 +20,7 @@ from core.management.commands.update_feeds import update_feeds_immediately
 from utils.modelAdmin_utils import status_icon
 from .views import import_opml
 
+BACKGROUND_EXECUTOR = ThreadPoolExecutor(max_workers=5, thread_name_prefix="feed_updater_")
 
 class FeedAdmin(admin.ModelAdmin):
     form = FeedForm
@@ -68,13 +71,57 @@ class FeedAdmin(admin.ModelAdmin):
         translation_display_changed = "translation_display" in form.changed_data
         if feed_url_changed or translation_display_changed:
             obj.fetch_status = None
+            obj.translation_status = None
             obj.name = obj.name or "Loading"
             obj.save()
-            update_feeds_immediately([obj])
+            # 提交后台更新任务到线程池
+            self._submit_background_update(obj.id)
         else:
             obj.name = obj.name or "Empty"
             obj.save()
 
+    def _submit_background_update(self, feed_id):
+        """提交后台更新任务到线程池"""
+        # 创建任务并提交到线程池
+        future = BACKGROUND_EXECUTOR.submit(self._execute_feed_update, feed_id)
+        
+        # 添加回调处理（可选）
+        future.add_done_callback(self._handle_update_result)
+
+    def _execute_feed_update(self, feed_id):
+        """在后台线程中执行feed更新"""
+        from .models import Feed
+        
+        try:
+            # 确保在新线程中创建新的数据库连接
+            close_old_connections()
+            
+            # 重新获取feed对象
+            feed = Feed.objects.get(id=feed_id)
+            logging.info(f"Starting background update for feed: {feed.name} (ID: {feed_id})")
+            
+            # 执行更新操作
+            update_feeds_immediately([feed])
+            
+            logging.info(f"Completed background update for feed: {feed.name} (ID: {feed_id})")
+            return True
+        except Exception as e:
+            logging.error(f"Background feed update failed for ID {feed_id}: {str(e)}")
+            return False
+        finally:
+            # 确保关闭数据库连接
+            close_old_connections()
+
+    def _handle_update_result(self, future):
+        """处理后台任务结果（可选）"""
+        try:
+            success = future.result()
+            if success:
+                logging.debug("Feed update completed successfully")
+            else:
+                logging.warning("Feed update completed with errors")
+        except Exception as e:
+            logging.error(f"Exception in background task: {str(e)}")
 
     @admin.display(description=_("Update Frequency"), ordering="update_frequency")
     def simple_update_frequency(self, obj):
@@ -142,12 +189,12 @@ class FeedAdmin(admin.ModelAdmin):
             """
             <details>
                 <summary>show</summary>
-                <div>
-                    <p>{0}</p>
+                <div style="max-height: 200px; overflow: auto;">
+                    {0}
                 </div>
             </details>
             """,
-            obj.log,
+            mark_safe(obj.log),
         )
 
 
