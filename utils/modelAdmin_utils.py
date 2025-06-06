@@ -18,7 +18,7 @@ def get_all_app_models(app_name):
     app = apps.get_app_config(app_name)
     models = app.get_models()
     # exclude Translated_Content
-    exclude_models = ["Translated_Content"]
+    exclude_models = []
     if not settings.DEBUG:
         exclude_models.append("TestTranslator")
 

@@ -108,6 +108,7 @@ def feed_force_update(modeladmin, request, queryset):
             instance.fetch_status = None
             instance.save()
             update_feeds_immediately([instance])
+    # TODO: 后台执行
 
 
 @admin.display(description=_("Batch modification"))

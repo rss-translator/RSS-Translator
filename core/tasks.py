@@ -151,7 +151,6 @@ def translate_feed(feed: Feed, target_field: str = "title"):
                     entry=entry,
                     target_language=feed.target_language,
                     engine=feed.translator,
-                    translation_display=feed.translation_display
                 )
                 total_tokens += metrics['tokens']
                 total_characters += metrics['characters']
@@ -169,7 +168,6 @@ def translate_feed(feed: Feed, target_field: str = "title"):
                     entry=entry,
                     target_language=feed.target_language,
                     engine=feed.translator,
-                    translation_display=feed.translation_display,
                     quality=feed.quality,
                 )
                 total_tokens += metrics['tokens']
@@ -183,6 +181,7 @@ def translate_feed(feed: Feed, target_field: str = "title"):
             logging.exception(f"Error processing entry {entry.link}: {str(e)}")
             feed.log += f"{timezone.now()} Error processing entry {entry.link}: {str(e)}<br>"
             continue
+
     # 批量保存所有修改过的entry
     if entries_to_save:
         Entry.objects.bulk_update(
@@ -204,7 +203,6 @@ def _translate_title(
     entry: Entry,
     target_language: str,
     engine: TranslatorEngine,
-    translation_display: int
 )->dict:
     """Translate entry title with caching and retry logic"""
     total_tokens = 0
@@ -215,7 +213,7 @@ def _translate_title(
         return {"tokens": 0, "characters": 0}
 
     logging.debug("[Title] Translating title")
-    result = _retry_translation(
+    result = _auto_retry(
         engine.translate,
         max_retries=3,
         text=entry.original_title,
@@ -223,17 +221,9 @@ def _translate_title(
         text_type="title"
     )
     if result:
-        translated_text = result.get("text", entry.original_title)
+        entry.translated_title = result.get("text", entry.original_title)
         total_tokens = result.get("tokens", 0)
         total_characters = result.get("characters", 0)
-    
-        # 更新entry标题
-        entry.translated_title = text_handler.set_translation_display(
-            original=entry.original_title,
-            translation=translated_text,
-            translation_display=translation_display,
-            seprator=" || ",
-        )
     return {"tokens": total_tokens, "characters": total_characters}
 
 
@@ -241,11 +231,10 @@ def _translate_content(
     entry: Entry,
     target_language: str,
     engine: TranslatorEngine,
-    translation_display: int,
     quality: bool = False,
 )->dict:
     """Translate entry content with optimized caching"""
-
+# TODO: 
     total_tokens = 0
     total_characters = 0
     # 检查是否已经翻译过
@@ -266,24 +255,16 @@ def _translate_content(
         text = element.get_text()
 
     logging.debug("[Content] Translating content")
-    result = _retry_translation(
+    result = _auto_retry(
         func=engine.translate,
         max_retries=3,
         text=text,
         target_language=target_language,
         text_type="content"
     )
-    translated_text = result.get("text", text)
+    entry.translated_content = result.get("text", text)
     total_tokens = result.get("tokens", 0)
     total_characters = result.get("characters", 0)
-
-    # Format translated content
-    entry.translated_content = text_handler.set_translation_display(
-        original=text,
-        translation=translated_text,
-        translation_display=translation_display,
-        seprator="<br>---------------<br>",
-    )
 
     return {"tokens": total_tokens, "characters": total_characters}
 
@@ -296,9 +277,10 @@ def summarize_feed(
     """Generate content summary with retry logic"""
     # check detail is set correctly
     assert 0 <= feed.summary_detail <= 1
-
+    entries_to_save = []
     try:
         for entry in feed.entries.all():
+            entry_needs_save = False
             # Check cache first
             if entry.ai_summary:
                 logging.debug("[Summary] Summary already generated")
@@ -321,15 +303,12 @@ def summarize_feed(
                 accumulated_summaries = []
                 for chunk in text_chunks:
                     if summarize_recursively and accumulated_summaries:
-                        # Creating a structured prompt for recursive summarization
                         accumulated_summaries_string = "\n\n".join(accumulated_summaries)
                         user_message_content = f"Previous summaries:\n\n{accumulated_summaries_string}\n\nText to summarize next:\n\n{chunk}"
                     else:
-                        # Directly passing the chunk for summarization without recursive context
                         user_message_content = chunk
 
-                    # Assuming this function gets the completion and works as expected
-                    response = _retry_translation(
+                    response = _auto_retry(
                         feed.summarizer.summarize,
                         max_retries=3,
                         text=user_message_content,
@@ -338,20 +317,25 @@ def summarize_feed(
                     accumulated_summaries.append(response.get("text"))
                     feed.total_tokens += response.get("tokens", 0)
 
-                summary_text = "<br>".join(accumulated_summaries)
-            
-                # Format summary
-                html_summary = f"<br>🤖:{mistune.html(summary_text)}<br>---------------<br>"
-                entry.ai_summary = summary_text
-                entry.translated_content = html_summary + entry.translated_content
-            
-                entry.save()
+                entry.ai_summary = "<br>".join(accumulated_summaries)
+                entry_needs_save = True
+
+            if entry_needs_save:
+                entries_to_save.append(entry)
     except Exception as e:
         logging.exception(f"Error summarizing feed {feed.feed_url}: {str(e)}")
         feed.log += f"{timezone.now()} Error summarizing feed {feed.feed_url}: {str(e)}<br>"
+    finally:
+        if entries_to_save:
+            Entry.objects.bulk_update(
+                entries_to_save,
+                fields=[
+                    "ai_summary"
+                ]
+            )
 
 
-def _retry_translation(
+def _auto_retry(
     func: callable, 
     max_retries: int = 3, 
     **kwargs
