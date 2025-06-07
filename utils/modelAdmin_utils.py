@@ -1,34 +1,21 @@
 from django.conf import settings
 from django.utils.html import format_html
-from django.apps import apps
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
+from core.models import DeepLTranslator, OpenAITranslator, TestTranslator
 
-# if settings.DEBUG:
-#    from huey_monitor.models import TaskModel
-
-# def get_all_subclasses(cls):
-#     subclasses = set()
-#     for subclass in cls.__subclasses__():
-#         if not subclass.__subclasses__():
-#             subclasses.add(subclass)
-#         subclasses.update(get_all_subclasses(subclass))
-#     return subclasses
-def get_all_app_models(app_name):
-    app = apps.get_app_config(app_name)
-    models = app.get_models()
+def get_translator_models():
+    translator_models = [DeepLTranslator, OpenAITranslator]
     # exclude Translated_Content
-    exclude_models = []
     if not settings.DEBUG:
-        exclude_models.append("TestTranslator")
+        translator_models.append(TestTranslator)
 
-    models = [model for model in models if model.__name__ not in exclude_models]
-
-    return models
+    return translator_models
 
 
 def get_translator_and_summary_choices():
-    translator_models = get_all_app_models("translator")
+    translator_models = get_translator_models()
+    
     # Cache ContentTypes to avoid repetitive database calls
     content_types = {
         model: ContentType.objects.get_for_model(model) for model in translator_models

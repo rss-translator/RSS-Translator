@@ -4,9 +4,11 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
+from django.conf import settings
+from core.models import DeepLTranslator, OpenAITranslator, TestTranslator
 
 from utils.modelAdmin_utils import (
-    get_all_app_models,
+    get_translator_models,
     status_icon,
 )
 class CoreAdminSite(AdminSite):
@@ -30,8 +32,8 @@ class CoreAdminSite(AdminSite):
                             "name": _("Translator"),
                             "object_name": "Translator",
                             "admin_url": "/translator/list",
-                        "add_url": "/translator/add",
-                        # "view_only": False,
+                            "add_url": "/translator/add",
+                            # "view_only": False,
                     }
                 ],
             }
@@ -43,7 +45,7 @@ class TranslatorPaginator(Paginator):
     def __init__(self):
         super().__init__(self, 100)
 
-        self.translator_count = len(get_all_app_models("translator"))
+        self.translator_count = 3
 
     @property
     def count(self):
@@ -60,9 +62,9 @@ class TranslatorPaginator(Paginator):
 
     # Copied from Huey's SqliteStorage with some modifications to allow pagination
     def enqueued_items(self, limit, offset):
-        translators = get_all_app_models("translator")
+        translator_models = get_translator_models()
         translator_list = []
-        for model in translators:
+        for model in translator_models:
             objects = (
                 model.objects.all()
                 .order_by("name")
@@ -102,14 +104,14 @@ def translator_add_view(request):
     if request.method == "POST":
         translator_name = request.POST.get("translator_name", "/")
         # redirect to example.com/translator/translator_name/add
-        target = f"/translator/{translator_name}/add"
+        target = f"/core/{translator_name}/add"
         return (
             redirect(target)
             if url_has_allowed_host_and_scheme(target, allowed_hosts=None)
             else redirect("/")
         )
     else:
-        models = get_all_app_models("translator")
+        models = get_translator_models()
         translator_list = []
         for model in models:
             translator_list.append(

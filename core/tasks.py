@@ -5,10 +5,9 @@ from bs4 import BeautifulSoup
 import mistune
 import newspaper
 from typing import Optional
-from .models import Feed, Entry
+from .models import Feed, Entry, TranslatorEngine
 from utils.feed_action import fetch_feed
 from utils import text_handler
-from translator.models import TranslatorEngine
 
 
 def handle_feeds_fetch(feeds: list):

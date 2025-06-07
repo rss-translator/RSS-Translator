@@ -1,4 +1,4 @@
-from .base import TranslatorEngine
+from .translator_abstract import TranslatorEngine
 import logging
 from django.db import models
 from time import sleep

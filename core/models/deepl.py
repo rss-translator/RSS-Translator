@@ -1,5 +1,5 @@
 import deepl
-from .base import TranslatorEngine
+from .translator_abstract import TranslatorEngine
 import logging
 from django.db import models
 from encrypted_model_fields.fields import EncryptedCharField
