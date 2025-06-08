@@ -12,75 +12,96 @@ from django.conf import settings
 from typing import Dict
 
 import feedparser
-import httpx
+#import httpx
 from lxml import etree
 
 from feedgen.feed import FeedGenerator
-from fake_useragent import UserAgent
+#from fake_useragent import UserAgent
 
 
 def get_first_non_none(feed, *keys):
     return next((feed.get(key) for key in keys if feed.get(key) is not None),
                 None)
 
-
 def fetch_feed(url: str, etag: str = "") -> Dict:
-    update = False
-    feed = {}
-    error = None
-    response = None
-    ua = UserAgent()
-    headers = {
-        "If-None-Match": etag,
-        #'If-Modified-Since': modified,
-        "User-Agent": ua.random.strip(),
-        "Accept":
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Cache-Control": "max-age=0"
-    }
-
-    client = httpx.Client()
-
     try:
-        response = client.get(url,
-                              headers=headers,
-                              timeout=30,
-                              follow_redirects=True)
-
-        if response.status_code == 200:
-            feed = feedparser.parse(response.text)
-            update = True
-        elif response.status_code == 304:
-            update = False
-        else:
-            response.raise_for_status()
-
-    except httpx.HTTPStatusError as exc:
-        error = f"HTTP status error while requesting {url}: {exc.response.status_code} {exc.response.reason_phrase}"
-    except httpx.TimeoutException:
-        error = f"Timeout while requesting {url}"
-    except Exception as e:
-        error = f"Error while requesting {url}: {str(e)}"
-
-    if feed:
+        feed = feedparser.parse(url)
         if feed.bozo and not feed.entries:
-            logging.warning("Get feed %s %s", url, feed.get("bozo_exception"))
-            error = feed.get("bozo_exception")
+            return {
+                "feed": feed,
+                "update": False,
+                "error": feed.get("bozo_exception"),
+            }
+        else:
+            return {
+                "feed": feed,
+                "update": True,
+                "error": None,
+            }
+    except Exception as e:
+        return {
+            "feed": None,
+            "update": False,
+            "error": str(e),
+        }
+    
+# def fetch_feed(url: str, etag: str = "") -> Dict:
+#     update = False
+#     feed = {}
+#     error = None
+#     response = None
+#     ua = UserAgent()
+#     headers = {
+#         "If-None-Match": etag,
+#         #'If-Modified-Since': modified,
+#         "User-Agent": ua.random.strip(),
+#         "Accept":
+#         "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+#         "Accept-Language": "en-US,en;q=0.5",
+#         "Accept-Encoding": "gzip, deflate, br",
+#         "Connection": "keep-alive",
+#         "Upgrade-Insecure-Requests": "1",
+#         "Sec-Fetch-Dest": "document",
+#         "Sec-Fetch-Mode": "navigate",
+#         "Sec-Fetch-Site": "none",
+#         "Sec-Fetch-User": "?1",
+#         "Cache-Control": "max-age=0"
+#     }
 
-    return {
-        "feed": feed,
-        "xml": response.text if response else "",
-        "update": update,
-        "error": error,
-    }
+#     client = httpx.Client()
+
+#     try:
+#         response = client.get(url,
+#                               headers=headers,
+#                               timeout=30,
+#                               follow_redirects=True)
+
+#         if response.status_code == 200:
+#             feed = feedparser.parse(response.text)
+#             update = True
+#         elif response.status_code == 304:
+#             update = False
+#         else:
+#             response.raise_for_status()
+
+#     except httpx.HTTPStatusError as exc:
+#         error = f"HTTP status error while requesting {url}: {exc.response.status_code} {exc.response.reason_phrase}"
+#     except httpx.TimeoutException:
+#         error = f"Timeout while requesting {url}"
+#     except Exception as e:
+#         error = f"Error while requesting {url}: {str(e)}"
+
+#     if feed:
+#         if feed.bozo and not feed.entries:
+#             logging.warning("Get feed %s %s", url, feed.get("bozo_exception"))
+#             error = feed.get("bozo_exception")
+
+#     return {
+#         "feed": feed,
+#         "xml": response.text if response else "",
+#         "update": update,
+#         "error": error,
+#     }
 
 
 def generate_atom_feed(feed_url: str, feed_dict: dict):
