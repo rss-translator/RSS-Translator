@@ -8,13 +8,20 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import condition
 from .models import Feed
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from opyml import OPML
 from django.utils.translation import gettext_lazy as _
-
 from utils.feed_action import merge_all_atom, check_file_path
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.core.paginator import Paginator
+
+from utils.modelAdmin_utils import (
+    get_translator_models,
+    status_icon,
+)
+from .custom_admin_site import core_admin_site
 
 def import_opml(request):
     if request.method == 'POST':
@@ -221,3 +228,89 @@ def file_iterator(file_path, chunk_size=8192):
             if not chunk:
                 break
             yield chunk
+
+
+def translator_list_view(request):
+    page_number = int(request.GET.get("p", 1))
+    paginator = TranslatorPaginator()
+    page = paginator.get_page(page_number)
+    page_range = paginator.get_elided_page_range(page_number, on_each_side=2, on_ends=2)
+
+    context = {
+        **core_admin_site.each_context(request),
+        "title": "Translator",
+        "page": page,
+        "page_range": page_range,
+        "translators": page.object_list,
+    }
+    return render(request, "admin/translator.html", context)
+
+
+def translator_add_view(request):
+    if request.method == "POST":
+        translator_name = request.POST.get("translator_name", "/")
+        # redirect to example.com/translator/translator_name/add
+        target = f"/core/{translator_name}/add"
+        return (
+            redirect(target)
+            if url_has_allowed_host_and_scheme(target, allowed_hosts=None)
+            else redirect("/")
+        )
+    else:
+        models = get_translator_models()
+        translator_list = []
+        for model in models:
+            translator_list.append(
+                {
+                    "table_name": model._meta.db_table.split("_")[1],
+                    "provider": model._meta.verbose_name,
+                }
+            )
+        context = {
+            **core_admin_site.each_context(request),
+            "translator_choices": translator_list,
+        }
+        return render(request, "admin/translator_add.html", context)
+
+
+class TranslatorPaginator(Paginator):
+    def __init__(self):
+        super().__init__(self, 100)
+
+        self.translator_count = 3
+
+    @property
+    def count(self):
+        return self.translator_count
+
+    def page(self, number):
+        limit = self.per_page
+        offset = (number - 1) * self.per_page
+        return self._get_page(
+            self.enqueued_items(limit, offset),
+            number,
+            self,
+        )
+
+    # Copied from Huey's SqliteStorage with some modifications to allow pagination
+    def enqueued_items(self, limit, offset):
+        translator_models = get_translator_models()
+        translator_list = []
+        for model in translator_models:
+            objects = (
+                model.objects.all()
+                .order_by("name")
+                .values_list("id", "name", "valid")[offset : offset + limit]
+            )
+            for obj_id, obj_name, obj_valid in objects:
+                translator_list.append(
+                    {
+                        "id": obj_id,
+                        "table_name": model._meta.db_table.split("_")[1],
+                        "name": obj_name,
+                        "valid": status_icon(obj_valid),
+                        "provider": model._meta.verbose_name,
+                    }
+                )
+
+        return translator_list

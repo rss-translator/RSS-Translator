@@ -22,7 +22,7 @@ from django.views.generic.base import RedirectView
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from core.admin import core_admin_site
-
+from core import views
 favicon_view = RedirectView.as_view(url="/static/favicon.ico", permanent=True)
 
 
@@ -45,6 +45,8 @@ urlpatterns = [
     path("favicon.ico", favicon_view),
     path("log/", log, name="log"),
     path("rss/", include("core.urls")),
+    path("translator/add", views.translator_add_view, name="translator_add"),
+    path("translator/list", views.translator_list_view, name="translator_list"),
     path("", core_admin_site.urls),
 ]
 

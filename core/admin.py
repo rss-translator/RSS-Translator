@@ -7,6 +7,7 @@ from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse
 from django.db import close_old_connections
+from django.shortcuts import redirect
 
 from .models import *
 from .custom_admin_site import core_admin_site
@@ -211,7 +212,7 @@ class BaseTranslatorAdmin(admin.ModelAdmin):
             logging.error("Error in translator: %s", e)
         finally:
             obj.save()
-        return redirect("/translator")
+        return redirect("/translator/list")
 
     def is_valid(self, obj):
         return status_icon(obj.valid)
@@ -229,8 +230,7 @@ class BaseTranslatorAdmin(admin.ModelAdmin):
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
         # 重定向到指定URL
-        return redirect("/translator")
-
+        return redirect("/translator/list")
 
 class OpenAITranslatorAdmin(BaseTranslatorAdmin):
     fields = [
@@ -258,7 +258,6 @@ class OpenAITranslatorAdmin(BaseTranslatorAdmin):
         "max_tokens",
         "base_url",
     ]
-
 
 class DeepLTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "api_key", "server_url", "proxy", "max_characters"]

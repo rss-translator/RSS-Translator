@@ -269,15 +269,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fake-useragent"
-version = "2.2.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/41/43/948d10bf42735709edb5ae51e23297d034086f17fc7279fef385a7acb473/fake_useragent-2.2.0.tar.gz", hash = "sha256:4e6ab6571e40cc086d788523cf9e018f618d07f9050f822ff409a4dfe17c16b2", size = 158898, upload-time = "2025-04-14T15:32:19.238Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/37/b3ea9cd5558ff4cb51957caca2193981c6b0ff30bd0d2630ac62505d99d0/fake_useragent-2.2.0-py3-none-any.whl", hash = "sha256:67f35ca4d847b0d298187443aaf020413746e56acd985a611908c73dba2daa24", size = 161695, upload-time = "2025-04-14T15:32:17.732Z" },
-]
-
-[[package]]
 name = "feed2json"
 version = "2024.4.29"
 source = { registry = "https://pypi.org/simple" }
@@ -949,14 +940,12 @@ dependencies = [
     { name = "django" },
     { name = "django-encrypted-model-fields" },
     { name = "django-tagulous2" },
-    { name = "fake-useragent" },
     { name = "feed2json" },
     { name = "feedgen" },
     { name = "feedparser" },
     { name = "gevent" },
     { name = "gunicorn" },
     { name = "html2text" },
-    { name = "httpx" },
     { name = "lxml" },
     { name = "lxml-html-clean" },
     { name = "mistune" },
@@ -980,14 +969,12 @@ requires-dist = [
     { name = "django", specifier = ">=5.2.1" },
     { name = "django-encrypted-model-fields", specifier = ">=0.6.5" },
     { name = "django-tagulous2", git = "https://github.com/versun/django-tagulous2" },
-    { name = "fake-useragent", specifier = ">=2.2.0" },
     { name = "feed2json", specifier = ">=2024.4.29" },
     { name = "feedgen", specifier = ">=1.0.0" },
     { name = "feedparser", specifier = ">=6.0.11" },
     { name = "gevent", specifier = ">=25.5.1" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "html2text", specifier = ">=2025.4.15" },
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "lxml", specifier = ">=5.4.0" },
     { name = "lxml-html-clean", specifier = ">=0.4.2" },
     { name = "mistune", specifier = ">=3.1.3" },

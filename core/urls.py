@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from django.urls import re_path
+# from django.urls import re_path
 
 app_name = "core"
 urlpatterns = [
@@ -12,7 +12,7 @@ urlpatterns = [
     path("category/<str:category>/", views.category, name="category"),
     path("json/<str:feed_slug>", views.rss_json, name="json"),
     path("json/<str:feed_slug>/", views.rss_json, name="json"),
-    path('core/feed/import_opml/', views.import_opml, name='import_opml'),
+    path('feed/import_opml/', views.import_opml, name='import_opml'),
     path("proxy/<str:feed_slug>", views.rss, kwargs={"type": "o"}, name="proxy"),
     path("proxy/<str:feed_slug>/", views.rss, kwargs={"type": "o"}, name="proxy"),
     # re_path(r"(?P<feed_slug>[^/]+)/?$", views.rss, type="t", name="rss"),
