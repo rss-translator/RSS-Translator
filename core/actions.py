@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from utils.modelAdmin_utils import get_translator_and_summary_choices
-from .custom_admin_site import core_admin_site
+# from .custom_admin_site import core_admin_site
 from .models import Feed
 from core.management.commands.update_feeds import update_feeds_immediately
 
@@ -205,7 +205,7 @@ def feed_batch_modify(modeladmin, request, queryset):
         request,
         "admin/feed_batch_modify.html",
         context={
-            **core_admin_site.each_context(request),
+            **admin.site.each_context(request),
             "items": queryset,
             "translator_choices": translator_choices,
             "summary_engine_choices": summary_engine_choices,

@@ -6,6 +6,8 @@ from . import views
 app_name = "core"
 urlpatterns = [
     # path("filter/<str:name>", views.filter, name="filter"),
+    # path("translator/add", views.translator_add_view, name="translator_add"),
+    # path("translator/list", views.translator_list_view, name="translator_list"),
     path("all/<str:name>", views.all, name="all"),
     path("all/<str:name>/", views.all, name="all"),
     path("category/<str:category>", views.category, name="category"),

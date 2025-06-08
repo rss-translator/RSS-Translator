@@ -7,10 +7,9 @@ from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse
 from django.db import close_old_connections
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 
 from .models import *
-from .custom_admin_site import core_admin_site
 from .forms import FeedForm
 from .actions import (
     feed_export_as_opml,
@@ -20,6 +19,7 @@ from .actions import (
 from core.management.commands.update_feeds import update_feeds_immediately
 from utils.modelAdmin_utils import status_icon
 from .views import import_opml
+
 
 BACKGROUND_EXECUTOR = ThreadPoolExecutor(max_workers=5, thread_name_prefix="feed_updater_")
 
@@ -198,41 +198,9 @@ class FeedAdmin(admin.ModelAdmin):
             mark_safe(obj.log),
         )
 
-class BaseTranslatorAdmin(admin.ModelAdmin):
-    get_model_perms = lambda self, request: {}  # 不显示在admin页面
 
-    def save_model(self, request, obj, form, change):
-        logging.info("Call save_model: %s", obj)
-        # obj.valid = None
-        # obj.save()
-        try:
-            obj.valid = obj.validate()
-        except Exception as e:
-            obj.valid = False
-            logging.error("Error in translator: %s", e)
-        finally:
-            obj.save()
-        return redirect("/translator/list")
-
-    def is_valid(self, obj):
-        return status_icon(obj.valid)
-
-    is_valid.short_description = "Valid"
-
-    def masked_api_key(self, obj):
-        api_key = obj.api_key if hasattr(obj, "api_key") else obj.token
-        if api_key:
-            return f"{api_key[:3]}...{api_key[-3:]}"
-        return ""
-
-    masked_api_key.short_description = "API Key"
-
-    def delete_model(self, request, obj):
-        super().delete_model(request, obj)
-        # 重定向到指定URL
-        return redirect("/translator/list")
-
-class OpenAITranslatorAdmin(BaseTranslatorAdmin):
+@admin.register(OpenAITranslator)
+class OpenAITranslatorAdmin(TranslatorAdmin):
     fields = [
         "name",
         "api_key",
@@ -259,7 +227,9 @@ class OpenAITranslatorAdmin(BaseTranslatorAdmin):
         "base_url",
     ]
 
-class DeepLTranslatorAdmin(BaseTranslatorAdmin):
+
+@admin.register(DeepLTranslator)
+class DeepLTranslatorAdmin(TranslatorAdmin):
     fields = ["name", "api_key", "server_url", "proxy", "max_characters"]
     list_display = [
         "name",
@@ -270,20 +240,25 @@ class DeepLTranslatorAdmin(BaseTranslatorAdmin):
         "max_characters",
     ]
 
-
-class TestTranslatorAdmin(BaseTranslatorAdmin):
+@admin.register(TestTranslator)
+class TestTranslatorAdmin(TranslatorAdmin):
     fields = ["name", "translated_text", "max_characters", "interval"]
     list_display = ["name", "is_valid", "translated_text", "max_characters", "interval"]
+    
 
 
-core_admin_site.register(Feed, FeedAdmin)
-core_admin_site.register(OpenAITranslator, OpenAITranslatorAdmin)
-core_admin_site.register(DeepLTranslator, DeepLTranslatorAdmin)
+#core_admin_site.register(Feed, FeedAdmin)
+admin.site.register(Feed, FeedAdmin)  # Register Feed with the default admin site
+admin.site.site_header = _("RSS Translator Admin")
+admin.site.site_title = _("RSS Translator")
+admin.site.index_title = _("Dashboard")
 
 if settings.USER_MANAGEMENT:
-    core_admin_site.register(User)
-    core_admin_site.register(Group)
+    admin.site.register(User)
+    admin.site.register(Group)
+else:
+    admin.site.unregister(User)
+    admin.site.unregister(Group)
 
 if settings.DEBUG:
-    core_admin_site.register(Translated_Content, Translated_ContentAdmin)
-    core_admin_site.register(TestTranslator, TestTranslatorAdmin)
+    admin.site.register(TestTranslator, ??)

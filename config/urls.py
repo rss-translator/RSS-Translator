@@ -21,7 +21,9 @@ from django.conf import settings
 from django.views.generic.base import RedirectView
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from core.admin import core_admin_site
+# from core.admin import core_admin_site
+from django.contrib import admin
+
 from core import views
 favicon_view = RedirectView.as_view(url="/static/favicon.ico", permanent=True)
 
@@ -39,15 +41,15 @@ if settings.DEMO:
     class AccessUser:
         has_module_perms = has_perm = __getattr__ = lambda s, *a, **kw: True
 
-    core_admin_site.has_permission = lambda r: setattr(r, "user", AccessUser()) or True
+    admin.site.has_permission = lambda r: setattr(r, "user", AccessUser()) or True
 
 urlpatterns = [
     path("favicon.ico", favicon_view),
     path("log/", log, name="log"),
     path("rss/", include("core.urls")),
-    path("translator/add", views.translator_add_view, name="translator_add"),
-    path("translator/list", views.translator_list_view, name="translator_list"),
-    path("", core_admin_site.urls),
+    # path("translator/add", views.translator_add_view, name="translator_add"),
+    # path("translator/list", views.translator_list_view, name="translator_list"),
+    path("", admin.site.urls),
 ]
 
 if settings.DEBUG:
