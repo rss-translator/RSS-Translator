@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import mistune
 import newspaper
 from typing import Optional
-from .models import Feed, Entry, TranslatorEngine
+from .models import Feed, Entry, Translator
 from utils.feed_action import fetch_feed
 from utils import text_handler
 
@@ -201,7 +201,7 @@ def translate_feed(feed: Feed, target_field: str = "title"):
 def _translate_title(
     entry: Entry,
     target_language: str,
-    engine: TranslatorEngine,
+    engine: Translator,
 )->dict:
     """Translate entry title with caching and retry logic"""
     total_tokens = 0
@@ -229,7 +229,7 @@ def _translate_title(
 def _translate_content(
     entry: Entry,
     target_language: str,
-    engine: TranslatorEngine,
+    engine: Translator,
     quality: bool = False,
 )->dict:
     """Translate entry content with optimized caching"""

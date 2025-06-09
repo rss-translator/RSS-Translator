@@ -1,15 +1,15 @@
 import deepl
-from .translator_abstract import TranslatorEngine
+from .translator import Translator
 import logging
 from django.db import models
 from encrypted_model_fields.fields import EncryptedCharField
 from django.utils.translation import gettext_lazy as _
 
 
-class DeepLTranslator(TranslatorEngine):
+class DeepLTranslator(Translator):
     # https://github.com/DeepLcom/deepl-python
-    api_key = EncryptedCharField(_("API Key"), max_length=255)
-    max_characters = models.IntegerField(default=5000)
+    api_key = EncryptedCharField(_("API Key"), max_length=255, null=True)
+    max_characters = 5000
     server_url = models.URLField(_("API URL(optional)"), null=True, blank=True)
     proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True)
     language_code_map = {

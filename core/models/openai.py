@@ -4,43 +4,43 @@ from django.utils.translation import gettext_lazy as _
 from config import settings
 from openai import OpenAI
 from encrypted_model_fields.fields import EncryptedCharField
-from .translator_abstract import TranslatorEngine
+from .translator import Translator
 
 
-class OpenAITranslator(TranslatorEngine):
+class OpenAITranslator(Translator):
     # https://platform.openai.com/docs/api-reference/chat
-    is_ai = models.BooleanField(default=True, editable=False)
-    api_key = EncryptedCharField(_("API Key"), max_length=255)
-    base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
-    model = models.CharField(
-        max_length=100,
-        default="gpt-3.5-turbo",
-        help_text="e.g. gpt-3.5-turbo, gpt-4-turbo",
-    )
-    translate_prompt = models.TextField(
-        _("Title Translate Prompt"), default=settings.default_title_translate_prompt
-    )
-    content_translate_prompt = models.TextField(
-        _("Content Translate Prompt"), default=settings.default_content_translate_prompt
-    )
-
-    temperature = models.FloatField(default=0.2)
-    top_p = models.FloatField(default=0.2)
-    frequency_penalty = models.FloatField(default=0)
-    presence_penalty = models.FloatField(default=0)
-    max_tokens = models.IntegerField(default=2000)
-
-    summary_prompt = models.TextField(default=settings.default_summary_prompt)
 
     class Meta:
+        proxy = True
         verbose_name = "OpenAI"
         verbose_name_plural = "OpenAI"
 
-    def _init(self):
+    def get_client(self):
+        config = self.service_config
+        self.base_url = config.get("base_url", "https://api.openai.com/v1")
+        self.model = config.get("model", "gpt-3.5-turbo")
+        self.title_translate_prompt = config.get("title_translate_prompt", settings.default_title_translate_prompt)
+        self.content_translate_prompt = config.get("content_translate_prompt", settings.default_content_translate_prompt)
+        self.summary_prompt = config.get("summary_prompt", settings.default_summary_prompt)
+        self.temperature = config.get("temperature", 0.2)
+        self.top_p = config.get("top_p", 0.2)
+        self.frequency_penalty = config.get("frequency_penalty", 0)
+        self.presence_penalty = config.get("presence_penalty", 0)
+        self.max_tokens = config.get("max_tokens", 2000)
+    
         return OpenAI(
             api_key=self.api_key,
             base_url=self.base_url,
             timeout=120.0,
+            model=self.model,
+            title_translate_prompt=self.title_translate_prompt,
+            content_translate_prompt=self.content_translate_prompt,
+            summary_prompt=self.summary_prompt,
+            temperature=self.temperature,
+            top_p=self.top_p,
+            frequency_penalty=self.frequency_penalty,
+            presence_penalty=self.presence_penalty,
+            max_tokens=self.max_tokens,
         )
 
     def validate(self) -> bool:
@@ -75,7 +75,7 @@ class OpenAITranslator(TranslatorEngine):
         tokens = 0
         translated_text = ""
         system_prompt = (
-            system_prompt or self.translate_prompt
+            system_prompt or self.title_translate_prompt
             if text_type == "title"
             else self.content_translate_prompt
         )

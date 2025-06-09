@@ -269,6 +269,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "django-typed-models"
+version = "0.14.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/32/1a/f231998a68f5357c0bfcc5f94247bef3c69acc63517e2cd24a33910b75ba/django-typed-models-0.14.0.tar.gz", hash = "sha256:1d374f9fc3c7aedcfbaada9200c0b489c3d2262c275a499141c2dcfc7472a5b7", size = 12542, upload-time = "2023-10-24T22:10:35.296Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/47/51c2d6ea1157e24a8a70aeec49e65cc915045dd905890595853a293382ab/django_typed_models-0.14.0-py3-none-any.whl", hash = "sha256:efb51da12e51492b95c32798c0c9ac2b4caa05b0138391b676bc3e8b9ca2e5dd", size = 13299, upload-time = "2023-10-24T22:10:33.047Z" },
+]
+
+[[package]]
 name = "feed2json"
 version = "2024.4.29"
 source = { registry = "https://pypi.org/simple" }
@@ -940,6 +949,7 @@ dependencies = [
     { name = "django" },
     { name = "django-encrypted-model-fields" },
     { name = "django-tagulous2" },
+    { name = "django-typed-models" },
     { name = "feed2json" },
     { name = "feedgen" },
     { name = "feedparser" },
@@ -969,6 +979,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2.1" },
     { name = "django-encrypted-model-fields", specifier = ">=0.6.5" },
     { name = "django-tagulous2", git = "https://github.com/versun/django-tagulous2" },
+    { name = "django-typed-models", specifier = ">=0.14.0" },
     { name = "feed2json", specifier = ">=2024.4.29" },
     { name = "feedgen", specifier = ">=1.0.0" },
     { name = "feedparser", specifier = ">=6.0.11" },

@@ -23,6 +23,7 @@ from .views import import_opml
 
 BACKGROUND_EXECUTOR = ThreadPoolExecutor(max_workers=5, thread_name_prefix="feed_updater_")
 
+@admin.register(Feed)
 class FeedAdmin(admin.ModelAdmin):
     form = FeedForm
     list_display = [
@@ -198,57 +199,90 @@ class FeedAdmin(admin.ModelAdmin):
             mark_safe(obj.log),
         )
 
-
 @admin.register(OpenAITranslator)
-class OpenAITranslatorAdmin(TranslatorAdmin):
-    fields = [
-        "name",
-        "api_key",
-        "base_url",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "temperature",
-        "top_p",
-        "frequency_penalty",
-        "presence_penalty",
-        "max_tokens",
-    ]
-    list_display = [
-        "name",
-        "is_valid",
-        "masked_api_key",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "max_tokens",
-        "base_url",
-    ]
-
+class OpenAITranslatorAdmin(TypedModelAdmin):
+    pass
+    # base_fields = [
+    #     "name",
+    #     "api_key",
+    #     "base_url",
+    #     "model",
+    #     "translate_prompt",
+    #     "content_translate_prompt",
+    #     "summary_prompt",
+    #     "temperature",
+    #     "top_p",
+    #     "frequency_penalty",
+    #     "presence_penalty",
+    #     "max_tokens",
+    # ]
+    # list_display = [
+    #     "name",
+    #     "is_valid",
+    #     "masked_api_key",
+    #     "model",
+    #     "translate_prompt",
+    #     "content_translate_prompt",
+    #     "summary_prompt",
+    #     "max_tokens",
+    #     "base_url",
+    # ]
 
 @admin.register(DeepLTranslator)
-class DeepLTranslatorAdmin(TranslatorAdmin):
-    fields = ["name", "api_key", "server_url", "proxy", "max_characters"]
-    list_display = [
-        "name",
-        "is_valid",
-        "masked_api_key",
-        "server_url",
-        "proxy",
-        "max_characters",
-    ]
+class DeepLTranslatorAdmin(TypedModelAdmin):
+    pass
+    #base_fields = ["name", "api_key", "server_url", "proxy", "max_characters"]
+    # list_display = [
+    #     "name",
+    #     "is_valid",
+    #     "masked_api_key",
+    #     "server_url",
+    #     "proxy",
+    #     "max_characters",
+    # ]
 
 @admin.register(TestTranslator)
-class TestTranslatorAdmin(TranslatorAdmin):
-    fields = ["name", "translated_text", "max_characters", "interval"]
-    list_display = ["name", "is_valid", "translated_text", "max_characters", "interval"]
+class TestTranslatorAdmin(TypedModelAdmin):
+    pass
+    #base_fields = ["name", "translated_text", "max_characters", "interval"]
+    #list_display = ["name", "is_valid", "translated_text", "max_characters", "interval"]
     
+@admin.register(Translator)
+class TranslatorParentAdmin(TypedModelAdmin):
+    #list_display = ["name", "is_valid", "masked_api_key", "translator_type"]
+    list_display = ["name", "get_translator_type"]
+    list_display_links = ["name"]
+    #list_filter = ["translator_type"]
+    search_fields = ["name"]
 
 
-#core_admin_site.register(Feed, FeedAdmin)
-admin.site.register(Feed, FeedAdmin)  # Register Feed with the default admin site
+
+    def get_translator_type(self, obj):
+        """显示翻译器类型"""
+        if hasattr(obj, 'polymorphic_ctype'):
+            return obj.polymorphic_ctype.model.replace('translator', '').upper()
+        return ""
+    get_translator_type.short_description = 'Type'
+    
+    def get_child_model_admin(self, obj):
+        """
+        根据对象类型返回对应的子模型 Admin 类
+        """
+        if obj is None:
+            return None
+        for model, admin_cls in self._registry.items():
+            if model == obj.get_real_instance_class():
+                return admin_cls
+        return None
+    # def get_child_model_admin(self, obj):
+    #     if isinstance(obj, OpenAITranslator):
+    #         return OpenAITranslatorAdmin
+    #     elif isinstance(obj, DeepLTranslator):
+    #         return DeepLTranslatorAdmin
+    #     elif isinstance(obj, TestTranslator):
+    #         return TestTranslatorAdmin
+    #     return super().get_child_model_admin(obj)
+
 admin.site.site_header = _("RSS Translator Admin")
 admin.site.site_title = _("RSS Translator")
 admin.site.index_title = _("Dashboard")
@@ -259,6 +293,3 @@ if settings.USER_MANAGEMENT:
 else:
     admin.site.unregister(User)
     admin.site.unregister(Group)
-
-if settings.DEBUG:
-    admin.site.register(TestTranslator, ??)

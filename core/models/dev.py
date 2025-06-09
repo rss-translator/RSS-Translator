@@ -1,15 +1,15 @@
-from .translator_abstract import TranslatorEngine
+from .translator import Translator
 import logging
 from django.db import models
 from time import sleep
 from django.utils.translation import gettext_lazy as _
 
 
-class TestTranslator(TranslatorEngine):
+class TestTranslator(Translator):
     translated_text = models.TextField(default="@@Translated Text@@")
-    max_characters = models.IntegerField(default=50000)
+    max_characters = 50000
     interval = models.IntegerField(_("Request Interval(s)"), default=3)
-    is_ai = models.BooleanField(default=True, editable=False)
+    is_ai = True
 
     class Meta:
         verbose_name = "Test"
