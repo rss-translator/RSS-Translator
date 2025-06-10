@@ -137,6 +137,29 @@ wheels = [
 ]
 
 [[package]]
+name = "bx-django-utils"
+version = "89"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "bx-py-utils" },
+    { name = "django" },
+    { name = "python-stdnum" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a0/98/b5287c50d4f3127da58b481d4b4bfd4ba4c8057a6d6701bd8f260bcf0fa3/bx_django_utils-89.tar.gz", hash = "sha256:c7c96b8760128b9a0c2633fd0a5ecb47f44dac9f684ac4ed18f0af866883ff62", size = 209099, upload-time = "2025-06-03T07:47:34.218Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d6/1f/ae55b140c7e1ac8fbf29df3b3acacc874ef3d66aac65cb04129eb8322cf0/bx_django_utils-89-py3-none-any.whl", hash = "sha256:733d6cab9f2da6335a1b00de1e36dd56eaf376de4f29f27282683cc958300c8f", size = 116871, upload-time = "2025-06-03T07:47:32.426Z" },
+]
+
+[[package]]
+name = "bx-py-utils"
+version = "108"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/64/48/49e8cf2ffef4ea2eb5eb6f8de373694ee32951af35cbe00cd58af7c15825/bx_py_utils-108.tar.gz", hash = "sha256:d04fa970393dd1d04d40722327e41f08495b98e751a707558276caea1b807792", size = 217281, upload-time = "2025-01-13T16:44:16.886Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b1/21/c8d9e6220f3ce538938d45363e7044bfaa80f8c769b7c35debc0945c738a/bx_py_utils-108-py3-none-any.whl", hash = "sha256:01768717b8f7a4c44b1c62d0dcf75cee7362ee79c9fd73cd4990d005ebc8586f", size = 176162, upload-time = "2025-01-13T16:44:13.89Z" },
+]
+
+[[package]]
 name = "cachetools"
 version = "5.5.2"
 source = { registry = "https://pypi.org/simple" }
@@ -537,6 +560,9 @@ dependencies = [
     { name = "uritemplate" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/35/99/237cd2510aecca9fabb54007e58553274cc43cb3c18512ee1ea574d11b87/google_api_python_client-2.171.0.tar.gz", hash = "sha256:057a5c08d28463c6b9eb89746355de5f14b7ed27a65c11fdbf1d06c66bb66b23", size = 13028937, upload-time = "2025-06-03T18:57:38.732Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/db/c397e3eb3ea18f423855479d0a5852bdc9c3f644e3d4194931fa664a70b4/google_api_python_client-2.171.0-py3-none-any.whl", hash = "sha256:c9c9b76f561e9d9ac14e54a9e2c0842876201d5b96e69e48f967373f0784cbe9", size = 13547393, upload-time = "2025-06-10T02:14:38.225Z" },
+]
 
 [[package]]
 name = "google-auth"
@@ -1327,6 +1353,15 @@ wheels = [
 ]
 
 [[package]]
+name = "python-stdnum"
+version = "2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/60/fd8299c7d8990a7d802286ac604862387bcac3df08be7cb1c932c33ef7da/python_stdnum-2.1.tar.gz", hash = "sha256:6b01645969eb3dfd55061a0114d593753cd9e653cea9083198b7eea12644397a", size = 1238596, upload-time = "2025-05-17T13:18:43.506Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/67/04/730f619b5b8470adf0e029ee2f0a060689145ea64dec001c8bac3c3959e2/python_stdnum-2.1-py3-none-any.whl", hash = "sha256:25eabcf5f307dd4150fd8f1c03f4512a6caeb84c9f09be1448711f5803373c58", size = 1120175, upload-time = "2025-05-17T13:18:41.193Z" },
+]
+
+[[package]]
 name = "pytz"
 version = "2025.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1524,6 +1559,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "bx-django-utils" },
     { name = "django-debug-toolbar" },
 ]
 
@@ -1560,7 +1596,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "django-debug-toolbar", specifier = ">=5.2.0" }]
+dev = [
+    { name = "bx-django-utils", specifier = ">=89" },
+    { name = "django-debug-toolbar", specifier = ">=5.2.0" },
+]
 
 [[package]]
 name = "setuptools"
