@@ -13,6 +13,34 @@ from utils.modelAdmin_utils import get_translator_and_summary_choices
 from .custom_admin_site import core_admin_site
 from .models import Feed
 from core.management.commands.update_feeds import update_feeds_immediately
+from utils.task_manager import task_manager
+from django.db import close_old_connections
+
+def execute_feed_update(feed_id):
+        """在后台线程中执行feed更新"""        
+        try:
+            # 确保在新线程中创建新的数据库连接
+            close_old_connections()
+            
+            try:
+                # 尝试获取feed对象
+                feed = Feed.objects.get(id=feed_id)
+                logging.info(f"Starting feed update: {feed.name} (ID: {feed_id})")
+                task_manager.update_progress(feed_id, 50)
+                # 执行更新操作
+                update_feeds_immediately([feed])
+                
+                logging.info(f"Completed feed update: {feed.name} (ID: {feed_id})")
+                return True
+            except Feed.DoesNotExist:
+                logging.error(f"Feed not found: ID {feed_id}")
+                return False
+            except Exception as e:
+                logging.exception(f"Error updating feed ID {feed_id}: {str(e)}")
+                return False
+        finally:
+            # 确保关闭数据库连接
+            close_old_connections()
 
 
 @admin.display(description=_("Export selected feeds as OPML"))
@@ -106,7 +134,12 @@ def feed_force_update(modeladmin, request, queryset):
             instance.fetch_status = None
             instance.save()
             update_feeds_immediately([instance])
-    # TODO: 后台执行
+    for feed_id in queryset.values_list("id", flat=True):
+        task_manager.submit_task(
+            f"Force Update Feed: {feed_id}",
+            execute_feed_update,
+            feed_id
+        )
 
 
 @admin.display(description=_("Batch modification"))

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, Group
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse
-from django.db import close_old_connections
+from django.db import transaction
 
 from .models import Feed
 from .custom_admin_site import core_admin_site
@@ -15,9 +15,10 @@ from .actions import (
     feed_export_as_opml,
     feed_force_update,
     feed_batch_modify,
+    execute_feed_update,
 )
-from core.management.commands.update_feeds import update_feeds_immediately
 from utils.modelAdmin_utils import status_icon
+from utils.task_manager import task_manager
 from .views import import_opml
 
 BACKGROUND_EXECUTOR = ThreadPoolExecutor(max_workers=5, thread_name_prefix="feed_updater_")
@@ -73,55 +74,43 @@ class FeedAdmin(admin.ModelAdmin):
             obj.fetch_status = None
             obj.translation_status = None
             obj.name = obj.name or "Loading"
-            obj.save()
+            #obj.save()
+            super().save_model(request, obj, form, change)
             # 提交后台更新任务到线程池
-            self._submit_background_update(obj.id)
+            # transaction.on_commit(lambda: self._submit_background_update(obj.id))
+            # 使用transaction.on_commit确保在事务提交后提交任务
+            def submit_task_after_commit():
+                task_id = task_manager.submit_task(
+                    f"Update Feed: {obj.name}",
+                    execute_feed_update,
+                    obj.id
+                )
+                logging.info(f"Submitted feed update task after commit: {task_id}")
+            
+            transaction.on_commit(submit_task_after_commit)
         else:
             obj.name = obj.name or "Empty"
-            obj.save()
+            super().save_model(request, obj, form, change)
 
-    def _submit_background_update(self, feed_id):
-        """提交后台更新任务到线程池"""
-        # 创建任务并提交到线程池
-        future = BACKGROUND_EXECUTOR.submit(self._execute_feed_update, feed_id)
+    # def _submit_background_update(self, feed_id):
+    #     """提交后台更新任务到线程池"""
+    #     # 创建任务并提交到线程池
+    #     future = BACKGROUND_EXECUTOR.submit(self._execute_feed_update, feed_id)
         
-        # 添加回调处理（可选）
-        future.add_done_callback(self._handle_update_result)
+    #     # 添加回调处理（可选）
+    #     future.add_done_callback(self._handle_update_result)
 
-    def _execute_feed_update(self, feed_id):
-        """在后台线程中执行feed更新"""
-        from .models import Feed
-        
-        try:
-            # 确保在新线程中创建新的数据库连接
-            close_old_connections()
-            
-            # 重新获取feed对象
-            feed = Feed.objects.get(id=feed_id)
-            logging.info(f"Starting background update for feed: {feed.name} (ID: {feed_id})")
-            
-            # 执行更新操作
-            update_feeds_immediately([feed])
-            
-            logging.info(f"Completed background update for feed: {feed.name} (ID: {feed_id})")
-            return True
-        except Exception as e:
-            logging.error(f"Background feed update failed for ID {feed_id}: {str(e)}")
-            return False
-        finally:
-            # 确保关闭数据库连接
-            close_old_connections()
 
-    def _handle_update_result(self, future):
-        """处理后台任务结果（可选）"""
-        try:
-            success = future.result()
-            if success:
-                logging.debug("Feed update completed successfully")
-            else:
-                logging.warning("Feed update completed with errors")
-        except Exception as e:
-            logging.error(f"Exception in background task: {str(e)}")
+    # def _handle_update_result(self, future):
+    #     """处理后台任务结果（可选）"""
+    #     try:
+    #         success = future.result()
+    #         if success:
+    #             logging.debug("Feed update completed successfully")
+    #         else:
+    #             logging.warning("Feed update completed with errors")
+    #     except Exception as e:
+    #         logging.error(f"Exception in background task: {str(e)}")
 
     @admin.display(description=_("Update Frequency"), ordering="update_frequency")
     def simple_update_frequency(self, obj):
