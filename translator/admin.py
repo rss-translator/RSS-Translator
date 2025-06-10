@@ -391,28 +391,6 @@ class KagiTranslatorAdmin(BaseTranslatorAdmin):
         "content_translate_prompt",
     ]
 
-class Translated_ContentAdmin(admin.ModelAdmin):
-    fields = [
-        "original_content",
-        "translated_content",
-        "translated_language",
-        "tokens",
-        "characters",
-    ]
-    list_display = [
-        "original_content",
-        "translated_language",
-        "translated_content",
-        "tokens",
-        "characters",
-    ]
-
-    # def has_change_permission(self, request, obj=None):
-    #     return False
-
-    # def has_add_permission(self, request):
-    #     return False
-
 
 class TestTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "translated_text", "max_characters", "interval"]
@@ -441,5 +419,4 @@ core_admin_site.register(OpenlTranslator, OpenlTranslatorAdmin)
 core_admin_site.register(KagiTranslator, KagiTranslatorAdmin)
 
 if settings.DEBUG:
-    core_admin_site.register(Translated_Content, Translated_ContentAdmin)
     core_admin_site.register(TestTranslator, TestTranslatorAdmin)

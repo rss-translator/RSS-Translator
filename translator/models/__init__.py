@@ -1,4 +1,4 @@
-from .base import TranslatorEngine, Translated_Content
+from .base import TranslatorEngine
 from .azureai import AzureAITranslator
 from .caiyun import CaiYunTranslator
 from .claude import ClaudeTranslator
