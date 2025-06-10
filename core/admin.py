@@ -15,11 +15,11 @@ from .actions import (
     feed_export_as_opml,
     feed_force_update,
     feed_batch_modify,
-    execute_feed_update,
 )
 from utils.modelAdmin_utils import status_icon
 from utils.task_manager import task_manager
 from .views import import_opml
+from .management.commands.update_feeds import update_single_feed
 
 BACKGROUND_EXECUTOR = ThreadPoolExecutor(max_workers=5, thread_name_prefix="feed_updater_")
 
@@ -76,13 +76,11 @@ class FeedAdmin(admin.ModelAdmin):
             obj.name = obj.name or "Loading"
             #obj.save()
             super().save_model(request, obj, form, change)
-            # 提交后台更新任务到线程池
-            # transaction.on_commit(lambda: self._submit_background_update(obj.id))
             # 使用transaction.on_commit确保在事务提交后提交任务
             def submit_task_after_commit():
                 task_id = task_manager.submit_task(
                     f"Update Feed: {obj.name}",
-                    execute_feed_update,
+                    update_single_feed,
                     obj.id
                 )
                 logging.info(f"Submitted feed update task after commit: {task_id}")
@@ -91,26 +89,6 @@ class FeedAdmin(admin.ModelAdmin):
         else:
             obj.name = obj.name or "Empty"
             super().save_model(request, obj, form, change)
-
-    # def _submit_background_update(self, feed_id):
-    #     """提交后台更新任务到线程池"""
-    #     # 创建任务并提交到线程池
-    #     future = BACKGROUND_EXECUTOR.submit(self._execute_feed_update, feed_id)
-        
-    #     # 添加回调处理（可选）
-    #     future.add_done_callback(self._handle_update_result)
-
-
-    # def _handle_update_result(self, future):
-    #     """处理后台任务结果（可选）"""
-    #     try:
-    #         success = future.result()
-    #         if success:
-    #             logging.debug("Feed update completed successfully")
-    #         else:
-    #             logging.warning("Feed update completed with errors")
-    #     except Exception as e:
-    #         logging.error(f"Exception in background task: {str(e)}")
 
     @admin.display(description=_("Update Frequency"), ordering="update_frequency")
     def simple_update_frequency(self, obj):
@@ -146,7 +124,6 @@ class FeedAdmin(admin.ModelAdmin):
     @admin.display(description=_("Fetch Feed"))
     def fetch_feed(self, obj): # 显示3个元素：fetch状态、原url、代理feed
         return format_html(
-            # "<span>{0}</span> | <a href='{1}' target='_blank'>{2}</a> | <a href='{3}' target='_blank'>{4}</a>",
             "<span>{0}</span><br><a href='{1}' target='_blank'>{2}</a> | <a href='{3}' target='_blank'>{4}</a>",
 
             status_icon(obj.fetch_status), # 0

@@ -3,6 +3,8 @@ import sys
 from django.core.management.base import BaseCommand
 from core.models import Feed
 from core.tasks import handle_feeds_fetch, handle_feeds_translation, handle_feeds_summary
+from django.db import close_old_connections
+
 
 class Command(BaseCommand):
     help = 'Updates feeds based on specified frequency or runs immediate update'
@@ -34,26 +36,68 @@ class Command(BaseCommand):
                 sys.exit(1)
 
 
-def update_feeds_immediately(feeds: list):
+def update_single_feed(feed_id):
+        """在后台线程中执行feed更新"""        
+        try:
+            # 确保在新线程中创建新的数据库连接
+            close_old_connections()
+            
+            try:
+                # 尝试获取feed对象
+                feed = Feed.objects.get(id=feed_id)
+                logging.info(f"Starting feed update: {feed.name} (ID: {feed_id})")
+
+                handle_feeds_fetch([feed])
+                #task_manager.update_progress(feed_id, 50)
+                # 执行更新操作
+                if feed.translate_title:
+                    handle_feeds_translation([feed], target_field="title")
+                if feed.translate_content:
+                    handle_feeds_translation([feed], target_field="content")
+                if feed.summary:
+                    handle_feeds_summary([feed])
+                
+                logging.info(f"Completed feed update: {feed.name} (ID: {feed_id})")
+                return True
+            except Feed.DoesNotExist:
+                logging.error(f"Feed not found: ID {feed_id}")
+                return False
+            except Exception as e:
+                logging.exception(f"Error updating feed ID {feed_id}: {str(e)}")
+                return False
+        finally:
+            # 确保关闭数据库连接
+            close_old_connections()
+
+def update_multiple_feeds(feeds: list):
+    """并行更新多个Feed"""
     try:
-        handle_feeds_fetch(feeds)
-        title_trans_feeds = [f for f in feeds if f.translate_title]
-        handle_feeds_translation(title_trans_feeds, target_field="title")
+        # 为每个feed创建并行任务
+        task_ids = []
+        for feed in feeds:
+            task_name = f"update_feed_{feed.id}"
+            task_id = task_manager.submit_task(task_name, update_single_feed, feed.id)
+            task_ids.append(task_id)
         
-        content_trans_feeds = [f for f in feeds if f.translate_content]
-        handle_feeds_translation(content_trans_feeds, target_field="content")
-        
-        summary_feeds = [f for f in feeds if f.summary]
-        handle_feeds_summary(summary_feeds)
-        
+        # 等待所有任务完成（可选，根据需求决定是否阻塞）
+        # 实际应用中可能需要更完善的等待/超时机制
+        while True:
+            completed = all(
+                task_manager.get_task_status(tid)['status'] in ['completed', 'failed']
+                for tid in task_ids
+            )
+            if completed:
+                break
+            time.sleep(3)  # 避免CPU忙等待
+            
     except Exception as e:
-        logging.exception("Command update_feeds_immediately failed: %s", str(e))
+        logging.exception("Command update_multiple_feeds failed: %s", str(e))
 
 def update_feeds_for_frequency(simple_update_frequency: str):
     """
     Update feeds for given update frequency group.
     """
-    update_frequency = {
+    update_frequency_map = {
     "5 min": 5,
     "15 min": 15,
     "30 min": 30,
@@ -64,13 +108,17 @@ def update_feeds_for_frequency(simple_update_frequency: str):
     
     try:
         logging.info("Start update feeds for frequency: %s", simple_update_frequency)
-        update_feeds_immediately(Feed.objects.filter(update_frequency=update_frequency[simple_update_frequency]))
+        frequency_val = update_frequency_map[simple_update_frequency]
+        feeds = list(Feed.objects.filter(update_frequency=frequency_val))
+
+        update_multiple_feeds(feeds)
 
         # TODO:export feeds as rss
         # TODO:export feeds as json
+    except KeyError:
+        logging.error(f"Invalid frequency: {simple_update_frequency}")
     except Exception as e:
         logging.exception("Command update_feeds_for_frequency %s: %s", simple_update_frequency, str(e))
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
