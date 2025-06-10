@@ -2,8 +2,6 @@ import logging
 from datetime import datetime
 from ast import literal_eval
 from opyml import OPML, Outline, Head
-from huey.contrib.djhuey import HUEY as huey
-
 from django.contrib import admin
 from django.shortcuts import render, redirect
 from django.urls import reverse

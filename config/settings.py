@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "huey.contrib.djhuey",
+    # "huey.contrib.djhuey",
     "translator.apps.TranslatorConfig",
     "core.apps.CoreConfig",
     "encrypted_model_fields",  # must set FIELD_ENCRYPTION_KEY value
@@ -123,19 +123,6 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATA_FOLDER / "db.sqlite3",
     }
-}
-
-HUEY = {
-    "huey_class": "huey.SqliteHuey",
-    "filename": DATA_FOLDER / "tasks.sqlite3",
-    "consumer": {
-        "workers": int(os.environ.get("HUEY_WORKERS", 10)),
-        "worker_type": "greenlet",
-    },
-    "immediate": False,
-    "results": False,
-    "store_none": False,
-    "utc": True,
 }
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
