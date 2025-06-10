@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "huey.contrib.djhuey",
     "translator.apps.TranslatorConfig",
     "core.apps.CoreConfig",
     "encrypted_model_fields",  # must set FIELD_ENCRYPTION_KEY value
@@ -64,7 +63,6 @@ INSTALLED_APPS = [
 DEBUG_PLUGINS = [
     "debug_toolbar",
     "bx_django_utils",  # https://github.com/boxine/bx_django_utils
-    #'huey_monitor',
 ]
 
 SERIALIZATION_MODULES = {
