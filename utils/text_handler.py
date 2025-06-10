@@ -148,10 +148,6 @@ def should_skip(element):
     if element.find_parent("span", class_="katex"):
         return True
 
-    text = element.get_text(strip=True)
-    if not text:
-        return True
-
     # 使用正则表达式来检查元素是否为数字、URL、电子邮件或包含特定符号
     skip_patterns = [
         r"^http",  # URL
@@ -160,7 +156,7 @@ def should_skip(element):
     ]
 
     for pattern in skip_patterns:
-        if re.match(pattern, text):
+        if re.match(pattern, element.get_text(strip=True)):
             return True
 
     return False

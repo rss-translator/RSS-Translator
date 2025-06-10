@@ -87,7 +87,7 @@ def handle_feeds_translation(feeds: list, target_field: str = "title"):
                 continue
             
             feed.translation_status = None
-            logging.info("Start translate feed: [%s]%s", feed.target_language, feed.feed_url)
+            logging.info("Start translate %s of feed %s to %s", target_field,feed.feed_url, feed.target_language)
 
             translate_feed(feed, target_field=target_field)
             feed.translation_status = True
@@ -111,7 +111,7 @@ def handle_feeds_summary(feeds: list):
                 continue
             
             feed.translation_status = None
-            logging.info("Start summary feed: [%s]%s", feed.target_language, feed.feed_url)
+            logging.info("Start summary feed %s to %s", feed.feed_url, feed.target_language)
 
             summarize_feed(feed)
             feed.translation_status = True
@@ -209,7 +209,7 @@ def _translate_title(
     total_characters = 0
     # Check if title has been translated
     if entry.translated_title:
-        logging.debug("[Title] Title already translated")
+        logging.debug(f"[Title] Title already translated: {entry.original_title}")
         return {"tokens": 0, "characters": 0}
 
     logging.debug("[Title] Translating title")
@@ -232,37 +232,44 @@ def _translate_content(
     target_language: str,
     engine: TranslatorEngine,
     quality: bool = False,
-)->dict:
+)->dict: # TODO: Force update会执行2次
     """Translate entry content with optimized caching"""
-# TODO: 
     total_tokens = 0
     total_characters = 0
     # 检查是否已经翻译过
     if entry.translated_content:
-        logging.debug("[Content] Content already translated")
+        logging.debug(f"[Content] Content already translated: {entry.original_title}")
         return {"tokens": 0, "characters": 0}
     
-    # TODO:清理逻辑要优化
-    logging.debug("[Content] Translating content")
     soup = BeautifulSoup(entry.original_content, "lxml")
-    if quality:
-        soup = BeautifulSoup(text_handler.unwrap_tags(soup), "lxml")
+    # if quality:
+    #     soup = BeautifulSoup(text_handler.unwrap_tags(soup), "lxml")
 
+    # add notranslate class and translate="no" to elements that should not be translated
     for element in soup.find_all(string=True):
-        if text_handler.should_skip(element):
+        if not element.get_text(strip=True):
             continue
-        # TODO 如果文字长度大于最大长度，就分段翻译，需要用chunk_translate
-        text = element.get_text()
+        if text_handler.should_skip(element):
+            logging.debug("[Content] Skipping element %s", element.parent)
+            # 标记父元素不翻译
+            parent = element.parent
+            parent.attrs.update({
+                'class': parent.get('class', []) + ['notranslate'],
+                'translate': 'no'
+            })
 
-    logging.debug("[Content] Translating content")
+    # TODO 如果文字长度大于最大长度，就分段翻译
+    processed_html = str(soup)
+
+    logging.debug(f"[Content] Translating content: {entry.original_title}")
     result = _auto_retry(
         func=engine.translate,
         max_retries=3,
-        text=text,
+        text=processed_html,
         target_language=target_language,
         text_type="content"
     )
-    entry.translated_content = result.get("text", text)
+    entry.translated_content = result.get("text", processed_html)
     total_tokens = result.get("tokens", 0)
     total_characters = result.get("characters", 0)
 
@@ -283,9 +290,9 @@ def summarize_feed(
             entry_needs_save = False
             # Check cache first
             if entry.ai_summary:
-                logging.debug("[Summary] Summary already generated")
+                logging.debug(f"[Summary] Summary already generated: {entry.original_title}")
             else:
-                logging.debug("[Summary] Generating summary")
+                logging.debug(f"[Summary] Generating summary: {entry.original_title}")
                 max_chunks = len(
                         text_handler.chunk_on_delimiter(
                             entry.original_content, minimum_chunk_size, chunk_delimiter
