@@ -11,7 +11,11 @@ from .models import Feed
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.cache import cache
+from functools import wraps
+
 from opyml import OPML
+from feed2json import feed2json
 from django.utils.translation import gettext_lazy as _
 
 from utils.feed_action import merge_all_atom, generate_atom_feed
@@ -72,12 +76,10 @@ def get_etag(request, feed_slug, type="t"):
         etag = None
     return etag
 
-def get_feed_cache_timeout(request, feed_slug, type):
+def get_feed_cache_timeout(request, feed_slug, *args, **kwargs):
     """
     根据 feed 的 update_frequency 获取缓存超时时间（秒）
-    """
-    from core.models import Feed
-    
+    """    
     try:
         feed = Feed.objects.get(slug=feed_slug)
         # 将分钟转换为秒，并确保至少缓存1分钟
@@ -87,14 +89,34 @@ def get_feed_cache_timeout(request, feed_slug, type):
         return 60 * 15
 
 
-def rss_cache_key(view_func, request, feed_slug, type):
-    """
-    为 rss 视图生成缓存键
-    """
-    return f'rss_feed_{feed_slug}_{type}'
+def dynamic_cache_page(timeout_func):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            view_name = view_func.__name__
+            feed_slug = kwargs.get("feed_slug")
+            feed_type = kwargs.get("type", "t")
+            # 计算动态超时时间
+            timeout = timeout_func(request, *args, **kwargs)
+            # 生成唯一的缓存键
+            cache_key = f'view_cache_{view_name}_{feed_slug}_{feed_type}'
+            # 尝试从缓存获取响应
+            response = cache.get(cache_key)
+            if response is None:
+                # 缓存未命中，调用视图函数
+                logging.debug(f"Cache MISS for key: {cache_key}")
+                response = view_func(request, *args, **kwargs)
+                # 缓存响应
+                cache.set(cache_key, response, timeout)
+                logging.debug(f"Cached response for key: {cache_key} with timeout: {timeout}s")
+            else:
+                logging.debug(f"Cache HIT for key: {cache_key}")
+            return response
+        return _wrapped_view
+    return decorator
 
 
-@cache_page(get_feed_cache_timeout, key_prefix='rss')  # Cache this view for 15 minutes #TODO：应该设置为feed的update_frequency
+@dynamic_cache_page(get_feed_cache_timeout)
 @condition(etag_func=get_etag, last_modified_func=get_modified)
 def rss(request, feed_slug, type="t"):
     # Sanitize the feed_slug to prevent path traversal attacks
@@ -113,40 +135,27 @@ def rss(request, feed_slug, type="t"):
         logging.warning(f"Requested feed not found: {feed_slug}")
         return HttpResponse(status=404, content=f"Feed {feed_slug} not found")
     except Exception as e:
-        logging.error(f"Error generating feed {feed_slug}: {str(e)}")
+        logging.error(f"Error generating rss {feed_slug}: {str(e)}")
         return HttpResponse(status=500, content="Internal Server Error")
 
 
-@cache_page(get_feed_cache_timeout, key_prefix='rss_json')  # Cache this view for 15 minutes #TODO：应该设置为feed的update_frequency
+@dynamic_cache_page(get_feed_cache_timeout)
 @condition(etag_func=get_etag, last_modified_func=get_modified)
 def rss_json(request, feed_slug, type="t"):
-    # Sanitize the feed_slug to prevent path traversal attacks
     feed_slug = smart_str(feed_slug)
-    base_path = os.path.join(settings.DATA_FOLDER, "feeds")
-    feed_file_path = check_file_path(base_path, f"{type}_{feed_slug}.json")
-    content_type = "application/json; charset=utf-8"
-
-    # Check if the file exists and if not, raise a 404 error
-    if not os.path.exists(feed_file_path):
-        logging.warning("Requested feed file not found: %s", feed_file_path)
-        # raise Http404(f"The feed with ID {feed_slug} does not exist.")
-        return HttpResponse(
-            "Please wait for the translation to complete or check if the original feeds has been verified"
-        )
-
     try:
-        with open(feed_file_path, "rb") as f:
-            feed_data = json.load(f)
-        response = JsonResponse(feed_data)
-
-        logging.info("Feed file served: %s", feed_file_path)
-        return response
+        feed = Feed.objects.get(slug=feed_slug)
+        atom_feed = generate_atom_feed(feed, type)
+        if not atom_feed:
+            return HttpResponse(status=500, content="Feed not found, Maybe it's still in progress")
+        feed_json = feed2json(atom_feed)
+        return JsonResponse(feed_json)
+    except Feed.DoesNotExist:
+        logging.warning(f"Requested feed not found: {feed_slug}")
+        return HttpResponse(status=404, content=f"Feed {feed_slug} not found")
     except Exception as e:
-        # Log the exception and return an appropriate error response
-        logging.exception(
-            "Failed to read the feed file: %s / %s", feed_file_path, str(e)
-        )
-        return HttpResponse(status=500)
+        logging.error(f"Error generating json {feed_slug}: {str(e)}")
+        return HttpResponse(status=500, content="Internal Server Error")
 
 
 @cache_page(60 * 15)  # Cache this view for 15 minutes
