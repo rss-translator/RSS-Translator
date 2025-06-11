@@ -16,8 +16,11 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('link', models.URLField()),
-                ('created', models.DateTimeField(db_index=True)),
+                ('author', models.CharField(max_length=255, null=True, blank=True)),
+                ('pubdate', models.DateTimeField(null=True, blank=True)),
+                ('updated', models.DateTimeField(null=True, blank=True)),
                 ('guid', models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                ('enclosures_xml', models.TextField(null=True, blank=True)),
                 ('original_title', models.CharField(blank=True, max_length=255, null=True)),
                 ('translated_title', models.CharField(blank=True, max_length=255, null=True)),
                 ('original_content', models.TextField(blank=True, null=True)),

@@ -12,10 +12,38 @@ from tagulous.models import SingleTagField
 
 class Feed(models.Model):
     name = models.CharField( max_length=255, blank=True, null=True, verbose_name=_("Name"))
+    subtitle = models.CharField( max_length=255, blank=True, null=True, verbose_name=_("Subtitle"))
     slug = models.SlugField(
         _("URL Slug"),
         max_length=255,
         unique=True,
+        blank=True,
+        null=True,
+    )
+    link = models.URLField(
+        _("Link"),
+        blank=True,
+        null=True,
+    )
+    author = models.CharField(
+        _("Author"),
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    language = models.CharField(
+        _("Language"),
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    pubdate = models.DateTimeField(
+        _("Pubdate"),
+        blank=True,
+        null=True,
+    )
+    updated = models.DateTimeField(
+        _("Updated"),
         blank=True,
         null=True,
     )
@@ -74,16 +102,16 @@ class Feed(models.Model):
     )
 
     translator_content_type = models.ForeignKey(
-        ContentType, on_delete=models.SET_NULL, null=True, related_name="translator"
+        ContentType, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name="translator"
     )
-    translator_object_id = models.PositiveIntegerField(null=True)
+    translator_object_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     translator = GenericForeignKey("translator_content_type", "translator_object_id")
 
 
     summary_content_type = models.ForeignKey(
-        ContentType, on_delete=models.SET_NULL, null=True, related_name="summarizer"
+        ContentType, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name="summarizer"
     )
-    summary_object_id = models.PositiveIntegerField(null=True)
+    summary_object_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     summarizer = GenericForeignKey("summary_content_type", "summary_object_id")
 
     summary_detail = models.FloatField(
@@ -168,6 +196,13 @@ class Feed(models.Model):
         
         if len(self.log.encode('utf-8')) > 2048:
             self.log = self.log[-2048:]
+        
+        if not self.translator_content_type_id:
+            self.translator_content_type_id = None
+            self.translator_object_id = None
+        if not self.summary_content_type_id:
+            self.summary_content_type_id = None
+            self.summary_object_id = None
 
         super(Feed, self).save(*args, **kwargs)
 
@@ -177,8 +212,11 @@ class Feed(models.Model):
 class Entry(models.Model):
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="entries")
     link = models.URLField(null=False)
-    created = models.DateTimeField(db_index=True)
+    author = models.CharField(max_length=255, null=True, blank=True)
+    pubdate = models.DateTimeField(null=True, blank=True)
+    updated = models.DateTimeField(null=True, blank=True)
     guid = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    enclosures_xml = models.TextField(null=True, blank=True)
     
     original_title = models.CharField(max_length=255, null=True, blank=True)
     translated_title = models.CharField(max_length=255, null=True, blank=True)
@@ -198,4 +236,4 @@ class Entry(models.Model):
                 fields=["feed", "guid"], name="unique_entry_guid"
             )
         ]
-    
+

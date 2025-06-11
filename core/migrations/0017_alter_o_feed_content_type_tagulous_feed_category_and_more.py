@@ -76,6 +76,24 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(
                 blank=True, max_length=255, null=True, verbose_name="Name"
                 )),
+                ("author", models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Author"
+                )),
+                ("language", models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Language"
+                )),
+                ("link", models.URLField(
+                blank=True, null=True, verbose_name="Link"
+                )),
+                ("pubdate", models.DateTimeField(
+                blank=True, null=True, verbose_name="Pubdate"
+                )),
+                ("subtitle", models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Subtitle"
+                )),
+                ("updated", models.DateTimeField(
+                blank=True, null=True, verbose_name="Updated"
+                )),
                 (
                     "slug",
                     models.SlugField(
@@ -136,8 +154,8 @@ class Migration(migrations.Migration):
                         verbose_name="Fetch Original Article",
                     ),
                 ),
-                ("translator_object_id", models.PositiveIntegerField(null=True)),
-                ("summary_object_id", models.PositiveIntegerField(null=True)),
+                ("translator_object_id", models.PositiveIntegerField(null=True, blank=True, default=None)),
+                ("summary_object_id", models.PositiveIntegerField(null=True, blank=True, default=None)),
                 (
                     "summary_detail",
                     models.FloatField(
@@ -242,6 +260,8 @@ class Migration(migrations.Migration):
                     "summary_content_type",
                     models.ForeignKey(
                         null=True,
+                        default=None,
+                        blank=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="summarizer",
                         to="contenttypes.contenttype",
@@ -251,6 +271,8 @@ class Migration(migrations.Migration):
                     "translator_content_type",
                     models.ForeignKey(
                         null=True,
+                        default=None,
+                        blank=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="translator",
                         to="contenttypes.contenttype",
