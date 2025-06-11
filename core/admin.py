@@ -114,9 +114,9 @@ class FeedAdmin(admin.ModelAdmin):
         return format_html(
             "<span>{0}</span><br><a href='{1}' target='_blank'>{2}</a> | <a href='{3}' target='_blank'>{4}</a>",
             status_icon(obj.translation_status), # 0
-            f"/rss/{obj.slug}", # 1
+            f"/feed/rss/{obj.slug}", # 1
             "rss", # 2
-            f"/json/{obj.slug}", # 3
+            f"/feed/json/{obj.slug}", # 3
             "json", # 4
             
         )
@@ -129,7 +129,7 @@ class FeedAdmin(admin.ModelAdmin):
             status_icon(obj.fetch_status), # 0
             obj.feed_url, # 1
             "url", # 2
-            f"/rss/proxy/{obj.slug}", # 3
+            f"/feed/proxy/{obj.slug}", # 3
             "proxy", # 4
         )
     
