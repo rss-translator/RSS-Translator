@@ -81,14 +81,14 @@ def update_multiple_feeds(feeds: list):
         
         # 等待所有任务完成（可选，根据需求决定是否阻塞）
         # 实际应用中可能需要更完善的等待/超时机制
-        while True:
-            completed = all(
-                task_manager.get_task_status(tid)['status'] in ['completed', 'failed']
-                for tid in task_ids
-            )
-            if completed:
-                break
-            time.sleep(3)  # 避免CPU忙等待
+        # while True:
+        #     completed = all(
+        #         task_manager.get_task_status(tid)['status'] in ['completed', 'failed']
+        #         for tid in task_ids
+        #     )
+        #     if completed:
+        #         break
+        #     time.sleep(3)  # 避免CPU忙等待
             
     except Exception as e:
         logging.exception("Command update_multiple_feeds failed: %s", str(e))
@@ -112,9 +112,6 @@ def update_feeds_for_frequency(simple_update_frequency: str):
         feeds = list(Feed.objects.filter(update_frequency=frequency_val))
 
         update_multiple_feeds(feeds)
-
-        # TODO:export feeds as rss
-        # TODO:export feeds as json
     except KeyError:
         logging.error(f"Invalid frequency: {simple_update_frequency}")
     except Exception as e:
