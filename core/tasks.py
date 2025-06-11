@@ -6,7 +6,7 @@ import mistune
 import newspaper
 from typing import Optional
 from .models import Feed, Entry
-from utils.feed_action import fetch_feed, convert_time
+from utils.feed_action import fetch_feed, convert_struct_time_to_datetime
 from utils import text_handler
 from translator.models import TranslatorEngine
 
@@ -33,8 +33,8 @@ def handle_feeds_fetch(feeds: list):
             feed.language = latest_feed.feed.get("language")
             feed.author = latest_feed.feed.get("author")
             feed.link = latest_feed.feed.get("link")
-            feed.pubdate = convert_time(latest_feed.feed.get("published_parsed"))
-            feed.updated = convert_time(latest_feed.feed.get("updated_parsed"))
+            feed.pubdate = convert_struct_time_to_datetime(latest_feed.feed.get("published_parsed"))
+            feed.updated = convert_struct_time_to_datetime(latest_feed.feed.get("updated_parsed"))
             feed.last_fetch = timezone.now()
             feed.etag = latest_feed.get("etag")
 
@@ -65,8 +65,8 @@ def handle_feeds_fetch(feeds: list):
                     entry_values = {
                         'link': link,
                         'author': author,
-                        'pubdate': convert_time(entry_data.get('published_parsed')),
-                        'updated': convert_time(entry_data.get('updated_parsed')),
+                        'pubdate': convert_struct_time_to_datetime(entry_data.get('published_parsed')),
+                        'updated': convert_struct_time_to_datetime(entry_data.get('updated_parsed')),
                         'original_title': entry_data.get('title', 'No title'),
                         'original_content': content,
                         'original_summary': entry_data.get('summary'),
