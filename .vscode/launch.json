@@ -8,7 +8,7 @@
             "env": {"GEVENT_SUPPORT": "True"},
             "request": "launch",
             "args": [
-                "run_dev"
+                "runserver"
             ],
             "django": true,
             "autoStartBrowser": false,
