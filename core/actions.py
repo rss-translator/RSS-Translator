@@ -61,48 +61,6 @@ def feed_export_as_opml(modeladmin, request, queryset):
         return HttpResponse("An error occurred", status=500)
 
 
-@admin.display(description=_("Export selected feeds as OPML"))
-def t_feed_export_as_opml(modeladmin, request, queryset):
-    try:
-        opml_obj = OPML()
-        opml_obj.head = Head(
-            title="Translated Feeds | RSS Translator",
-            date_created=datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z"),
-            owner_name="RSS Translator",
-        )
-
-        categories = {}
-        for item in queryset:
-            category = item.feed.category.name if item.feed.category else "default"
-            text = item.feed.name or "No Name"
-            xml_url = request.build_absolute_uri(
-                reverse("core:rss", kwargs={"feed_sid": item.sid})
-            )
-
-            if category not in categories:
-                categories[category] = Outline(text=category)
-
-            item_outline = Outline(
-                title=text,
-                text=text,
-                type="rss",
-                xml_url=xml_url,
-                html_url=item.feed.feed_url,
-            )
-            categories[category].outlines.append(item_outline)
-        for category_outline in categories.values():
-            opml_obj.body.outlines.append(category_outline)
-
-        response = HttpResponse(opml_obj.to_xml(), content_type="application/xml")
-        response["Content-Disposition"] = (
-            'attachment; filename="rsstranslator_translated_feeds.opml"'
-        )
-        return response
-    except Exception as e:
-        logging.error("t_feed_export_as_opml: %s", str(e))
-        return HttpResponse("An error occurred", status=500)
-
-
 @admin.display(description=_("Force update"))
 def feed_force_update(modeladmin, request, queryset):
     logging.info("Call feed_force_update: %s", queryset)
