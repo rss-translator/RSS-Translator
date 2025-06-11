@@ -6,7 +6,7 @@ import mistune
 import newspaper
 from typing import Optional
 from .models import Feed, Entry
-from utils.feed_action import fetch_feed
+from utils.feed_action import fetch_feed, convert_time
 from utils import text_handler
 from translator.models import TranslatorEngine
 
@@ -28,49 +28,76 @@ def handle_feeds_fetch(feeds: list):
             
             latest_feed = fetch_results.get("feed")
             # Update feed meta
-            if not feed.name or feed.name in ["Loading", "Empty"]:
-                feed.name = latest_feed.feed.get("title") or latest_feed.feed.get("subtitle", "Empty")
+            feed.name = latest_feed.feed.get("title", "Empty")
+            feed.subtitle = latest_feed.feed.get("subtitle")
+            feed.language = latest_feed.feed.get("language")
+            feed.author = latest_feed.feed.get("author")
+            feed.link = latest_feed.feed.get("link")
+            feed.pubdate = convert_time(latest_feed.feed.get("published_parsed"))
+            feed.updated = convert_time(latest_feed.feed.get("updated_parsed"))
+            feed.last_fetch = timezone.now()
+            feed.etag = latest_feed.get("etag")
 
-            update_time = latest_feed.feed.get("updated_parsed")
-            feed.last_fetch = (
-                timezone.datetime.fromtimestamp(time.mktime(update_time), tz=timezone.get_default_timezone())
-                if update_time
-                else timezone.now()
-            )
-            feed.etag = latest_feed.get("etag", "")
             # Update entries
             if getattr(latest_feed, 'entries', None):
+                entries_to_create = []
+                entries_to_update = []
+                existing_entries = {
+                    entry.guid: entry.id 
+                    for entry in Entry.objects.filter(feed=feed).only('id', 'guid')
+                }
+
                 for entry_data in latest_feed.entries[:feed.max_posts]:
-                    # 转换发布时间
-                    published = entry_data.get('published_parsed') or entry_data.get('updated_parsed')
-                    published_dt = timezone.datetime.fromtimestamp(
-                        time.mktime(published),
-                        tz=timezone.get_default_timezone()
-                    ) if published else timezone.now()
                     
                     # 获取内容
                     content = ""
                     if 'content' in entry_data:
                         content = entry_data.content[0].value if entry_data.content else ""
                     else:
-                        content = entry_data.get('summary', '')
+                        content = entry_data.get('summary')
                     
                     guid = entry_data.get('id') or entry_data.get('link')
+                    link = entry_data.get('link')
+                    author = entry_data.get('author', feed.author)
                     if not guid:
                         continue  # 跳过无效条目
 
-                    # 创建或更新条目
-                    Entry.objects.update_or_create(
-                        feed=feed,
-                        guid=guid,
-                        defaults={
-                            'link': entry_data.get('link', ''),
-                            'created': published_dt,
-                            'original_title': entry_data.get('title', 'No title'),
-                            'original_content': content,
-                            'original_summary': entry_data.get('summary', '')
-                        }
-                    )
+                    entry_values = {
+                        'link': link,
+                        'author': author,
+                        'pubdate': convert_time(entry_data.get('published_parsed')),
+                        'updated': convert_time(entry_data.get('updated_parsed')),
+                        'original_title': entry_data.get('title', 'No title'),
+                        'original_content': content,
+                        'original_summary': entry_data.get('summary'),
+                        'enclosures_xml': entry_data.get('enclosures_xml'),
+                    }
+
+                    # 判断是创建新条目还是更新现有条目
+                    if guid in existing_entries:
+                        # 更新操作
+                        entry = Entry(
+                            id=existing_entries[guid],  # 直接设置主键
+                            feed=feed,
+                            guid=guid,
+                            **entry_values
+                        )
+                        entries_to_update.append(entry)
+                    else:
+                        # 创建操作
+                        entries_to_create.append(Entry(
+                            feed=feed,
+                            guid=guid,
+                            **entry_values
+                        ))
+                 
+                # 批量执行数据库操作
+                if entries_to_create:
+                    Entry.objects.bulk_create(entries_to_create)
+                if entries_to_update:
+                    update_fields = list(entry_values.keys())
+                    Entry.objects.bulk_update(entries_to_update, fields=update_fields)
+                
             feed.fetch_status = True
             feed.log = f"{timezone.now()} Fetch Completed <br>"
         except Exception as e:
@@ -78,7 +105,14 @@ def handle_feeds_fetch(feeds: list):
             feed.fetch_status = False
             feed.log = f"{timezone.now()} {str(e)}<br>"
 
-    Feed.objects.bulk_update(feeds,fields=["fetch_status", "last_fetch", "etag", "log", "name"])
+    Feed.objects.bulk_update(
+            feeds,
+            fields=[
+                "fetch_status", "last_fetch", "etag", "log", "name", 
+                "subtitle", "language", "author", "link", "pubdate", "updated"
+            ]
+        )
+
 
 def handle_feeds_translation(feeds: list, target_field: str = "title"):
     for feed in feeds:
@@ -232,7 +266,7 @@ def _translate_content(
     target_language: str,
     engine: TranslatorEngine,
     quality: bool = False,
-)->dict: # TODO: Force update会执行2次
+)->dict:
     """Translate entry content with optimized caching"""
     total_tokens = 0
     total_characters = 0
