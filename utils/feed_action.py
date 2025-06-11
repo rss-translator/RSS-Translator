@@ -21,7 +21,7 @@ from feedgen.feed import FeedGenerator
 from core.models import Feed, Entry
 #from fake_useragent import UserAgent
 
-def convert_time(time_str):
+def convert_struct_time_to_datetime(time_str):
     if not time_str:
         return None
     return timezone.datetime.fromtimestamp(time.mktime(time_str), tz=timezone.get_default_timezone())
@@ -51,66 +51,8 @@ def fetch_feed(url: str, etag: str = "") -> Dict:
             "update": False,
             "error": str(e),
         }
-    
-# def fetch_feed(url: str, etag: str = "") -> Dict:
-#     update = False
-#     feed = {}
-#     error = None
-#     response = None
-#     ua = UserAgent()
-#     headers = {
-#         "If-None-Match": etag,
-#         #'If-Modified-Since': modified,
-#         "User-Agent": ua.random.strip(),
-#         "Accept":
-#         "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-#         "Accept-Language": "en-US,en;q=0.5",
-#         "Accept-Encoding": "gzip, deflate, br",
-#         "Connection": "keep-alive",
-#         "Upgrade-Insecure-Requests": "1",
-#         "Sec-Fetch-Dest": "document",
-#         "Sec-Fetch-Mode": "navigate",
-#         "Sec-Fetch-Site": "none",
-#         "Sec-Fetch-User": "?1",
-#         "Cache-Control": "max-age=0"
-#     }
 
-#     client = httpx.Client()
-
-#     try:
-#         response = client.get(url,
-#                               headers=headers,
-#                               timeout=30,
-#                               follow_redirects=True)
-
-#         if response.status_code == 200:
-#             feed = feedparser.parse(response.text)
-#             update = True
-#         elif response.status_code == 304:
-#             update = False
-#         else:
-#             response.raise_for_status()
-
-#     except httpx.HTTPStatusError as exc:
-#         error = f"HTTP status error while requesting {url}: {exc.response.status_code} {exc.response.reason_phrase}"
-#     except httpx.TimeoutException:
-#         error = f"Timeout while requesting {url}"
-#     except Exception as e:
-#         error = f"Error while requesting {url}: {str(e)}"
-
-#     if feed:
-#         if feed.bozo and not feed.entries:
-#             logging.warning("Get feed %s %s", url, feed.get("bozo_exception"))
-#             error = feed.get("bozo_exception")
-
-#     return {
-#         "feed": feed,
-#         "xml": response.text if response else "",
-#         "update": update,
-#         "error": error,
-#     }
-
-
+# 请勿使用django的feedgenerator，生成的feed没有内容，只有标题
 def generate_atom_feed(feed: Feed, type="t"):
     if not feed:
         logging.error("generate_atom_feed: feed is None")
@@ -120,14 +62,14 @@ def generate_atom_feed(feed: Feed, type="t"):
         updated = feed.updated
 
         title = feed.name
-        subtitle = feed.name
+        subtitle = feed.subtitle
         link = feed.link
         language = feed.language
         author_name = feed.author
         # logging.info("generate_atom_feed:%s,%s,%s,%s,%s",title,subtitle,link,language,author_name)
 
         fg = FeedGenerator()
-        fg.id(feed.id)
+        fg.id(str(feed.id))
         fg.title(title)
         fg.author({"name": author_name})
         fg.link(href=link, rel="alternate")
@@ -139,18 +81,13 @@ def generate_atom_feed(feed: Feed, type="t"):
         if not fg.updated():
             fg.updated(pubdate if pubdate else timezone.now())
         if not fg.title():
-            fg.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
+            fg.title(updated)
         if not fg.id():
             fg.id(fg.title())
 
-        for entry in feed.entries:
+        for entry in feed.entries.all():
             pubdate = entry.pubdate
-            # pubdate = (datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
-            #            if pubdate else None)
-
             updated = entry.updated
-            # updated = (datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
-            #            if updated else None)
 
             title = entry.original_title if type == "o" else entry.translated_title
             link = entry.link
@@ -170,12 +107,14 @@ def generate_atom_feed(feed: Feed, type="t"):
             fe.pubDate(pubdate)
             fe.summary(summary, type="html")
 
-            for enclosure in entry.get("enclosures", []):
-                fe.enclosure(
-                    url=enclosure.get("href"),
-                    type=enclosure.get("type"),
-                    length=enclosure.get("length"),
-                )
+            if entry.enclosures_xml:
+                xml = etree.fromstring(entry.enclosures_xml)    
+                for enclosure in xml.iter("enclosure"):
+                    fe.enclosure(
+                        url=enclosure.get("href"),
+                        type=enclosure.get("type"),
+                        length=enclosure.get("length"),
+                    )
 
             # id, title, updated are required
             if not fe.updated():
@@ -189,7 +128,7 @@ def generate_atom_feed(feed: Feed, type="t"):
         atom_string = fg.atom_str(pretty=False)
 
     except Exception as e:
-        logging.error("generate_atom_feed error %s: %s", feed_url, str(e))
+        logging.error("generate_atom_feed error %s: %s", feed.feed_url, str(e))
         return None
 
     # dom = xml.dom.minidom.parseString(atom_string)
