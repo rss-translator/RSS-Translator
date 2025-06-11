@@ -1,11 +1,12 @@
 
 import logging
 import os
+import time
 # import json
 
 # import xml.dom.minidom
-from datetime import datetime, timezone, timedelta
-from time import mktime
+from datetime import datetime
+from django.utils import timezone
 
 # from dateutil import parser
 from django.conf import settings
@@ -17,8 +18,13 @@ import feedparser
 from lxml import etree
 
 from feedgen.feed import FeedGenerator
+from core.models import Feed, Entry
 #from fake_useragent import UserAgent
 
+def convert_time(time_str):
+    if not time_str:
+        return None
+    return timezone.datetime.fromtimestamp(time.mktime(time_str), tz=timezone.get_default_timezone())
 
 def get_first_non_none(feed, *keys):
     return next((feed.get(key) for key in keys if feed.get(key) is not None),
@@ -105,29 +111,23 @@ def fetch_feed(url: str, etag: str = "") -> Dict:
 #     }
 
 
-def generate_atom_feed(feed_url: str, feed_dict: dict):
-    if not feed_dict:
-        logging.error("generate_atom_feed: feed_dict is None")
+def generate_atom_feed(feed: Feed, type="t"):
+    if not feed:
+        logging.error("generate_atom_feed: feed is None")
         return None
     try:
-        source_feed = feed_dict["feed"]
-        pubdate = source_feed.get("published_parsed")
-        pubdate = (datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
-                   if pubdate else None)
+        pubdate = feed.pubdate
+        updated = feed.updated
 
-        updated = source_feed.get("updated_parsed")
-        updated = (datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
-                   if updated else None)
-
-        title = get_first_non_none(source_feed, "title", "subtitle", "info")
-        subtitle = get_first_non_none(source_feed, "subtitle")
-        link = source_feed.get("link") or feed_url
-        language = source_feed.get("language")
-        author_name = source_feed.get("author")
+        title = feed.name
+        subtitle = feed.name
+        link = feed.link
+        language = feed.language
+        author_name = feed.author
         # logging.info("generate_atom_feed:%s,%s,%s,%s,%s",title,subtitle,link,language,author_name)
 
         fg = FeedGenerator()
-        fg.id(source_feed.get("id", link))
+        fg.id(feed.id)
         fg.title(title)
         fg.author({"name": author_name})
         fg.link(href=link, rel="alternate")
@@ -137,29 +137,28 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
         fg.pubDate(pubdate)
 
         if not fg.updated():
-            fg.updated(pubdate if pubdate else datetime.now(timezone.utc))
+            fg.updated(pubdate if pubdate else timezone.now())
         if not fg.title():
             fg.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
         if not fg.id():
             fg.id(fg.title())
 
-        for entry in feed_dict["entries"]:
-            pubdate = entry.get("published_parsed")
-            pubdate = (datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
-                       if pubdate else None)
+        for entry in feed.entries:
+            pubdate = entry.pubdate
+            # pubdate = (datetime.fromtimestamp(mktime(pubdate), tz=timezone.utc)
+            #            if pubdate else None)
 
-            updated = entry.get("updated_parsed")
-            updated = (datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
-                       if updated else None)
+            updated = entry.updated
+            # updated = (datetime.fromtimestamp(mktime(updated), tz=timezone.utc)
+            #            if updated else None)
 
-            title = entry.get("title")
-            link = get_first_non_none(entry, "link")
-            unique_id = entry.get("id", link)
+            title = entry.original_title if type == "o" else entry.translated_title
+            link = entry.link
+            unique_id = entry.guid
 
-            author_name = get_first_non_none(entry, "author", "publisher")
-            content = (entry.get("content")[0].get("value")
-                       if entry.get("content") else None)
-            summary = entry.get("summary")
+            author_name = entry.author
+            content = entry.original_content if type == "o" else entry.translated_content
+            summary = entry.original_summary if type == "o" else entry.ai_summary
 
             fe = fg.add_entry(order="append")
             fe.title(title)
@@ -180,7 +179,7 @@ def generate_atom_feed(feed_url: str, feed_dict: dict):
 
             # id, title, updated are required
             if not fe.updated():
-                fe.updated(pubdate if pubdate else datetime.now(timezone.utc))
+                fe.updated(pubdate if pubdate else timezone.now())
             if not fe.title():
                 fe.title(updated.strftime("%Y-%m-%d %H:%M:%S"))
             if not fe.id():
@@ -250,7 +249,7 @@ class FeedMerger:
                 .encode("utf-8"))
             f.write(b'<link href="https://rsstranslator.com"/>\n')
             f.write(
-                f"<updated>{datetime.now(timezone.utc).isoformat()}</updated>\n"
+                f"<updated>{timezone.now().isoformat()}</updated>\n"
                 .encode("utf-8"))
 
     def _process_feed_file(self, feed_file):
@@ -279,7 +278,7 @@ class FeedMerger:
                 return False
 
             published_date = self._parse_date(published_elem.text)
-            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
 
             if published_date < thirty_days_ago.date():
                 return False
