@@ -36,7 +36,7 @@ class FeedAdmin(admin.ModelAdmin):
         "last_fetch",
         "total_tokens",
         "total_characters",
-        "category",
+        "show_category",
     ]
     search_fields = ["name", "feed_url", "category__name"]
     list_filter = ["fetch_status", "translation_status","category","translate_title","translate_content","summary"]
@@ -162,6 +162,19 @@ class FeedAdmin(admin.ModelAdmin):
             """,
             mark_safe(obj.log),
         )
+    
+    @admin.display(description=_("Category"))
+    def show_category(self, obj):
+        if not obj.category:
+            return ""
+        return format_html(
+            "<a href='{0}' target='_blank'>{1}</a><br><a href='{2}' target='_blank'>rss</a> | <a href='{3}' target='_blank'>json</a>",
+            f"/feed/category/proxy/{obj.category.name}",
+            obj.category.name,
+            f"/feed/category/rss/{obj.category.name}",
+            f"/feed/category/json/{obj.category.name}",
+        )
+    
 
 
 core_admin_site.register(Feed, FeedAdmin)

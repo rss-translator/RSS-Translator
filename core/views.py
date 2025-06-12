@@ -18,7 +18,7 @@ from opyml import OPML
 from feed2json import feed2json
 from django.utils.translation import gettext_lazy as _
 
-from utils.feed_action import merge_all_atom, generate_atom_feed
+from utils.feed_action import merge_feeds_into_one_atom, generate_atom_feed
 
 def import_opml(request):
     if request.method == 'POST':
@@ -159,83 +159,44 @@ def rss_json(request, feed_slug, type="t"):
 
 
 @cache_page(60 * 15)  # Cache this view for 15 minutes
-def all(request, name):
-    if name != "t":
-        return HttpResponse(status=404)
-    try:
-        # get all data from Feed
-        feeds = Feed.objects.all()
-        # get all feed file path from feeds.slug
-        feed_file_paths = get_feed_file_paths(feeds, "t")
-        merge_all_atom(feed_file_paths, "all_t")
-        base_path = os.path.join(settings.DATA_FOLDER, "feeds")
-        #merge_file_path = os.path.join(settings.DATA_FOLDER, "feeds", "all_t.xml")
-        merge_file_path = check_file_path(base_path, "all_t.xml")
-        response = StreamingHttpResponse(
-            file_iterator(merge_file_path), content_type="application/xml"
-        )
-        response["Content-Disposition"] = "inline; filename=all_t.xml"
-        logging.info("All Translated Feed file served: %s", merge_file_path)
-        return response
-    except Exception as e:
-        # Log the exception and return an appropriate error response
-        logging.exception(
-            "Failed to read the all_t feed file: %s / %s", merge_file_path, str(e)
-        )
-        return HttpResponse(status=500)
-
-
-@cache_page(60 * 15)  # Cache this view for 15 minutes
-def category(request, category: str):
+def category_rss(request, category: str, type="t"):
+    category = smart_str(category)
     all_category = Feed.category.tag_model.objects.all()
 
     if category not in all_category:
         return HttpResponse(status=404)
 
     try:
-        # # get all data from Feed
-        feeds = Feed.objects.filter(feed__category__name=category)
-        # # get all feed file path from feeds.slug
-        # feed_file_paths = [os.path.join(settings.DATA_FOLDER, 'feeds', f'{feed.slug}.xml') for feed in feeds]
-        feed_file_paths = get_feed_file_paths(feeds, "t")
-        merge_all_atom(feed_file_paths, category)
-        base_path = os.path.join(settings.DATA_FOLDER, "feeds")
-        #merge_file_path = os.path.join(settings.DATA_FOLDER, "feeds", f"{category}.xml")
-        merge_file_path = check_file_path(base_path, f"{category}.xml")
-        response = StreamingHttpResponse( 
-            file_iterator(merge_file_path), content_type="application/xml"
-        )
-        response["Content-Disposition"] = f"inline; filename={category}.xml"
-        logging.info("Category Feed file served: %s", merge_file_path)
+        # get all data from Feed
+        feeds = Feed.objects.filter(category__name=category)
+        atom_feed = merge_feeds_into_one_atom(category, feeds, type)
+        if not atom_feed:
+            return HttpResponse(status=500, content="No category feed found")
+        response = StreamingHttpResponse(
+            atom_feed, content_type="application/xml"
+        )   
+        response["Content-Disposition"] = f"inline; filename=feed_{category}.xml"
         return response
     except Exception as e:
-        # Log the exception and return an appropriate error response
-        logging.exception(
-            "Failed to read the category feed file: %s / %s", category, str(e)
-        )
-        return HttpResponse(status=500)
+        logging.exception("Failed to read the category feeds: %s / %s", category, str(e))
+        return HttpResponse(status=500, content="Internal Server Error")
 
+@cache_page(60 * 15)  # Cache this view for 15 minutes
+def category_json(request, category: str, type="t"):
+    category = smart_str(category)
+    all_category = Feed.category.tag_model.objects.all()
 
-# def get_feed_file_paths(feeds: list, type: str = "o") -> list:
-#     feed_file_dir = os.path.abspath(os.path.join(settings.DATA_FOLDER, "feeds"))
-#     feed_file_paths = []
+    if category not in all_category:
+        return HttpResponse(status=404)
 
-#     for feed in feeds:
-#         file_path = os.path.abspath(
-#             os.path.join(feed_file_dir, f"{type}_{feed.slug}.xml")
-#         )  # 获取绝对路径
-#         if (
-#             os.path.commonpath((feed_file_dir, file_path)) != feed_file_dir
-#         ):  # 对比最长公共路径，防止目录遍历
-#             raise ValueError(f"Invalid feed file path: {file_path}")
-#         feed_file_paths.append(file_path)
-#     return feed_file_paths
-
-
-def file_iterator(file_path, chunk_size=8192):
-    with open(file_path, "rb") as f:
-        while True:
-            chunk = f.read(chunk_size)
-            if not chunk:
-                break
-            yield chunk
+    try:
+        # get all data from Feed
+        feeds = Feed.objects.filter(category__name=category)
+        atom_feed = merge_feeds_into_one_atom(category, feeds, type)
+        if not atom_feed:
+            return HttpResponse(status=500, content="No category feeds found")
+        feed_json = feed2json(atom_feed)
+        return JsonResponse(feed_json)
+    except Exception as e:
+        logging.exception("Failed to load the category feeds: %s / %s", category, str(e))
+        return HttpResponse(status=500, content="Internal Server Error")
