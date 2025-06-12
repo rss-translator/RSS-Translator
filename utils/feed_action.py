@@ -16,10 +16,10 @@ from typing import Dict
 import feedparser
 #import httpx
 from lxml import etree
-
+import mistune
 from feedgen.feed import FeedGenerator
 from core.models import Feed, Entry
-#from fake_useragent import UserAgent
+from utils.text_handler import set_translation_display
 
 def convert_struct_time_to_datetime(time_str):
     if not time_str:
@@ -86,14 +86,25 @@ def generate_atom_feed(feed: Feed, type="t"):
         for entry in feed.entries.all():
             pubdate = entry.pubdate
             updated = entry.updated
+            summary = entry.original_summary
 
-            title = entry.original_title if type == "o" else entry.translated_title
+            if type == "o":
+                title = entry.original_title
+                content = entry.original_content
+            else:
+                title = set_translation_display(entry.original_title, entry.translated_title, feed.translation_display)
+                
+                content = set_translation_display(entry.original_content, entry.translated_content, feed.translation_display)
+
+                if entry.ai_summary:
+                    summary = entry.ai_summary
+                    html_summary = f"<br />🤖:{mistune.html(summary)}<br />---------------<br />"
+                    content = html_summary + content
+
             link = entry.link
             unique_id = entry.guid
 
             author_name = entry.author
-            content = entry.original_content if type == "o" else entry.translated_content
-            summary = entry.original_summary if type == "o" else entry.ai_summary
 
             fe = fg.add_entry(order="append")
             fe.title(title)
