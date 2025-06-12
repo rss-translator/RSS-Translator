@@ -67,28 +67,43 @@ class FeedAdmin(admin.ModelAdmin):
         return super().changelist_view(request, extra_context=extra_context)
 
     def save_model(self, request, obj, form, change):
-        logging.info("Call Feed save_model: %s", obj)
+        logging.info(f"Call Feed save_model: {obj}")
         feed_url_changed = "feed_url" in form.changed_data
-        translation_display_changed = "translation_display" in form.changed_data
-        if feed_url_changed or translation_display_changed:
-            obj.fetch_status = None
-            obj.translation_status = None
-            obj.name = obj.name or "Loading"
-            #obj.save()
-            super().save_model(request, obj, form, change)
-            # 使用transaction.on_commit确保在事务提交后提交任务
-            def submit_task_after_commit():
-                task_id = task_manager.submit_task(
-                    f"Update Feed: {obj.name}",
-                    update_single_feed,
-                    obj.id
-                )
-                logging.info(f"Submitted feed update task after commit: {task_id}")
-            
-            transaction.on_commit(submit_task_after_commit)
-        else:
-            obj.name = obj.name or "Empty"
-            super().save_model(request, obj, form, change)
+        target_language_changed = "target_language" in form.changed_data
+        # 处理默认名称设置
+        obj.name = obj.name or ("Loading" if (feed_url_changed or target_language_changed) else "Empty")
+        # 无需特殊处理的情况直接保存返回
+        if not (feed_url_changed or target_language_changed):
+            return super().save_model(request, obj, form, change)
+        
+        # 需要触发任务的处理流程
+        obj.fetch_status = None
+        obj.translation_status = None
+        
+        super().save_model(request, obj, form, change)
+
+        # 处理条目数据变更
+        if target_language_changed:
+            obj.entries.update(translated_content=None, translated_title=None, ai_summary=None)
+        if feed_url_changed:
+            obj.entries.all().delete()
+        
+        from functools import partial
+        transaction.on_commit(
+            partial(
+                self._submit_feed_update_task, 
+                obj.name, 
+                obj.id
+            )
+        )
+
+    def _submit_feed_update_task(self, feed_name, feed_id):
+        task_id = task_manager.submit_task(
+            f"Update Feed: {feed_name}",
+            update_single_feed,
+            feed_id
+        )
+        logging.info(f"Submitted feed update task after commit: {task_id}")
 
     @admin.display(description=_("Update Frequency"), ordering="update_frequency")
     def simple_update_frequency(self, obj):
