@@ -4,11 +4,11 @@ from ast import literal_eval
 from opyml import OPML, Outline, Head
 from django.contrib import admin
 from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.http import HttpResponse
 from django.db import transaction
+from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
-
+from django.conf import settings
 from utils.modelAdmin_utils import get_translator_and_summary_choices
 from .custom_admin_site import core_admin_site
 from .models import Feed
@@ -64,6 +64,23 @@ def feed_export_as_opml(modeladmin, request, queryset): # TODO
 @admin.display(description=_("Force update"))
 def feed_force_update(modeladmin, request, queryset):
     logging.info("Call feed_force_update: %s", queryset)
+    # 清除所有选中Feed的缓存
+    all_cache_keys = []
+    for instance in queryset:
+        # 构建缓存键 - 使用与dynamic_cache_page相同的逻辑
+        cache_keys = [
+            f'view_cache_rss_{instance.slug}_t',
+            f'view_cache_rss_{instance.slug}_o',
+            f'view_cache_rss_json_{instance.slug}_t',
+            f'view_cache_rss_json_{instance.slug}_o',
+            f'view_cache_proxy_{instance.slug}_t',
+            f'view_cache_proxy_{instance.slug}_o',
+        ]
+        all_cache_keys.extend(cache_keys)
+
+    if all_cache_keys:
+        cache.delete_many(all_cache_keys)
+
     with transaction.atomic():
         for instance in queryset:
             instance.fetch_status = None
@@ -87,6 +104,7 @@ def feed_batch_modify(modeladmin, request, queryset):
             "update_frequency": "update_frequency_value",
             "max_posts": "max_posts_value",
             "translator": "translator_value",
+            "target_language": "target_language_value",
             "translation_display": "translation_display_value",
             "summarizer": "summarizer_value",
             "summary_detail": "summary_detail_value",
@@ -101,6 +119,7 @@ def feed_batch_modify(modeladmin, request, queryset):
         field_types = {
             "update_frequency": int,
             "max_posts": int,
+            "target_language": str,
             "translation_display": int,
             "summary_detail": float,
             "additional_prompt": str,
@@ -178,6 +197,7 @@ def feed_batch_modify(modeladmin, request, queryset):
             **core_admin_site.each_context(request),
             "items": queryset,
             "translator_choices": translator_choices,
+            "target_language_choices": settings.TRANSLATION_LANGUAGES,
             "summary_engine_choices": summary_engine_choices,
             "update_frequency_choices": [
                 (5, "5 min"),
