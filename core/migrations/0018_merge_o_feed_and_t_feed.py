@@ -51,7 +51,7 @@ def merge_feeds_data(apps, schema_editor):
                     total_characters=t_feed.total_characters,
                     
                     # 时间戳
-                    last_translate=t_feed.modified,
+                    last_translate=None,
                     last_fetch=o_feed.last_pull,
                     
                     # URL slug
@@ -94,7 +94,7 @@ def merge_feeds_data(apps, schema_editor):
                 last_fetch=o_feed.last_pull, 
                 
                 # URL slug
-                slug=None,  # 没有T_Feed时，slug为None
+                slug=o_feed.sid if o_feed.sid else None,  # 没有T_Feed时，slug为None
             )
 
 class Migration(migrations.Migration):

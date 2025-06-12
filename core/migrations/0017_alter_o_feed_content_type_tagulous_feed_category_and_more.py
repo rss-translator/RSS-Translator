@@ -117,7 +117,7 @@ class Migration(migrations.Migration):
                         verbose_name="Translation Display",
                     ),
                 ),
-                ("etag", models.CharField(default="", editable=False, max_length=255)),
+                ("etag", models.CharField(default="", editable=False, max_length=255, null=True, blank=True)),
                 (
                     "fetch_status",
                     models.BooleanField(

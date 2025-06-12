@@ -159,6 +159,8 @@ class Feed(models.Model):
         max_length=255,
         default="",
         editable=False,
+        null=True,
+        blank=True,
     )
     
     log = models.TextField(
