@@ -67,6 +67,7 @@ class DeepLTranslator(TranslatorEngine):
                 target_lang=target_code,
                 preserve_formatting=True,
                 split_sentences="nonewlines",
+                tag_handling="html",
             )
             translated_text = resp.text
         except Exception as e:
