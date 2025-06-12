@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from core.models import Feed
 from core.tasks import handle_feeds_fetch, handle_feeds_translation, handle_feeds_summary
 from django.db import close_old_connections
+from utils.task_manager import task_manager
 
 
 class Command(BaseCommand):
@@ -107,15 +108,19 @@ def update_feeds_for_frequency(simple_update_frequency: str):
     }
     
     try:
-        logging.info("Start update feeds for frequency: %s", simple_update_frequency)
         frequency_val = update_frequency_map[simple_update_frequency]
         feeds = list(Feed.objects.filter(update_frequency=frequency_val))
-
+        log = f"Start update feeds for frequency: {simple_update_frequency}, feeds count: {len(feeds)}"
+        logging.info(log)
+        # output to stdout
+        print(log)
         update_multiple_feeds(feeds)
     except KeyError:
         logging.error(f"Invalid frequency: {simple_update_frequency}")
     except Exception as e:
-        logging.exception("Command update_feeds_for_frequency %s: %s", simple_update_frequency, str(e))
+        log = f"Command update_feeds_for_frequency {simple_update_frequency}: {str(e)}"
+        logging.exception(log)
+        print(log)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
