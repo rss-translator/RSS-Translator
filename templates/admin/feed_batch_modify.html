@@ -33,6 +33,15 @@
         {% endfor %}
     </select><br />
 
+    <br /><label>{% trans "Target Language" %}</label><br />
+    <input type="radio" name="target_language" value="Keep" checked required>{% trans " Keep Original" %}<br />
+    <input type="radio" name="target_language" value="True" required>{% trans " Change to " %}
+    <select name="target_language_value">
+        {% for id,name in target_language_choices %}
+        <option value="{{ id }}">{{ name }}</option>
+        {% endfor %}
+    </select><br />
+
     <br /><label>{% trans "Translation Display" %}</label><br />
     <input type="radio" name="translation_display" value="Keep" checked required>{% trans " Keep Original" %}<br />
     <input type="radio" name="translation_display" value="True" required>{% trans " Change to " %}
