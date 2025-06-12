@@ -13,7 +13,11 @@
     <label>{% trans "Update Frequency" %}</label><br />
     <input type="radio" name="update_frequency" value="Keep" checked required>{% trans " Keep Original" %}<br />
     <input type="radio" name="update_frequency" value="True" required>{% trans " Change to " %}
-    <input type="number" name="update_frequency_value" value="30" required><br />
+    <select name="update_frequency_value">
+        {% for id,name in update_frequency_choices %}
+        <option value="{{ id }}">{{ name }}</option>
+        {% endfor %}
+    </select><br />
 
     <br /><label>{% trans "Max Posts" %}</label><br />
     <input type="radio" name="max_posts" value="Keep" checked required>{% trans " Keep Original" %}<br />

@@ -21,11 +21,11 @@ def clean_translated_content(modeladmin, request, queryset):
     pass
 
 @admin.display(description=_("Export selected feeds as OPML"))
-def feed_export_as_opml(modeladmin, request, queryset):
+def feed_export_as_opml(modeladmin, request, queryset): # TODO
     try:
         opml_obj = OPML()
         opml_obj.head = Head(
-            title="Original Feeds | RSS Translator",
+            title="Feeds | RSS Translator",
             date_created=datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z"),
             owner_name="RSS Translator",
         )
@@ -53,7 +53,7 @@ def feed_export_as_opml(modeladmin, request, queryset):
 
         response = HttpResponse(opml_obj.to_xml(), content_type="application/xml")
         response["Content-Disposition"] = (
-            'attachment; filename="rsstranslator_original_feeds.opml"'
+            'attachment; filename="rsstranslator_feeds.opml"'
         )
         return response
     except Exception as e:
@@ -113,6 +113,7 @@ def feed_batch_modify(modeladmin, request, queryset):
         translate_title = request.POST.get("translate_title", "Keep")
         translate_content = request.POST.get("translate_content", "Keep")
         summary = request.POST.get("summary", "Keep")
+
         match translate_title:
             case "Keep":
                 pass
@@ -178,5 +179,13 @@ def feed_batch_modify(modeladmin, request, queryset):
             "items": queryset,
             "translator_choices": translator_choices,
             "summary_engine_choices": summary_engine_choices,
+            "update_frequency_choices": [
+                (5, "5 min"),
+                (15, "15 min"),
+                (30, "30 min"),
+                (60, "hourly"),
+                (1440, "daily"),
+                (10080, "weekly"),
+            ],
         },
     )
