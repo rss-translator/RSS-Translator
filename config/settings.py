@@ -16,6 +16,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 import os
 
+SITE_URL = os.environ.get("SITE_URL", "http://localhost:8000")
 USER_MANAGEMENT = os.environ.get("USER_MANAGEMENT") == "1"
 DEMO = os.environ.get("DEMO") == "1"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

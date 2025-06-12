@@ -2,6 +2,7 @@ services:
   rsstranslator:
     image: versun/rsstranslator
     environment:
+      - SITE_URL=http://127.0.0.1:8000
       - DEFAULT_TARGET_LANGUAGE=Chinese Simplified
       - PYTHONUNBUFFERED=0
       - PYTHONDONTWRITEBYTECODE=1
