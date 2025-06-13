@@ -3,9 +3,9 @@
 import os
 import subprocess
 import sys
-import signal
 from pathlib import Path
-from .init import init_server
+from init import init_server
+
 
 
 def setup_environment():
@@ -25,27 +25,6 @@ def setup_environment():
     print("Allow below domains access CSRF protection:")
     for origin in os.environ["CSRF_TRUSTED_ORIGINS"].split(","):
         print(f"  - {origin}")
-
-def start_huey_worker():
-    """启动Huey后台任务处理器"""
-    print("🚀 启动Huey任务处理器...")
-    process = subprocess.Popen([
-        "uv", "run", "python", "manage.py", "run_huey", "-f"
-    ])
-
-    
-    def cleanup():
-        """清理函数"""
-        if process.poll() is None:
-            print("\n🛑 正在停止Huey任务处理器...")
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-    
-    return process, cleanup
 
 
 def start_production_server():
@@ -93,7 +72,7 @@ def start_production_server():
             # 使用gunicorn + uvicorn worker（推荐的生产配置）
             print("🚀 使用 Gunicorn + Uvicorn Worker 启动...")
             cmd = [
-                "uv", "run", "gunicorn",
+                "gunicorn",
                 "--workers", workers,
                 "--worker-class", "uvicorn.workers.UvicornWorker",
                 "--bind", f"{host}:{port}",
@@ -108,7 +87,7 @@ def start_production_server():
             # 单独使用uvicorn
             print("🚀 使用 Uvicorn 启动...")
             cmd = [
-                "uv", "run", "uvicorn",
+                "uvicorn",
                 "config.asgi:application",  
                 "--host", host,
                 "--port", port,
@@ -124,7 +103,7 @@ def start_production_server():
         # 使用gunicorn启动（WSGI服务器）        
         print("🚀 使用 Gunicorn 启动...")
         cmd = [
-            "uv", "run", "gunicorn",
+            "gunicorn",
             #"--workers", workers,
             "--bind", f"{host}:{port}",
             "--timeout", "120",
@@ -138,7 +117,7 @@ def start_production_server():
         # 使用uwsgi启动        
         print("🚀 使用 uWSGI 启动...")
         cmd = [
-            "uv", "run", "uwsgi",
+            "uwsgi",
             "--http", f":{port}",
             "--workers", workers,
             "--module", "config.wsgi:application",  
@@ -151,25 +130,14 @@ def start_production_server():
         print("⚠️  正在使用Django内置服务器，不建议在生产环境使用")
         
         cmd = [
-            "uv", "run", "python", "manage.py", "runserver",
+            "python", "manage.py", "runserver",
             f"{host}:{port}", "--insecure"  # --insecure允许在DEBUG=False时提供静态文件
         ]
     
     print(f"🚀 启动生产服务器 (http://{host}:{port})...")
     process = subprocess.Popen(cmd)
     
-    # 清理函数
-    def cleanup():
-        if process.poll() is None:
-            print("\n🛑 正在停止生产服务器...")
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-    
-    return process, cleanup
+    return process
 
 
 
@@ -192,27 +160,9 @@ def main():
         # 2. 初始化
         init_server()
         
-        # 3. 启动Huey任务处理器
-        huey_process, huey_cleanup = start_huey_worker()
-        
-        server_process, server_cleanup = start_production_server()
+        start_production_server()
         
         print("🌟 所有服务已启动，按 Ctrl+C 停止")
-        
-        try:
-            # 等待任一进程结束
-            while True:
-                if huey_process.poll() is not None:
-                    print("❌ Huey进程意外退出")
-                    break
-                if server_process.poll() is not None:
-                    print("❌ 服务器进程意外退出")
-                    break
-        except KeyboardInterrupt:
-            print("\n🛑 正在停止所有服务...")
-        finally:
-            server_cleanup()
-            huey_cleanup()
         
     except Exception as e:
         print(f"❌ 发生错误: {e}")

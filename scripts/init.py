@@ -5,32 +5,32 @@ import subprocess
 from pathlib import Path
 
 
-def install_dependencies():
-    """安装依赖"""
-    pyproject_file = Path("pyproject.toml")
+# def install_dependencies():
+#     """安装依赖"""
+#     pyproject_file = Path("pyproject.toml")
     
-    if pyproject_file.exists():
-        print("📦 安装依赖...")
+#     if pyproject_file.exists():
+#         print("📦 安装依赖...")
         
-        # 首先尝试使用uv sync安装
-        try:
-            subprocess.run([
-                "uv", "sync"
-            ], check=True)
-            print("✓ 依赖安装完成")
-            return
-        except subprocess.CalledProcessError:
-            print("⚠️  uv sync失败，尝试使用uv pip install方式")
+#         # 首先尝试使用uv sync安装
+#         try:
+#             subprocess.run([
+#                 "uv", "sync", "--no-cache"
+#             ], check=True)
+#             print("✓ 依赖安装完成")
+#             return
+#         except subprocess.CalledProcessError:
+#             print("⚠️  uv sync失败，尝试使用pip install方式")
         
-        # 如果sync失败，尝试使用pip install方式
-        try:
-            subprocess.run([
-                "uv", "pip", "install", "-e", "."
-            ], check=True)
-            print("✓ 依赖安装完成")
-            return
-        except subprocess.CalledProcessError:
-            print("⚠️  无法安装依赖")
+#         # 如果sync失败，尝试使用pip install方式
+#         try:
+#             subprocess.run([
+#                 "pip", "install", "-e", ".", "--no-cache-dir"
+#             ], check=True)
+#             print("✓ 依赖安装完成")
+#             return
+#         except subprocess.CalledProcessError:
+#             print("⚠️  无法安装依赖")
 
 def create_superuser():
     from django.contrib.auth import get_user_model
@@ -47,7 +47,7 @@ def create_superuser():
 def init_server():
     """初始化服务器的主函数"""
     # 安装依赖
-    install_dependencies()
+    #install_dependencies()
     # 设置Django环境
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     django.setup()
