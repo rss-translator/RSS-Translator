@@ -4,8 +4,6 @@ services:
     environment:
       - SITE_URL=http://127.0.0.1:8000
       - DEFAULT_TARGET_LANGUAGE=Chinese Simplified
-      - PYTHONUNBUFFERED=0
-      - PYTHONDONTWRITEBYTECODE=1
       - PORT=8000
       - DEBUG=0
       - DEMO=0
@@ -16,7 +14,7 @@ services:
       - default_update_frequency=30
       - default_max_posts=20
     volumes:
-      - ./data:/home/rsstranslator/data
+      - ./data:/app/data
     ports:
       - 8000:8000
     restart: always
