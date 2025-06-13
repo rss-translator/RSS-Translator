@@ -46,6 +46,7 @@ class FeedAdmin(admin.ModelAdmin):
         "total_tokens",
         "total_characters",
         "last_fetch",
+        "last_translate",
         "show_log",        
     ]
     actions = [feed_force_update, feed_export_as_opml, feed_batch_modify]
