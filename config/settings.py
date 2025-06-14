@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import tomllib
+
 
 # from django.utils.crypto import get_random_string
 from django.core.management.utils import get_random_secret_key
@@ -21,6 +23,11 @@ USER_MANAGEMENT = os.environ.get("USER_MANAGEMENT") == "1"
 DEMO = os.environ.get("DEMO") == "1"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Read version from pyproject.toml
+with open(BASE_DIR / "pyproject.toml", "rb") as f:
+    pyproject = tomllib.load(f)
+    VERSION = pyproject["project"]["version"]
+
 X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'DENY')
 
 # Quick-start development settings - unsuitable for production
@@ -105,6 +112,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.version",
             ],
         },
     },
