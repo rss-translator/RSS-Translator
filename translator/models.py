@@ -42,7 +42,8 @@ class TranslatorEngine(models.Model):
     def __str__(self):
         return self.name
 
-class OpenAIInterface(TranslatorEngine):
+class OpenAITranslator(TranslatorEngine):
+    # https://platform.openai.com/docs/api-reference/chat
     is_ai = models.BooleanField(default=True, editable=False)
     api_key = EncryptedCharField(_("API Key"), max_length=255)
     base_url = models.URLField(_("API URL"), default="https://api.openai.com/v1")
@@ -67,7 +68,8 @@ class OpenAIInterface(TranslatorEngine):
     summary_prompt = models.TextField(default=settings.default_summary_prompt)
 
     class Meta:
-        abstract = True
+        verbose_name = "OpenAI"
+        verbose_name_plural = "OpenAI"
 
     def _init(self):
         return OpenAI(
@@ -149,3 +151,98 @@ class OpenAIInterface(TranslatorEngine):
     def summarize(self, text: str, target_language: str) -> dict:
         logging.info(">>> Summarize [%s]: %s", target_language, text)
         return self.translate(text, target_language, system_prompt=self.summary_prompt)
+
+
+
+class DeepLTranslator(TranslatorEngine):
+    # https://github.com/DeepLcom/deepl-python
+    api_key = EncryptedCharField(_("API Key"), max_length=255)
+    max_characters = models.IntegerField(default=5000)
+    server_url = models.URLField(_("API URL(optional)"), null=True, blank=True)
+    proxy = models.URLField(_("Proxy(optional)"), null=True, blank=True)
+    language_code_map = {
+        "English": "EN-US",
+        "Chinese Simplified": "ZH",
+        "Russian": "RU",
+        "Japanese": "JA",
+        "Korean": "KO",
+        "Czech": "CS",
+        "Danish": "DA",
+        "German": "DE",
+        "Spanish": "ES",
+        "French": "FR",
+        "Indonesian": "ID",
+        "Italian": "IT",
+        "Hungarian": "HU",
+        "Norwegian Bokmål": "NB",
+        "Dutch": "NL",
+        "Polish": "PL",
+        "Portuguese": "PT-PT",
+        "Swedish": "SV",
+        "Turkish": "TR",
+    }
+
+    class Meta:
+        verbose_name = "DeepL"
+        verbose_name_plural = "DeepL"
+
+    def _init(self):
+        return deepl.Translator(
+            self.api_key, server_url=self.server_url, proxy=self.proxy
+        )
+
+    def validate(self) -> bool:
+        try:
+            translator = self._init()
+            usage = translator.get_usage()
+            return usage.character.valid
+        except Exception as e:
+            logging.error("DeepLTranslator validate ->%s", e)
+            return False
+
+    def translate(self, text: str, target_language: str, **kwargs) -> dict:
+        logging.info(">>> DeepL Translate [%s]: %s", target_language, text)
+        target_code = self.language_code_map.get(target_language, None)
+        translated_text = ""
+        try:
+            if target_code is None:
+                logging.error(
+                    "DeepLTranslator->Not support target language:%s", target_language
+                )
+            translator = self._init()
+            resp = translator.translate_text(
+                text,
+                target_lang=target_code,
+                preserve_formatting=True,
+                split_sentences="nonewlines",
+                tag_handling="html",
+            )
+            translated_text = resp.text
+        except Exception as e:
+            logging.error("DeepLTranslator->%s: %s", e, text)
+        return {"text": translated_text, "characters": len(text)}
+
+
+
+class TestTranslator(TranslatorEngine):
+    translated_text = models.TextField(default="@@Translated Text@@")
+    max_characters = models.IntegerField(default=50000)
+    interval = models.IntegerField(_("Request Interval(s)"), default=3)
+    is_ai = models.BooleanField(default=True, editable=False)
+
+    class Meta:
+        verbose_name = "Test"
+        verbose_name_plural = "Test"
+
+    def validate(self) -> bool:
+        return True
+
+    def translate(self, text: str, target_language: str, **kwargs) -> dict:
+        logging.info(">>> Test Translate [%s]: %s", target_language, text)
+        sleep(self.interval)
+        return {"text": self.translated_text, "tokens": 0, "characters": len(text)}
+
+    def summarize(self, text: str, target_language: str) -> dict:
+        logging.info(">>> Test Summarize [%s]: %s", target_language, text)
+        return self.translate(text, target_language)
+
