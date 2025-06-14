@@ -86,117 +86,6 @@ class DeepLTranslatorAdmin(BaseTranslatorAdmin):
         "max_characters",
     ]
 
-class MoonshotAITranslatorAdmin(BaseTranslatorAdmin):
-    fields = [
-        "name",
-        "api_key",
-        "base_url",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "temperature",
-        "top_p",
-        "frequency_penalty",
-        "presence_penalty",
-        "max_tokens",
-    ]
-    list_display = [
-        "name",
-        "is_valid",
-        "masked_api_key",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "max_tokens",
-        "base_url",
-    ]
-
-
-class TogetherAITranslatorAdmin(BaseTranslatorAdmin):
-    fields = [
-        "name",
-        "api_key",
-        "base_url",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "temperature",
-        "top_p",
-        "frequency_penalty",
-        "presence_penalty",
-        "max_tokens",
-    ]
-    list_display = [
-        "name",
-        "is_valid",
-        "masked_api_key",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "max_tokens",
-        "base_url",
-    ]
-
-
-class OpenRouterAITranslatorAdmin(BaseTranslatorAdmin):
-    fields = [
-        "name",
-        "api_key",
-        "base_url",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "temperature",
-        "top_p",
-        "frequency_penalty",
-        "presence_penalty",
-        "max_tokens",
-    ]
-    list_display = [
-        "name",
-        "is_valid",
-        "masked_api_key",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "max_tokens",
-        "base_url",
-    ]
-
-
-class GroqTranslatorAdmin(BaseTranslatorAdmin):
-    fields = [
-        "name",
-        "api_key",
-        "base_url",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "temperature",
-        "top_p",
-        "frequency_penalty",
-        "presence_penalty",
-        "max_tokens",
-    ]
-    list_display = [
-        "name",
-        "is_valid",
-        "masked_api_key",
-        "model",
-        "translate_prompt",
-        "content_translate_prompt",
-        "summary_prompt",
-        "max_tokens",
-        "base_url",
-    ]
-
 class TestTranslatorAdmin(BaseTranslatorAdmin):
     fields = ["name", "translated_text", "max_characters", "interval"]
     list_display = ["name", "is_valid", "translated_text", "max_characters", "interval"]
@@ -204,10 +93,6 @@ class TestTranslatorAdmin(BaseTranslatorAdmin):
 
 core_admin_site.register(OpenAITranslator, OpenAITranslatorAdmin)
 core_admin_site.register(DeepLTranslator, DeepLTranslatorAdmin)
-core_admin_site.register(MoonshotAITranslator, MoonshotAITranslatorAdmin)
-core_admin_site.register(TogetherAITranslator, TogetherAITranslatorAdmin)
-core_admin_site.register(OpenRouterAITranslator, OpenRouterAITranslatorAdmin)
-core_admin_site.register(GroqTranslator, GroqTranslatorAdmin)
 
 if settings.DEBUG:
     core_admin_site.register(TestTranslator, TestTranslatorAdmin)
