@@ -108,11 +108,11 @@ class Feed(models.Model):
     translator = GenericForeignKey("translator_content_type", "translator_object_id")
 
 
-    summary_content_type = models.ForeignKey(
+    summarizer_content_type = models.ForeignKey(
         ContentType, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name="summarizer"
     )
-    summary_object_id = models.PositiveIntegerField(null=True, blank=True, default=None)
-    summarizer = GenericForeignKey("summary_content_type", "summary_object_id")
+    summarizer_object_id = models.PositiveIntegerField(null=True, blank=True, default=None)
+    summarizer = GenericForeignKey("summarizer_content_type", "summarizer_object_id")
 
     summary_detail = models.FloatField(
         _("Summary Detail"),
@@ -202,9 +202,9 @@ class Feed(models.Model):
         if not self.translator_content_type_id:
             self.translator_content_type_id = None
             self.translator_object_id = None
-        if not self.summary_content_type_id:
-            self.summary_content_type_id = None
-            self.summary_object_id = None
+        if not self.summarizer_content_type_id:
+            self.summarizer_content_type_id = None
+            self.summarizer_object_id = None
 
         super(Feed, self).save(*args, **kwargs)
 

@@ -51,10 +51,19 @@
         <option value="2">{% trans "Original | Translation" %}</option>
     </select><br />
 
-    <br /><label>{% trans "Summary Engine" %}</label><br />
-    <input type="radio" name="summary_engine" value="Keep" checked required>{% trans " Keep Original" %}<br />
-    <input type="radio" name="summary_engine" value="True" required>{% trans " Change to " %}
-    <select name="summary_engine_value">
+    <br /><label>{% trans "Translator" %}</label><br />
+    <input type="radio" name="translator" value="Keep" checked required>{% trans " Keep Original" %}<br />
+    <input type="radio" name="translator" value="True" required>{% trans " Change to " %}
+    <select name="translator_value">
+        {% for id,name in summary_engine_choices %}
+        <option value="{{ id }}">{{ name }}</option>
+        {% endfor %}
+    </select><br />
+
+    <br /><label>{% trans "Summarizer" %}</label><br />
+    <input type="radio" name="summarizer" value="Keep" checked required>{% trans " Keep Original" %}<br />
+    <input type="radio" name="summarizer" value="True" required>{% trans " Change to " %}
+    <select name="summarizer_value">
         {% for id,name in summary_engine_choices %}
         <option value="{{ id }}">{{ name }}</option>
         {% endfor %}

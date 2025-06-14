@@ -38,8 +38,8 @@ def merge_feeds_data(apps, schema_editor):
                     # 翻译器和摘要引擎的GenericForeignKey
                     translator_content_type=o_feed.content_type,
                     translator_object_id=o_feed.object_id,
-                    summary_content_type=o_feed.content_type_summary,
-                    summary_object_id=o_feed.object_id_summary,
+                    summarizer_content_type=o_feed.content_type_summary,
+                    summarizer_object_id=o_feed.object_id_summary,
                     
                     # 语言和翻译相关信息从T_Feed复制
                     target_language=t_feed.language,
@@ -77,8 +77,8 @@ def merge_feeds_data(apps, schema_editor):
                 # 翻译器和摘要引擎的GenericForeignKey
                 translator_content_type=o_feed.content_type,
                 translator_object_id=o_feed.object_id,
-                summary_content_type=o_feed.content_type_summary,
-                summary_object_id=o_feed.object_id_summary,
+                summarizer_content_type=o_feed.content_type_summary,
+                summarizer_object_id=o_feed.object_id_summary,
                 
                 # 语言和翻译相关信息为空
                 target_language=settings.DEFAULT_TARGET_LANGUAGE,

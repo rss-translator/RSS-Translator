@@ -90,8 +90,8 @@ class FeedForm(forms.ModelForm):
     def _set_initial_values(self, instance):
         if instance.translator_content_type and instance.translator_object_id:
             self.fields["translator_option"].initial = f"{instance.translator_content_type.id}:{instance.translator_object_id}"
-        if instance.summary_content_type and instance.summary_object_id:
-            self.fields["summary_engine_option"].initial = f"{instance.summary_content_type.id}:{instance.summary_object_id}"
+        if instance.summarizer_content_type and instance.summarizer_object_id:
+            self.fields["summary_engine_option"].initial = f"{instance.summarizer_content_type.id}:{instance.summarizer_object_id}"
         if instance.update_frequency:
             self.fields["simple_update_frequency"].initial = instance.update_frequency
         if instance.translate_title:
@@ -112,12 +112,12 @@ class FeedForm(forms.ModelForm):
 
     def _process_summary_engine(self, instance):
         if self.cleaned_data["summary_engine_option"]:
-            summary_content_type_id, summary_object_id = map(int, self.cleaned_data["summary_engine_option"].split(":"))
-            instance.summary_content_type_id = summary_content_type_id
-            instance.summary_object_id = summary_object_id
+            summarizer_content_type_id, summarizer_object_id = map(int, self.cleaned_data["summary_engine_option"].split(":"))
+            instance.summarizer_content_type_id = summarizer_content_type_id
+            instance.summarizer_object_id = summarizer_object_id
         else:
-            instance.summary_content_type_id = None
-            instance.summary_object_id = None
+            instance.summarizer_content_type_id = None
+            instance.summarizer_object_id = None
     
     def _process_update_frequency(self, instance):
         if self.cleaned_data["simple_update_frequency"]:

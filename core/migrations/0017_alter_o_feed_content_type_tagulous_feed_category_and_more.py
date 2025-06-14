@@ -155,7 +155,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("translator_object_id", models.PositiveIntegerField(null=True, blank=True, default=None)),
-                ("summary_object_id", models.PositiveIntegerField(null=True, blank=True, default=None)),
+                ("summarizer_object_id", models.PositiveIntegerField(null=True, blank=True, default=None)),
                 (
                     "summary_detail",
                     models.FloatField(
@@ -257,7 +257,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "summary_content_type",
+                    "summarizer_content_type",
                     models.ForeignKey(
                         null=True,
                         default=None,
