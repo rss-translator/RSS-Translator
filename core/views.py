@@ -9,32 +9,75 @@ from django.contrib import messages
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.cache import cache
 from functools import wraps
-
-from opyml import OPML
+from lxml import etree
 from feed2json import feed2json
+import xml.etree.ElementTree as ET
 from django.utils.translation import gettext_lazy as _
 
 from utils.feed_action import merge_feeds_into_one_atom, generate_atom_feed
 
+# def import_opml(request):
+#     if request.method == 'POST':
+#         opml_file = request.FILES.get('opml_file')
+#         if opml_file and isinstance(opml_file, InMemoryUploadedFile):
+#             try:
+#                 opml_content = opml_file.read().decode('utf-8')
+#                 opml = OPML.from_xml(opml_content)
+                
+#                 for outline in opml.body.outlines:
+#                     category = outline.text
+                    
+#                     for feed in outline.outlines:
+#                         Feed.objects.create(
+#                             # name=feed.title or feed.text,
+#                             feed_url=feed.xml_url,
+#                             category=category
+#                         )
+                
+#                 messages.success(request, _("OPML file imported successfully."))
+#             except Exception as e:
+#                 messages.error(request, _("Error importing OPML file: {}").format(str(e)))
+#         else:
+#             messages.error(request, _("Please upload a valid OPML file."))
+    
+#     return redirect('admin:core_feed_changelist')
 def import_opml(request):
     if request.method == 'POST':
         opml_file = request.FILES.get('opml_file')
         if opml_file and isinstance(opml_file, InMemoryUploadedFile):
             try:
-                opml_content = opml_file.read().decode('utf-8')
-                opml = OPML.from_xml(opml_content)
+                # 直接读取字节数据（lxml 支持二进制解析）
+                opml_content = opml_file.read()
                 
-                for outline in opml.body.outlines:
-                    category = outline.text
-                    
-                    for feed in outline.outlines:
-                        Feed.objects.create(
-                            # name=feed.title or feed.text,
-                            feed_url=feed.xml_url,
-                            category=category
-                        )
+                # 使用 lxml 解析 OPML
+                root = etree.fromstring(opml_content)
+                body = root.find('body')
+                
+                if body is None:
+                    messages.error(request, _("Invalid OPML: Missing body element"))
+                    return redirect('admin:core_feed_changelist')
+                
+                # 递归处理所有 outline 节点
+                def process_outlines(outlines, category=None):
+                    for outline in outlines:
+                        # 检查是否为 feed（有 xmlUrl 属性）
+                        if 'xmlUrl' in outline.attrib:
+                            Feed.objects.create(
+                                name=outline.get('title') or outline.get('text'),
+                                feed_url=outline.get('xmlUrl'),
+                                category=category
+                            )
+                        # 处理嵌套结构（新类别）
+                        elif outline.find('outline') is not None:
+                            new_category = outline.get('text') or outline.get('title')
+                            process_outlines(outline.findall('outline'), new_category)
+                
+                # 从 body 开始处理顶级 outline
+                process_outlines(body.findall('outline'))
                 
                 messages.success(request, _("OPML file imported successfully."))
+            except etree.XMLSyntaxError as e:
+                messages.error(request, _("XML syntax error: {}").format(str(e)))
             except Exception as e:
                 messages.error(request, _("Error importing OPML file: {}").format(str(e)))
         else:
