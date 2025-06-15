@@ -1,8 +1,4 @@
 import logging
-import os
-import json
-
-from django.conf import settings
 from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_page
@@ -30,11 +26,10 @@ def import_opml(request):
                 
                 for outline in opml.body.outlines:
                     category = outline.text
-                    #category, _ = Category.objects.get_or_create(name=category_name)
                     
                     for feed in outline.outlines:
                         Feed.objects.create(
-                            name=feed.title or feed.text,
+                            # name=feed.title or feed.text,
                             feed_url=feed.xml_url,
                             category=category
                         )
