@@ -7,7 +7,7 @@
 # docker buildx build . --platform linux/arm64,linux/amd64 --push -t versun/rsstranslator:latest -t versun/rsstranslator:version
 
 # 使用更小的基础镜像作为builder
-FROM python:3.12-slim-bookworm AS builder
+FROM python:3.13-slim-bookworm AS builder
 
 # 设置工作目录
 WORKDIR /app
@@ -41,7 +41,7 @@ RUN uv pip install --no-cache-dir -e .
 # RUN pip install --no-cache-dir uv
 # RUN uv pip install --no-cache-dir -r pyproject.toml
 # ---- 最终阶段 ----
-FROM python:3.12-slim-bookworm AS final
+FROM python:3.13-slim-bookworm AS final
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
