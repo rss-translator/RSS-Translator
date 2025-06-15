@@ -1,7 +1,6 @@
 import logging
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-import cityhash
 from config import settings
 from openai import OpenAI
 from encrypted_model_fields.fields import EncryptedCharField
