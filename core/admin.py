@@ -12,7 +12,8 @@ from .models import Feed
 from .custom_admin_site import core_admin_site
 from .forms import FeedForm
 from .actions import (
-    feed_export_as_opml,
+    export_original_feed_as_opml,
+    export_translated_feed_as_opml,
     feed_force_update,
     feed_batch_modify,
 )
@@ -49,7 +50,7 @@ class FeedAdmin(admin.ModelAdmin):
         "last_translate",
         "show_log",        
     ]
-    actions = [feed_force_update, feed_export_as_opml, feed_batch_modify]
+    actions = [feed_force_update, export_original_feed_as_opml, export_translated_feed_as_opml, feed_batch_modify]
     list_per_page = 20
 
     def get_urls(self):

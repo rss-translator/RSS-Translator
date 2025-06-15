@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from ast import literal_eval
-from opyml import OPML, Outline, Head
 from django.contrib import admin
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -9,6 +8,7 @@ from django.db import transaction
 from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from lxml import etree
 from utils.modelAdmin_utils import get_translator_and_summary_choices
 from .custom_admin_site import core_admin_site
 from .models import Feed
@@ -20,46 +20,123 @@ from .management.commands.update_feeds import update_single_feed
 def clean_translated_content(modeladmin, request, queryset):
     pass
 
-@admin.display(description=_("Export selected feeds as OPML"))
-def feed_export_as_opml(modeladmin, request, queryset): # TODO
+@admin.display(description=_("Export selected original feeds as OPML"))
+def export_original_feed_as_opml(modeladmin, request, queryset):
     try:
-        opml_obj = OPML()
-        opml_obj.head = Head(
-            title="Feeds | RSS Translator",
-            date_created=datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z"),
-            owner_name="RSS Translator",
-        )
-
+        # 创建根元素 <opml> 并设置版本
+        root = etree.Element("opml", version="2.0")
+        
+        # 创建头部 <head>
+        head = etree.SubElement(root, "head")
+        etree.SubElement(head, "title").text = "Original Feeds | RSS Translator"
+        etree.SubElement(head, "dateCreated").text = datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z")
+        etree.SubElement(head, "ownerName").text = "RSS Translator"
+        
+        # 创建主体 <body>
+        body = etree.SubElement(root, "body")
+        
+        # 按分类组织订阅源
         categories = {}
         for item in queryset:
-            category = item.category.name if item.category else "default"
-            # category_outline = Outline(text=category)
-            if category not in categories:
-                categories[category] = Outline(text=category)
-
-            item_outline = Outline(
-                title=item.name,
-                text=item.name,
-                type="rss",
-                xml_url=item.feed_url,
-                html_url=item.feed_url,
+            category_name = item.category.name if item.category else "default"
+            
+            # 获取或创建分类大纲
+            if category_name not in categories:
+                category_outline = etree.Element("outline", text=category_name, title=category_name)
+                categories[category_name] = category_outline
+                body.append(category_outline)
+            else:
+                category_outline = categories[category_name]
+            
+            # 添加订阅源条目
+            etree.SubElement(
+                category_outline,
+                "outline",
+                {
+                    "title": item.name,
+                    "text": item.name,
+                    "type": "rss",
+                    "xmlUrl": item.feed_url,
+                    "htmlUrl": item.feed_url
+                }
             )
-            categories[category].outlines.append(item_outline)
-
-            # category_outline.outlines.append(item_outline)
-            # opml_obj.body.outlines.append(category_outline)
-        for category_outline in categories.values():
-            opml_obj.body.outlines.append(category_outline)
-
-        response = HttpResponse(opml_obj.to_xml(), content_type="application/xml")
-        response["Content-Disposition"] = (
-            'attachment; filename="rsstranslator_feeds.opml"'
+        
+        # 生成 XML 内容
+        xml_content = etree.tostring(
+            root,
+            encoding="utf-8",
+            xml_declaration=True,
+            pretty_print=True
         )
+        
+        # 创建 HTTP 响应
+        response = HttpResponse(xml_content, content_type="application/xml")
+        response["Content-Disposition"] = 'attachment; filename="original_feeds_from_rsstranslator.opml"'
         return response
+        
     except Exception as e:
-        logging.error("feed_export_as_opml: %s", str(e))
+        logging.error("export_original_feed_as_opml: %s", str(e))
         return HttpResponse("An error occurred", status=500)
 
+@admin.display(description=_("Export selected translated feeds as OPML"))
+def export_translated_feed_as_opml(modeladmin, request, queryset):
+    try:
+        # 创建根元素 <opml> 并设置版本
+        root = etree.Element("opml", version="2.0")
+        
+        # 创建头部 <head>
+        head = etree.SubElement(root, "head")
+        etree.SubElement(head, "title").text = "Translated Feeds | RSS Translator"
+        etree.SubElement(head, "dateCreated").text = datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z")
+        etree.SubElement(head, "ownerName").text = "RSS Translator"
+        
+        # 创建主体 <body>
+        body = etree.SubElement(root, "body")
+        
+        # 按分类组织订阅源
+        categories = {}
+        for item in queryset:
+            category_name = item.category.name if item.category else "default"
+            
+            # 获取或创建分类大纲
+            if category_name not in categories:
+                category_outline = etree.Element("outline", text=category_name, title=category_name)
+                categories[category_name] = category_outline
+                body.append(category_outline)
+            else:
+                category_outline = categories[category_name]
+            
+            translated_feed_url = f"{settings.SITE_URL}/feed/rss/{item.slug}"
+            
+            # 添加订阅源条目
+            etree.SubElement(
+                category_outline,
+                "outline",
+                {
+                    "title": item.name,
+                    "text": item.name,
+                    "type": "rss",
+                    "xmlUrl": translated_feed_url,
+                    "htmlUrl": translated_feed_url
+                }
+            )
+        
+        # 生成 XML 内容
+        xml_content = etree.tostring(
+            root,
+            encoding="utf-8",
+            xml_declaration=True,
+            pretty_print=True
+        )
+        
+        # 创建 HTTP 响应
+        response = HttpResponse(xml_content, content_type="application/xml")
+        response["Content-Disposition"] = 'attachment; filename="translated_feeds_from_rsstranslator.opml"'
+        return response
+        
+    except Exception as e:
+        logging.error("export_original_feed_as_opml: %s", str(e))
+        return HttpResponse("An error occurred", status=500)
 
 @admin.display(description=_("Force update"))
 def feed_force_update(modeladmin, request, queryset):
