@@ -16,31 +16,6 @@ from django.utils.translation import gettext_lazy as _
 
 from utils.feed_action import merge_feeds_into_one_atom, generate_atom_feed
 
-# def import_opml(request):
-#     if request.method == 'POST':
-#         opml_file = request.FILES.get('opml_file')
-#         if opml_file and isinstance(opml_file, InMemoryUploadedFile):
-#             try:
-#                 opml_content = opml_file.read().decode('utf-8')
-#                 opml = OPML.from_xml(opml_content)
-                
-#                 for outline in opml.body.outlines:
-#                     category = outline.text
-                    
-#                     for feed in outline.outlines:
-#                         Feed.objects.create(
-#                             # name=feed.title or feed.text,
-#                             feed_url=feed.xml_url,
-#                             category=category
-#                         )
-                
-#                 messages.success(request, _("OPML file imported successfully."))
-#             except Exception as e:
-#                 messages.error(request, _("Error importing OPML file: {}").format(str(e)))
-#         else:
-#             messages.error(request, _("Please upload a valid OPML file."))
-    
-#     return redirect('admin:core_feed_changelist')
 def import_opml(request):
     if request.method == 'POST':
         opml_file = request.FILES.get('opml_file')
