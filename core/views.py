@@ -37,15 +37,21 @@ def import_opml(request):
                     for outline in outlines:
                         # 检查是否为 feed（有 xmlUrl 属性）
                         if 'xmlUrl' in outline.attrib:
-                            Feed.objects.create(
-                                name=outline.get('title') or outline.get('text'),
-                                feed_url=outline.get('xmlUrl'),
-                                category=category
-                            )
+                            # 确保 feed_url 和 name 都是字符串类型
+                            feed_url = str(outline.get('xmlUrl', ''))
+                            name = str(outline.get('title') or outline.get('text') or '')
+                            
+                            if feed_url and name:  # 确保必要字段不为空
+                                Feed.objects.create(
+                                    name=name,
+                                    feed_url=feed_url,
+                                    category=str(category) if category else None
+                                )
                         # 处理嵌套结构（新类别）
                         elif outline.find('outline') is not None:
-                            new_category = outline.get('text') or outline.get('title')
-                            process_outlines(outline.findall('outline'), new_category)
+                            new_category = str(outline.get('text') or outline.get('title') or '')
+                            if new_category:  # 确保类别名不为空
+                                process_outlines(outline.findall('outline'), new_category)
                 
                 # 从 body 开始处理顶级 outline
                 process_outlines(body.findall('outline'))
