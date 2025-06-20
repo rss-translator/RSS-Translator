@@ -16,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 
 from utils.feed_action import merge_feeds_into_one_atom, generate_atom_feed
 
+
 def import_opml(request):
     if request.method == 'POST':
         opml_file = request.FILES.get('opml_file')
@@ -33,14 +34,14 @@ def import_opml(request):
                     return redirect('admin:core_feed_changelist')
                 
                 # 递归处理所有 outline 节点
-                def process_outlines(outlines, category=None):
+                def process_outlines(outlines, category:str=None):
                     for outline in outlines:
                         # 检查是否为 feed（有 xmlUrl 属性）
                         if 'xmlUrl' in outline.attrib:
-                            Feed.objects.create(
+                            Feed.objects.get_or_create(
                                 name=outline.get('title') or outline.get('text'),
                                 feed_url=outline.get('xmlUrl'),
-                                category=category
+                                category=category,
                             )
                         # 处理嵌套结构（新类别）
                         elif outline.find('outline') is not None:

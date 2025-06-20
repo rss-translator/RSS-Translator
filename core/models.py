@@ -58,7 +58,7 @@ class Feed(models.Model):
 
     update_frequency = models.IntegerField(
         _("Update Frequency"),
-        default=os.getenv("default_update_frequency", 30),
+        default=30,
         help_text=_("Minutes"),
     )
     max_posts = models.IntegerField(
